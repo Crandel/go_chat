@@ -1,4 +1,4 @@
-package app
+package setup
 
 // Database ...
 type Database struct {

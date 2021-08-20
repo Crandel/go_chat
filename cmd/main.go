@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/Crandel/go_chat/app"
+	"github.com/Crandel/go_chat/pkg/setup"
 )
 
 var config = &configuration{}
 
 // config struct
 type configuration struct {
-	Version  string       `json:"Version"`
-	Database app.Database `json:"Database"`
-	Server   app.Server   `json:"Server"`
+	Version  string         `json:"Version"`
+	Database setup.Database `json:"Database"`
+	Server   setup.Server   `json:"Server"`
 	// Template Templates `json:"Template"`
 	// Session  Session       `json:"Session"`
 }
