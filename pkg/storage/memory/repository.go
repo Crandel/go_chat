@@ -5,3 +5,7 @@ type Storage struct {
 	Rooms    []Room
 	Messages []Message
 }
+
+func NewStorage() Storage {
+	return Storage{}
+}
