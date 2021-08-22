@@ -1,6 +1,33 @@
 :content = application/json
+:host = http://localhost:8080
 # Root
 
-GET http://localhost:8080/api
+GET :host/api
 Accept: :content
 Content-Type: :content
+
+# Signin
+POST :host/api/signin
+Accept: :content
+Content-Type: :content
+{
+    "name": "Vitalii",
+    "second_name": "Drevenchuk",
+    "email": "example@post.com",
+    "password": "pass"
+}
+
+# {
+#    "id":"43e69a32-f535-4a92-9132-63ab3194e73b",
+#    "token":"58aef9e3-fa22-4b30-aac1-2a6616e22a84"}
+:token = 58aef9e3-fa22-4b30-aac1-2a6616e22a84
+
+# Login
+
+POST :host/api/login
+Accept: :content
+Content-Type: :content
+{
+    "email": "example@post.com",
+    "password": "pass"
+}
