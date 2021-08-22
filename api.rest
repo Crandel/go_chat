@@ -1,0 +1,6 @@
+:content = application/json
+# Root
+
+GET http://localhost:8080/api
+Accept: :content
+Content-Type: :content
