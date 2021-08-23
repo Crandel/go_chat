@@ -1,4 +1,4 @@
-package memory
+package sqlite
 
 import (
 	"errors"
@@ -31,17 +31,15 @@ func (s *Storage) SigninUser(u signin.User) (signin.SigninResponse, error) {
 	id := uuid.New().String()
 	token := uuid.New().String()
 	su := User{id, u.Name, u.SecondName, u.Email, u.Password, token, Member, time.Now()}
-	s.Users[u.Email] = su
+	_ = append(s.Users, su)
 	return signin.SigninResponse{Id: id, Token: token}, nil
 }
 
 func (s *Storage) LoginUser(lu login.User) (string, error) {
-	u, exists := s.Users[lu.Email]
-	if !exists {
-		return "", errors.New("No user with email: " + lu.Email)
+	for _, u := range s.Users {
+		if lu.Email == u.Email && lu.Password == u.Password {
+			return u.Token, nil
+		}
 	}
-	if u.Password != lu.Password {
-		return "", errors.New("User with email" + lu.Email + "has wrong password")
-	}
-	return u.Token, nil
+	return "", errors.New("No user with email: " + lu.Email)
 }
