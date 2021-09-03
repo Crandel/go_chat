@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Crandel/go_chat/pkg/storage/sqlite"
+	"github.com/google/uuid"
 	"github.com/samonzeweb/godb"
 	as "github.com/samonzeweb/godb/adapters/sqlite"
 )
@@ -27,8 +28,9 @@ func main() {
 
 func SetupSqlite(db *godb.DB) {
 	createTable := `
-	create table users (
-		id          integer not null primary key autoincrement,
+	DROP TABLE IF EXISTS users;
+	CREATE TABLE users (
+		id          varchar(500) unique primary key,
 		name        text not null,
 		second_name text null,
 		email       text not null,
@@ -38,15 +40,15 @@ func SetupSqlite(db *godb.DB) {
 		created     date not null
 	);
 	`
-	result, err := db.CurrentDB().Exec(createTable)
+	_, err := db.CurrentDB().Exec(createTable)
 	if err != nil {
 		fmt.Println("Error while creating DB:", err)
 	}
-	fmt.Println(result)
 }
 
 func FillSqlite(db *godb.DB) {
 	su := sqlite.User{
+		ID:         uuid.New().String(),
 		Name:       "test_name",
 		SecondName: "test_second_name",
 		Email:      "test@email.com",

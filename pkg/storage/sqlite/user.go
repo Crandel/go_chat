@@ -24,7 +24,7 @@ func (r *Role) Scan(value interface{}) error { *r = Role(value.(string)); return
 func (r Role) Value() (driver.Value, error)  { return driver.Value(string(r)), nil }
 
 type User struct {
-	ID         int       `db:id,key,auto`
+	ID         string    `db:"id"`
 	Name       string    `db:"name"`
 	SecondName string    `db:"second_name"`
 	Email      string    `db:"email"`
@@ -39,8 +39,10 @@ func (*User) TableName() string {
 }
 
 func (s *Storage) SigninUser(u signin.User) (signin.SigninResponse, error) {
+	id := uuid.New().String()
 	token := uuid.New().String()
 	su := User{
+		ID:         id,
 		Name:       u.Name,
 		SecondName: u.SecondName,
 		Email:      u.Email,
