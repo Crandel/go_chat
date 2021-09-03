@@ -18,3 +18,4 @@ vendor/
 server
 cli
 !/cmd
+storage.db

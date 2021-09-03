@@ -21,7 +21,7 @@ const (
 )
 
 func (r *Role) Scan(value interface{}) error { *r = Role(value.(string)); return nil }
-func (r Role) Value() (driver.Value, error)  { return r, nil }
+func (r Role) Value() (driver.Value, error)  { return driver.Value(string(r)), nil }
 
 type User struct {
 	ID         int       `db:id,key,auto`
@@ -32,6 +32,10 @@ type User struct {
 	Token      string    `db:"token"`
 	Role       Role      `db:"role"`
 	Created    time.Time `db:"created"`
+}
+
+func (*User) TableName() string {
+	return "users"
 }
 
 func (s *Storage) SigninUser(u signin.User) (signin.SigninResponse, error) {
@@ -45,7 +49,11 @@ func (s *Storage) SigninUser(u signin.User) (signin.SigninResponse, error) {
 		Role:       Member,
 		Created:    time.Now(),
 	}
-	s.db.Insert(su).Do()
+	s.db.InsertInto("users").
+		Columns("name", "second_name", "email", "password", "token", "role", "created").
+		Values(su.Name, su.SecondName, su.Email, su.Password, su.Token, su.Role, su.Created).
+		Returning("id").
+		DoWithReturning(&su)
 	return signin.SigninResponse{Id: fmt.Sprint(su.ID), Token: token}, nil
 }
 
