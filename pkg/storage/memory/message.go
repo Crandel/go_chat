@@ -4,6 +4,6 @@ import "time"
 
 type Message struct {
 	ID      string
-	Text    string
+	Payload string
 	Created time.Time
 }

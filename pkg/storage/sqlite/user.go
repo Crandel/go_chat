@@ -24,7 +24,7 @@ func (r *Role) Scan(value interface{}) error { *r = Role(value.(string)); return
 func (r Role) Value() (driver.Value, error)  { return driver.Value(string(r)), nil }
 
 type User struct {
-	ID         string    `db:"id"`
+	ID         string    `db:"id,key"`
 	Name       string    `db:"name"`
 	SecondName string    `db:"second_name"`
 	Email      string    `db:"email"`
