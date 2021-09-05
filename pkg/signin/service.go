@@ -17,6 +17,5 @@ func NewService(r Repository) *service {
 }
 
 func (s *service) SigninUser(u User) (SigninResponse, error) {
-	response, err := s.r.SigninUser(u)
-	return response, err
+	return s.r.SigninUser(u)
 }

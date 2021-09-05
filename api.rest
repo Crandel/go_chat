@@ -37,7 +37,30 @@ GET :host/api/users
 Accept: :content
 
 #
-:user_id=dddd
+:user_id=example@post.com
 # User
 GET :host/api/users/:user_id
+Accept: :content
+
+# List rooms
+GET :host/api/rooms
+Accept: :content
+
+# Add room
+POST :host/api/rooms
+Accept: :content
+Content-Type: :content
+{
+    "name": "room 1",
+    "users": [
+        {
+            "id": "example@post.com"
+        }
+    ]
+}
+
+#
+:room_id=example@post.com
+# Room
+GET :host/api/rooms/:room_id
 Accept: :content

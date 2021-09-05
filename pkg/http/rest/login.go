@@ -2,6 +2,7 @@ package rest
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/Crandel/go_chat/pkg/login"
@@ -16,7 +17,8 @@ func loginHandler(ls login.Service) func(w http.ResponseWriter, r *http.Request)
 		}
 		token, err := ls.LoginUser(lu)
 		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			log.Println("Failed during login", err)
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 		json.NewEncoder(w).Encode(token)

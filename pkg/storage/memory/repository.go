@@ -3,6 +3,7 @@ package memory
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	a "github.com/Crandel/go_chat/pkg/adding"
@@ -22,8 +23,14 @@ func NewStorage() Storage {
 
 func (str *Storage) SigninUser(su s.User) (s.SigninResponse, error) {
 	u := ConvertUserFromSigning(su)
+	log.Println(u)
+	log.Println(str.Users)
+	if str.Users == nil {
+		str.Users = make(map[UserId]User)
+	}
 	str.Users[u.Email] = u
-	return s.SigninResponse{Id: string(u.Email), Token: u.Token}, nil
+	log.Println("After map")
+	return s.SigninResponse{Id: su.Email, Token: u.Token}, nil
 }
 
 func (str *Storage) LoginUser(lu l.User) (string, error) {
