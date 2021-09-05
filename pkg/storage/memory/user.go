@@ -1,12 +1,10 @@
 package memory
 
 import (
-	"errors"
 	"time"
 
-	"github.com/Crandel/go_chat/pkg/login"
-	"github.com/Crandel/go_chat/pkg/reading"
-	"github.com/Crandel/go_chat/pkg/signin"
+	r "github.com/Crandel/go_chat/pkg/reading"
+	s "github.com/Crandel/go_chat/pkg/signin"
 	"github.com/google/uuid"
 )
 
@@ -19,6 +17,14 @@ const (
 
 type UserId string
 
+func (muid UserId) ConvertUserIdToReading() r.UserId {
+	return r.UserId(string(muid))
+}
+
+func ConvertUserIdFromReading(rid r.UserId) UserId {
+	return UserId(string(rid))
+}
+
 type User struct {
 	Email      UserId
 	Name       string
@@ -29,55 +35,25 @@ type User struct {
 	Created    time.Time
 }
 
-func (s *Storage) SigninUser(u signin.User) (signin.SigninResponse, error) {
+func ConvertUserFromSigning(su s.User) User {
+	id := UserId(su.Email)
 	token := uuid.New().String()
-	su := User{
-		Email:      UserId(u.Email),
-		Name:       u.Name,
-		SecondName: u.SecondName,
-		Password:   u.Password,
+	return User{
+		Email:      id,
+		Name:       su.Name,
+		SecondName: su.SecondName,
+		Password:   su.Password,
 		Token:      token,
 		Role:       Member,
 		Created:    time.Now(),
 	}
-	s.Users[UserId(u.Email)] = su
-	return signin.SigninResponse{Id: u.Email, Token: token}, nil
 }
 
-func (s *Storage) LoginUser(lu login.User) (string, error) {
-	u, exists := s.Users[UserId(lu.Email)]
-	if !exists {
-		return "", errors.New("No user with email: " + lu.Email)
+func (u User) ConvertUserToReading() r.User {
+	return r.User{
+		ID:         u.Email.ConvertUserIdToReading(),
+		Name:       u.Name,
+		SecondName: u.SecondName,
+		Email:      string(u.Email),
 	}
-	if u.Password != lu.Password {
-		return "", errors.New("User with email" + lu.Email + "has wrong password")
-	}
-	return u.Token, nil
-}
-
-func (s *Storage) ReadUsers() ([]reading.User, error) {
-	var users = []reading.User{}
-	for id, u := range s.Users {
-		users = append(users, reading.User{
-			ID:         reading.UserId(id),
-			Name:       u.Name,
-			SecondName: u.SecondName,
-			Email:      string(u.Email)})
-	}
-	return users, nil
-}
-
-func (s *Storage) ReadUser(uid reading.UserId) (reading.User, error) {
-	umid := UserId(string(uid))
-	s_user, exists := s.Users[umid]
-	if !exists {
-		return reading.User{}, errors.New("")
-	}
-	r_user := reading.User{
-		ID:         reading.UserId(s_user.Email),
-		Name:       s_user.Name,
-		SecondName: s_user.SecondName,
-		Email:      string(s_user.Email),
-	}
-	return r_user, nil
 }

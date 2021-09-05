@@ -1,6 +1,6 @@
 package adding
 
 type Room struct {
-	Name  string
-	Users []User
+	Name  string `json:"name"`
+	Users []User `json:"users"`
 }

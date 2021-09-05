@@ -1,5 +1,5 @@
 package adding
 
 type User struct {
-	ID string
+	ID string `json:"id"`
 }

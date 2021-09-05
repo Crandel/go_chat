@@ -32,13 +32,12 @@ Content-Type: :content
     "password": "pass"
 }
 
-# Signin
-POST :host/api/
+# List users
+GET :host/api/users
 Accept: :content
-Content-Type: :content
-{
-    "name": "Vitalii",
-    "second_name": "Drevenchuk",
-    "email": "example@post.com",
-    "password": "pass"
-}
+
+#
+:user_id=dddd
+# User
+GET :host/api/users/:user_id
+Accept: :content
