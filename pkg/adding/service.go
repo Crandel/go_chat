@@ -1,11 +1,11 @@
 package adding
 
 type Repository interface {
-	AddMessage(Message) (string, error)
+	AddRoom(Room) (string, error)
 }
 
 type Service interface {
-	AddMessage(Message) (string, error)
+	AddRoom(Room) (string, error)
 }
 
 type service struct {
@@ -16,6 +16,6 @@ func NewService(r Repository) *service {
 	return &service{r}
 }
 
-func (s *service) AddMessage(m Message) (string, error) {
-	return s.r.AddMessage(m)
+func (s *service) AddRoom(r Room) (string, error) {
+	return s.r.AddRoom(r)
 }
