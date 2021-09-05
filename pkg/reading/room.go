@@ -1,6 +1,6 @@
 package reading
 
 type Room struct {
-	Name     string
-	Messages map[UserId][]Message
+	Name     string               `json:"name"`
+	Messages map[UserId][]Message `json:"messages"`
 }

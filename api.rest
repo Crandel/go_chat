@@ -17,10 +17,9 @@ Content-Type: :content
     "password": "pass"
 }
 
-# {
-#    "id":"43e69a32-f535-4a92-9132-63ab3194e73b",
-#    "token":"58aef9e3-fa22-4b30-aac1-2a6616e22a84"}
-:token = 58aef9e3-fa22-4b30-aac1-2a6616e22a84
+# {"id":"example@post.com","token":"5f2bfc34-7ea4-4bb9-9d76-a62dc293b2e9"}
+
+:token = 5f2bfc34-7ea4-4bb9-9d76-a62dc293b2e9
 
 # Login
 
@@ -60,7 +59,7 @@ Content-Type: :content
 }
 
 #
-:room_id=example@post.com
+:room_id=room 1
 # Room
 GET :host/api/rooms/:room_id
 Accept: :content

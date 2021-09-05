@@ -22,6 +22,6 @@ func InitHandlers(
 	router.HandleFunc("/api/users/{user_id}", getUserHandler(rs)).Methods("GET")
 	router.HandleFunc("/api/rooms", listRoomsHandler(rs)).Methods("GET")
 	router.HandleFunc("/api/rooms", addRoomHandler(as)).Methods("POST")
-	router.HandleFunc("/api/rooms/{room_id}", getRoomHandler(rs)).Methods("POST")
+	router.HandleFunc("/api/rooms/{room_id}", getRoomHandler(rs)).Methods("GET")
 	return router
 }

@@ -1,5 +1,7 @@
 package login
 
+import "log"
+
 type Repository interface {
 	LoginUser(User) (string, error)
 }
@@ -19,6 +21,7 @@ func NewService(r Repository) *service {
 func (s *service) LoginUser(u User) (string, error) {
 	token, err := s.r.LoginUser(u)
 	if err != nil {
+		log.Println("Error while login:", err)
 		return "", err
 	}
 	return token, nil
