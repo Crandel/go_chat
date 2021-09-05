@@ -44,17 +44,21 @@ func (str *Storage) LoginUser(lu l.User) (string, error) {
 	return u.Token, nil
 }
 
-func (s *Storage) AddRoom(ar a.Room) (string, error) {
-	_, exists := s.Rooms[ar.Name]
-	if exists {
-		return "", errors.New(fmt.Sprintf("Room with name %s already exists", ar.Name))
+func (str *Storage) AddRoom(ar a.Room) (string, error) {
+	if str.Rooms == nil {
+		str.Rooms = make(map[string]Room)
+	} else {
+		_, exists := str.Rooms[ar.Name]
+		if exists {
+			return "", errors.New(fmt.Sprintf("Room with name %s already exists", ar.Name))
+		}
 	}
 	messages := make(map[UserId][]Message)
 	for _, user := range ar.Users {
 		messages[UserId(user.ID)] = []Message{}
 	}
 	mr := Room{Name: ar.Name, Messages: messages, Created: time.Now()}
-	s.Rooms[mr.Name] = mr
+	str.Rooms[mr.Name] = mr
 	return mr.Name, nil
 }
 
