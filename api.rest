@@ -31,3 +31,14 @@ Content-Type: :content
     "email": "example@post.com",
     "password": "pass"
 }
+
+# Signin
+POST :host/api/
+Accept: :content
+Content-Type: :content
+{
+    "name": "Vitalii",
+    "second_name": "Drevenchuk",
+    "email": "example@post.com",
+    "password": "pass"
+}

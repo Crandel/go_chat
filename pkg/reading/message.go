@@ -1,10 +1,7 @@
-package memory
-
-import "time"
+package reading
 
 type Message struct {
 	ID      string
 	UserId  UserId
 	Payload string
-	Created time.Time
 }

@@ -1,9 +1,8 @@
 package memory
 
 type Storage struct {
-	Users    map[string]User
-	Rooms    map[string]Room
-	Messages map[string]Message
+	Users map[UserId]User
+	Rooms map[string]Room
 }
 
 func NewStorage() Storage {
