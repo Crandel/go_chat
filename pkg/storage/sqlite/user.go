@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Crandel/go_chat/pkg/login"
-	"github.com/Crandel/go_chat/pkg/signin"
+	l "github.com/Crandel/go_chat/pkg/login"
+	s "github.com/Crandel/go_chat/pkg/signin"
 	"github.com/google/uuid"
 	"github.com/samonzeweb/godb"
 )
@@ -38,7 +38,7 @@ func (*User) TableName() string {
 	return "users"
 }
 
-func (s *Storage) SigninUser(u signin.User) (signin.SigninResponse, error) {
+func (str *Storage) SigninUser(u s.User) (s.SigninResponse, error) {
 	id := uuid.New().String()
 	token := uuid.New().String()
 	su := User{
@@ -51,17 +51,17 @@ func (s *Storage) SigninUser(u signin.User) (signin.SigninResponse, error) {
 		Role:       Member,
 		Created:    time.Now(),
 	}
-	s.db.InsertInto("users").
+	str.db.InsertInto("users").
 		Columns("name", "second_name", "email", "password", "token", "role", "created").
 		Values(su.Name, su.SecondName, su.Email, su.Password, su.Token, su.Role, su.Created).
 		Returning("id").
 		DoWithReturning(&su)
-	return signin.SigninResponse{Id: fmt.Sprint(su.ID), Token: token}, nil
+	return s.SigninResponse{Id: fmt.Sprint(su.ID), Token: token}, nil
 }
 
-func (s *Storage) LoginUser(lu login.User) (string, error) {
+func (str *Storage) LoginUser(lu l.User) (string, error) {
 	user := User{}
-	err := s.db.Select(&user).WhereQ(
+	err := str.db.Select(&user).WhereQ(
 		godb.And(
 			godb.Q("email = ?", lu.Email),
 			godb.Q("password = ? ", lu.Password),
