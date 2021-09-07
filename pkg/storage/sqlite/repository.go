@@ -55,21 +55,21 @@ func (str *Storage) LoginUser(lu l.User) (string, error) {
 }
 
 func (str *Storage) AddRoom(ar a.Room) (string, error) {
-	// Do nothing
+	return "", nil
 }
 
 func (str *Storage) ReadUsers() ([]r.User, error) {
-	//
+	return []r.User{}, nil
 }
 
 func (str *Storage) ReadUser(r.UserId) (r.User, error) {
-	//
+	return r.User{}, nil
 }
 
 func (str *Storage) ReadRooms() ([]r.Room, error) {
-	//
+	return []r.Room{}, nil
 }
 
 func (str *Storage) ReadRoom(string) (r.Room, error) {
-	//
+	return r.Room{}, nil
 }

@@ -28,18 +28,18 @@ func main() {
 
 func SetupSqlite(db *godb.DB) {
 	createTable := `
-		DROP TABLE IF EXISTS users;
-		CREATE TABLE users (
-			id          varchar(500) unique primary key,
-			name        text not null,
-			second_name text null,
-			email       text not null,
-			password    text not null,
-			token       text not null,
-			role        text check( role in ('Admin', 'Member') ) not null default 'Member',
-			created     date not null
-		);
-		`
+	DROP TABLE IF EXISTS users;
+	CREATE TABLE users (
+		id          varchar(500) unique primary key,
+		name        text not null,
+		second_name text null,
+		email       text not null,
+		password    text not null,
+		token       text not null,
+		role        text check( role in ('Admin', 'Member') ) not null default 'Member',
+		created     date not null
+	);
+	`
 	_, err := db.CurrentDB().Exec(createTable)
 	if err != nil {
 		fmt.Println("Error while creating DB:", err)
