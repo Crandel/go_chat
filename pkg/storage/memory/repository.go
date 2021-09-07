@@ -30,7 +30,7 @@ func (str *Storage) SigninUser(su s.User) (s.SigninResponse, error) {
 	}
 	str.Users[u.Email] = u
 	log.Println("After map")
-	return s.SigninResponse{Id: su.Email, Token: u.Token}, nil
+	return s.SigninResponse{Token: u.Token}, nil
 }
 
 func (str *Storage) LoginUser(lu l.User) (string, error) {
