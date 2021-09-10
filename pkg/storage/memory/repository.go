@@ -7,6 +7,7 @@ import (
 	"time"
 
 	a "github.com/Crandel/go_chat/pkg/adding"
+	err "github.com/Crandel/go_chat/pkg/errors"
 	l "github.com/Crandel/go_chat/pkg/login"
 	r "github.com/Crandel/go_chat/pkg/reading"
 	s "github.com/Crandel/go_chat/pkg/signin"
@@ -45,12 +46,13 @@ func (str *Storage) LoginUser(lu l.User) (string, error) {
 }
 
 func (str *Storage) AddRoom(ar a.Room) (string, error) {
+	const op err.Op = "memory.AddRoom"
 	if str.Rooms == nil {
 		str.Rooms = make(map[string]Room)
 	} else {
 		_, exists := str.Rooms[ar.Name]
 		if exists {
-			return "", errors.New(fmt.Sprintf("Room with name %s already exists", ar.Name))
+			return "", err.New(op, err.Info, errors.New(fmt.Sprintf("Room with name %s already exists", ar.Name)))
 		}
 	}
 	messages := make(map[UserId][]Message)
