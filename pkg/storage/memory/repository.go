@@ -1,7 +1,6 @@
 package memory
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -34,10 +33,10 @@ func (str *Storage) LoginUser(lu l.User) (string, error) {
 	const op err.Op = "memory.LoginUser"
 	u, exists := str.Users[UserId(lu.Email)]
 	if !exists {
-		return "", err.New(op, err.Info, errors.New("No user with email: "+lu.Email))
+		return "", err.New(op, err.Info, "No user with email: "+lu.Email)
 	}
 	if u.Password != lu.Password {
-		return "", err.New(op, err.Info, errors.New("User with email"+lu.Email+"has wrong password"))
+		return "", err.New(op, err.Info, "User with email"+lu.Email+"has wrong password")
 	}
 	return u.Token, nil
 }
@@ -49,7 +48,7 @@ func (str *Storage) AddRoom(ar a.Room) (string, error) {
 	} else {
 		_, exists := str.Rooms[ar.Name]
 		if exists {
-			return "", err.New(op, err.Info, errors.New(fmt.Sprintf("Room with name %s already exists", ar.Name)))
+			return "", err.New(op, err.Info, fmt.Sprintf("Room with name %s already exists", ar.Name))
 		}
 	}
 	messages := make(map[UserId][]Message)
@@ -69,7 +68,7 @@ func (str *Storage) ReadRooms() ([]r.Room, error) {
 	}
 	var not_found error
 	if len(rooms) == 0 {
-		not_found = err.New(op, err.Info, errors.New("No rooms are here"))
+		not_found = err.New(op, err.Info, "No rooms are here")
 	}
 	return rooms, not_found
 }
@@ -78,7 +77,7 @@ func (str *Storage) ReadRoom(rid string) (r.Room, error) {
 	const op err.Op = "memory.ReadRoom"
 	room, exists := str.Rooms[rid]
 	if !exists {
-		return r.Room{}, err.New(op, err.Info, errors.New("No rooms with id "+rid))
+		return r.Room{}, err.New(op, err.Info, "No rooms with id "+rid)
 	}
 	return room.ConvertRoomToReading(), nil
 }
@@ -91,7 +90,7 @@ func (str *Storage) ReadUsers() ([]r.User, error) {
 	}
 	var not_found error
 	if len(users) == 0 {
-		not_found = err.New(op, err.Info, errors.New("No users are here"))
+		not_found = err.New(op, err.Info, "No users are here")
 	}
 	return users, not_found
 }
@@ -101,7 +100,7 @@ func (str *Storage) ReadUser(uid r.UserId) (r.User, error) {
 	umid := ConvertUserIdFromReading(uid)
 	s_user, exists := str.Users[umid]
 	if !exists {
-		return r.User{}, err.New(op, err.Info, errors.New("No user with id"+string(uid)))
+		return r.User{}, err.New(op, err.Info, "No user with id"+string(uid))
 	}
 	return s_user.ConvertUserToReading(), nil
 }

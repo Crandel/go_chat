@@ -33,19 +33,25 @@ func (l Level) String() string {
 }
 
 type CommonError struct {
-	Op    Op
-	Level Level
-	Err   error
+	Op      Op
+	Level   Level
+	Message string
+	Err     error
 }
 
 func (e CommonError) Error() string {
-	return fmt.Sprintf("%s: [%s] - %v", e.Level.String(), e.Op, e.Err.Error())
+	return e.Message
 }
 
-func New(op Op, l Level, err error) CommonError {
-	new_err := CommonError{op, l, err}
+func NewError(op Op, l Level, m string, err error) CommonError {
+	new_err := CommonError{op, l, m, err}
 	Logging(new_err, desiredLevel)
 	return new_err
+
+}
+
+func New(op Op, l Level, m string) CommonError {
+	return NewError(op, l, m, nil)
 }
 
 func Tracing(e *CommonError) []Op {
@@ -59,10 +65,13 @@ func Tracing(e *CommonError) []Op {
 }
 
 func Logging(e CommonError, desiredLevel Level) {
-	const format = "%s: [%s] - %v"
+	format := "%s: [%s] - %s"
+	if e.Err != nil {
+		format = format + fmt.Sprintf(". Error: %v", e.Err)
+	}
 	if e.Level == Unknown {
-		log.Fatal(format, "ERROR", e.Op, e.Err)
+		log.Fatal(format, "ERROR", e.Op, e.Message)
 	} else if e.Level > desiredLevel {
-		log.Printf(format, fmt.Sprint(e.Level), e.Op, e.Err)
+		log.Printf(format, fmt.Sprint(e.Level), e.Op, e.Message)
 	}
 }
