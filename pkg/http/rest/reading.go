@@ -42,7 +42,7 @@ func listRoomsHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Reques
 	return func(w http.ResponseWriter, r *http.Request) {
 		rooms, err := rs.ReadRooms()
 		if err != nil {
-			json.NewEncoder(w).Encode(err)
+			json.NewEncoder(w).Encode(err.Error())
 		} else {
 			json.NewEncoder(w).Encode(rooms)
 		}

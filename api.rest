@@ -17,9 +17,10 @@ Content-Type: :content
     "password": "pass"
 }
 
-# {"id":"example@post.com","token":"5f2bfc34-7ea4-4bb9-9d76-a62dc293b2e9"}
+#{"token":"c1148d4b-f671-4598-a318-1958785d0260"}
 
-:token = 5f2bfc34-7ea4-4bb9-9d76-a62dc293b2e9
+
+:token = c1148d4b-f671-4598-a318-1958785d0260
 
 # Login
 

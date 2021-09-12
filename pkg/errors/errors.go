@@ -19,8 +19,8 @@ const (
 
 const desiredLevel Level = Debug
 
-func (l *Level) String() string {
-	switch *l {
+func (l Level) String() string {
+	switch l {
 	case Debug:
 		return "DEBUG"
 	case Warning:
@@ -32,25 +32,25 @@ func (l *Level) String() string {
 	}
 }
 
-type Error struct {
+type CommonError struct {
 	Op    Op
 	Level Level
 	Err   error
 }
 
-func (e *Error) Error() string {
-	return fmt.Sprintf("%s: [%s] - %v", fmt.Sprint(e.Level), e.Op, e.Err.Error())
+func (e CommonError) Error() string {
+	return fmt.Sprintf("%s: [%s] - %v", e.Level.String(), e.Op, e.Err.Error())
 }
 
-func New(op Op, l Level, err error) Error {
-	new_err := Error{op, l, err}
+func New(op Op, l Level, err error) CommonError {
+	new_err := CommonError{op, l, err}
 	Logging(new_err, desiredLevel)
 	return new_err
 }
 
-func Tracing(e *Error) []Op {
+func Tracing(e *CommonError) []Op {
 	stack := []Op{e.Op}
-	intError, ok := e.Err.(*Error)
+	intError, ok := e.Err.(*CommonError)
 	if !ok {
 		return stack
 	}
@@ -58,7 +58,7 @@ func Tracing(e *Error) []Op {
 	return stack
 }
 
-func Logging(e Error, desiredLevel Level) {
+func Logging(e CommonError, desiredLevel Level) {
 	const format = "%s: [%s] - %v"
 	if e.Level == Unknown {
 		log.Fatal(format, "ERROR", e.Op, e.Err)
