@@ -58,8 +58,35 @@ func (str *Storage) LoginUser(lu l.User) (string, error) {
 	}
 }
 
-func (str *Storage) AddRoom(ar a.Room) (string, error) {
-	return "", nil
+func (str *Storage) AddRoom(ar a.Room) (string, []error) {
+	const op errs.Op = "sqlite.AddRoom"
+	users := []UserMessage{}
+	list_errors := []error{}
+	for _, au := range ar.Users {
+		su := User{}
+		error := str.db.Select(&su).Where("id = ?", au.ID).Do()
+		if error != nil {
+			list_errors = append(
+				list_errors,
+				errs.NewError(op, errs.Info, "User with ID"+au.ID+"not found", error))
+		} else {
+			users = append(users, UserMessage{User: su, Messages: []Message{}})
+		}
+	}
+	res_str := ""
+	if len(list_errors) == 0 {
+		id := uuid.New().String()
+		room := Room{id, users}
+		error := str.db.Insert(&room).Do()
+		if error != nil {
+			res_str = room.ID
+		} else {
+			list_errors = append(
+				list_errors,
+				errs.NewError(op, errs.Info, "Failed to create room", error))
+		}
+	}
+	return res_str, list_errors
 }
 
 func (str *Storage) ReadUsers() ([]r.User, error) {

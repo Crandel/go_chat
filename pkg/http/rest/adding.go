@@ -11,12 +11,16 @@ func addRoomHandler(as adding.Service) func(w http.ResponseWriter, r *http.Reque
 	return func(w http.ResponseWriter, r *http.Request) {
 		var ar adding.Room
 		if err := json.NewDecoder(r.Body).Decode(&ar); err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		name, err := as.AddRoom(ar)
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		if len(err) != 0 {
+			err_msg := ""
+			for _, e := range err {
+				err_msg = err_msg + e.Error()
+			}
+			http.Error(w, err_msg, http.StatusBadGateway)
 			return
 		}
 		json.NewEncoder(w).Encode(name)
