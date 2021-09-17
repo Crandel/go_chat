@@ -21,6 +21,9 @@ func loginHandler(ls login.Service) func(w http.ResponseWriter, r *http.Request)
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		json.NewEncoder(w).Encode(token)
+		response := map[string]string{
+			"token": token,
+		}
+		json.NewEncoder(w).Encode(response)
 	}
 }

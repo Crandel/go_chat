@@ -69,6 +69,7 @@ func Logging(e CommonError, desiredLevel Level) {
 	if e.Err != nil {
 		format = format + fmt.Sprintf(". Error: %v", e.Err)
 	}
+
 	if e.Level == Unknown {
 		log.Fatal(format, "ERROR", e.Op, e.Message)
 	} else if e.Level > desiredLevel {

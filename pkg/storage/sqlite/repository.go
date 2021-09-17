@@ -53,9 +53,10 @@ func (str *Storage) LoginUser(lu l.User) (string, error) {
 	).Do()
 	if error == sql.ErrNoRows {
 		return "", errs.New(op, errs.Info, "No user with email: "+lu.Email)
-	} else {
-		return user.Token, errs.NewError(op, errs.Info, "Internal error", error)
+	} else if error != nil {
+		return "", errs.NewError(op, errs.Info, "Internal error", error)
 	}
+	return user.Token, nil
 }
 
 func (str *Storage) AddRoom(ar a.Room) (string, []error) {
