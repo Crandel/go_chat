@@ -8,12 +8,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func rootHandler() func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode("Welcome")
-	}
-}
-
 func listUsersHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		users, _ := rs.ReadUsers()
