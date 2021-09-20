@@ -15,8 +15,9 @@ import (
 	"github.com/samonzeweb/godb/adapters/sqlite"
 )
 
+const port = 8080
+
 func main() {
-	port := 8080
 	fmt.Println("Starting server on port", port)
 	sql_db, _ := godb.Open(sqlite.Adapter, "./storage.db")
 	sqlite_storage := sql.NewStorage(sql_db)
