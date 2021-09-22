@@ -24,12 +24,31 @@ func TestRestHandlers(t *testing.T) {
 	defer srv.Close()
 
 	tt := []struct {
-		name   string
-		url    string
-		method string
-		data   []byte
+		name          string
+		url           string
+		method        string
+		data          []byte
+		response_keys []string
+		err           string
 	}{
-		{name: "Login", url: "%s/api/login", method: http.MethodPost, []byte{" "}},
-		{name: "Signin", url: "%s/api/signin", method: http.MethodPost},
+		{
+			name:          "Login",
+			url:           "%s/api/login",
+			method:        http.MethodPost,
+			data:          []byte(`{"email": "example@post.com","password": "pass"}`),
+			response_keys: []string{"token"},
+		},
+		{
+			name:          "Signin",
+			url:           "%s/api/signin",
+			method:        http.MethodPost,
+			data:          []byte(`{"name": "Name","second_name": "Second","email": "example@post.com","password": "pass"}`),
+			response_keys: []string{"token"},
+		},
+	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+
+		})
 	}
 }

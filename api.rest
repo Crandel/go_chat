@@ -11,9 +11,9 @@ POST :host/api/signin
 Accept: :content
 Content-Type: :content
 {
-    "name": "Vitalii",
-    "second_name": "Drevenchuk",
-    "email": "example@post.com",
+    "name": "Name",
+    "second_name": "Second",
+    "email": "examplew@post.com",
     "password": "pass"
 }
 
@@ -28,7 +28,7 @@ POST :host/api/login
 Accept: :content
 Content-Type: :content
 {
-    "email": "example@post.com",
+    "email": "examplew@post.com",
     "password": "pass"
 }
 
