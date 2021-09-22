@@ -10,7 +10,12 @@ import (
 
 func listUsersHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		users, _ := rs.ReadUsers()
+		users, err := rs.ReadUsers()
+		if err != nil {
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": err.Error(),
+			})
+		}
 		json.NewEncoder(w).Encode(users)
 	}
 }
@@ -24,7 +29,9 @@ func getUserHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request)
 		} else {
 			user, err := rs.ReadUser(rdg.UserId(user_id))
 			if err != nil {
-				json.NewEncoder(w).Encode(err)
+				json.NewEncoder(w).Encode(map[string]string{
+					"error": err.Error(),
+				})
 			} else {
 				json.NewEncoder(w).Encode(user)
 			}
@@ -36,7 +43,9 @@ func listRoomsHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Reques
 	return func(w http.ResponseWriter, r *http.Request) {
 		rooms, err := rs.ReadRooms()
 		if err != nil {
-			json.NewEncoder(w).Encode(err.Error())
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": err.Error(),
+			})
 		} else {
 			json.NewEncoder(w).Encode(rooms)
 		}
@@ -52,7 +61,9 @@ func getRoomHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request)
 		} else {
 			room, err := rs.ReadRoom(room_id)
 			if err != nil {
-				json.NewEncoder(w).Encode(err)
+				json.NewEncoder(w).Encode(map[string]string{
+					"error": err.Error(),
+				})
 			} else {
 				json.NewEncoder(w).Encode(room)
 			}
