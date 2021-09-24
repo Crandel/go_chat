@@ -35,6 +35,10 @@ Content-Type: :content
 # List users
 GET :host/api/users
 Accept: :content
+#[
+#  {"id":"examplew@post.com","email":"examplew@post.com","name":"Name","second_name":"Second"}]
+
+
 
 #
 :user_id=example@post.com
