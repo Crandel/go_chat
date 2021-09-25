@@ -8,13 +8,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
-	"github.com/Crandel/go_chat/pkg/adding"
-	"github.com/Crandel/go_chat/pkg/http/rest"
-	"github.com/Crandel/go_chat/pkg/login"
-	"github.com/Crandel/go_chat/pkg/reading"
-	"github.com/Crandel/go_chat/pkg/signin"
-	"github.com/Crandel/go_chat/pkg/storage/memory"
+	add "github.com/Crandel/go_chat/pkg/adding"
+	rst "github.com/Crandel/go_chat/pkg/http/rest"
+	lgn "github.com/Crandel/go_chat/pkg/login"
+	rdn "github.com/Crandel/go_chat/pkg/reading"
+	sgn "github.com/Crandel/go_chat/pkg/signin"
+	mem "github.com/Crandel/go_chat/pkg/storage/memory"
 )
 
 const user_id = "example@post.com"
@@ -22,12 +23,33 @@ const user_id = "example@post.com"
 type data map[string]string
 
 func TestRestHandlers(t *testing.T) {
-	memory := memory.NewStorage()
-	ls := login.NewService(&memory)
-	sis := signin.NewService(&memory)
-	as := adding.NewService(&memory)
-	rs := reading.NewService(&memory)
-	router := rest.InitHandlers(ls, sis, as, rs)
+	uid := mem.UserId(user_id)
+	testUsers := make(map[mem.UserId]mem.User)
+	testRooms := make(map[string]mem.Room)
+	testUser := mem.User{
+		Email:      uid,
+		Name:       "name",
+		SecondName: "second",
+		Password:   "pass",
+		Token:      "token",
+		Role:       mem.Member,
+		Created:    time.Now(),
+	}
+	testMessages := make(map[mem.UserId][]mem.Message)
+	testMessages[uid] = []mem.Message{}
+	testRoom := mem.Room{
+		Name:     "test room",
+		Messages: testMessages,
+	}
+	testUsers[testUser.Email] = testUser
+	testRooms[testRoom.Name] = testRoom
+	mStorage := mem.FilledStorage(testUsers, testRooms)
+	fmt.Printf("\n\n %v\n", mStorage.Users)
+	ls := lgn.NewService(&mStorage)
+	sis := sgn.NewService(&mStorage)
+	as := add.NewService(&mStorage)
+	rs := rdn.NewService(&mStorage)
+	router := rst.InitHandlers(ls, sis, as, rs)
 	srv := httptest.NewServer(router)
 	defer srv.Close()
 	client := &http.Client{}
@@ -88,6 +110,7 @@ func TestRestHandlers(t *testing.T) {
 			}
 			sb := string(body)
 			fmt.Println(sb)
+			fmt.Printf("\n\n %v\n", mStorage.Users)
 		})
 	}
 }

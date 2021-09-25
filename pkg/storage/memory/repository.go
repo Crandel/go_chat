@@ -26,6 +26,14 @@ func NewStorage() Storage {
 	}
 }
 
+func FilledStorage(users map[UserId]User, rooms map[string]Room) Storage {
+	return Storage{
+		Users:   users,
+		Rooms:   rooms,
+		RWMutex: &sync.RWMutex{},
+	}
+}
+
 func (str *Storage) SigninUser(su s.User) (s.SigninResponse, error) {
 	u := ConvertUserFromSigning(su)
 	if str.Users == nil {
