@@ -35,11 +35,17 @@ func FilledStorage(users map[UserId]User, rooms map[string]Room) Storage {
 }
 
 func (str *Storage) SigninUser(su s.User) (s.SigninResponse, error) {
+	const op errs.Op = "memory.Signin"
 	u := ConvertUserFromSigning(su)
 	if str.Users == nil {
 		str.Users = make(map[UserId]User)
 	}
 	str.Lock()
+	_, exists := str.Users[u.Email]
+	if exists {
+		return s.SigninResponse{}, errs.New(
+			op, errs.Info, fmt.Sprintf("User with email: '%s' exists", u.Email))
+	}
 	str.Users[u.Email] = u
 	str.Unlock()
 	return s.SigninResponse{Token: u.Token}, nil

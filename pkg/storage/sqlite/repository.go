@@ -37,7 +37,7 @@ func (str *Storage) SigninUser(u s.User) (s.SigninResponse, error) {
 	error := str.db.Insert(&su).Do()
 	if error != nil {
 		return s.SigninResponse{}, errs.NewError(
-			op, errs.Info, fmt.Sprintf("Insert user with email %s is not possible", u.Email), error)
+			op, errs.Info, fmt.Sprintf("User with email %s already exists", u.Email), error)
 	}
 	return s.SigninResponse{Token: token}, nil
 }
