@@ -3,7 +3,6 @@ package main_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -18,7 +17,7 @@ import (
 
 const user_id = "example@post.com"
 
-type data map[string]string
+type data map[string]interface{}
 
 func TestRestHandlers(t *testing.T) {
 	uid := mem.UserId(user_id)
@@ -42,7 +41,7 @@ func TestRestHandlers(t *testing.T) {
 	testUsers[testUser.Email] = testUser
 	testRooms[testRoom.Name] = testRoom
 	mStorage := mem.FilledStorage(testUsers, testRooms)
-	fmt.Printf("\n\n %v\n", mStorage.Users)
+	testAddingUser := add.User{ID: user_id}
 	aths := ath.NewService(&mStorage)
 	adds := add.NewService(&mStorage)
 	rdns := rdn.NewService(&mStorage)
@@ -73,7 +72,7 @@ func TestRestHandlers(t *testing.T) {
 			name:   "Login",
 			url:    "/api/users/login",
 			method: http.MethodPost,
-			data:   data{"email": "example@post.com", "password": "pass"},
+			data:   data{"email": user_id + "1", "password": "pass"},
 		},
 		{
 			name:   "List users",
@@ -84,7 +83,7 @@ func TestRestHandlers(t *testing.T) {
 			name:   "Add rooms",
 			url:    "/api/rooms",
 			method: http.MethodPost,
-			data:   data{"name": "room 1", "users": `[{"id":"example@post.com"}]`},
+			data:   data{"name": "room 1", "users": []add.User{testAddingUser}},
 		},
 		{
 			name:   "List rooms",
@@ -96,20 +95,29 @@ func TestRestHandlers(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			data := new(bytes.Buffer)
 			if tc.data != nil {
-				json.NewEncoder(data).Encode(tc.data)
+				err := json.NewEncoder(data).Encode(tc.data)
+				if err != nil {
+					t.Fatal(err)
+				}
 			}
-			fmt.Println(srv.URL + tc.url)
-			fmt.Println(data)
-			req, _ := http.NewRequest(tc.method, srv.URL+tc.url, data)
+			req, err := http.NewRequest(tc.method, srv.URL+tc.url, data)
+			if err != nil {
+				t.Fatalf("Could not create request %v", err)
+			}
 			res, err := client.Do(req)
 			if err != nil {
-				t.Fatalf("could not send GET request: %v", err)
+				t.Fatalf("Could not send %s request: %v", tc.method, err)
 			}
 			defer res.Body.Close()
 
 			if res.StatusCode != http.StatusOK {
-				t.Errorf("expected status OK; got %v", res.Status)
+				t.Errorf("Expected status OK; got %v", res.Status)
 			}
+			// b, err := ioutil.ReadAll(res.Body)
+			// if err != nil {
+			// 	t.Fatalf("could not read response: %v", err)
+			// }
+			// fmt.Println(string(bytes.TrimSpace(b)))
 		})
 	}
 }
