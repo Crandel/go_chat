@@ -5,11 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	a "github.com/Crandel/go_chat/pkg/adding"
+	add "github.com/Crandel/go_chat/pkg/adding"
+	ath "github.com/Crandel/go_chat/pkg/auth"
 	"github.com/Crandel/go_chat/pkg/http/rest"
-	l "github.com/Crandel/go_chat/pkg/login"
-	r "github.com/Crandel/go_chat/pkg/reading"
-	s "github.com/Crandel/go_chat/pkg/signin"
+	rdn "github.com/Crandel/go_chat/pkg/reading"
 	sql "github.com/Crandel/go_chat/pkg/storage/sqlite"
 	"github.com/samonzeweb/godb"
 	"github.com/samonzeweb/godb/adapters/sqlite"
@@ -21,10 +20,9 @@ func main() {
 	fmt.Println("Starting server on port", port)
 	sql_db, _ := godb.Open(sqlite.Adapter, "./storage.db")
 	sqlite_storage := sql.NewStorage(sql_db)
-	ls := l.NewService(&sqlite_storage)
-	sis := s.NewService(&sqlite_storage)
-	as := a.NewService(&sqlite_storage)
-	rs := r.NewService(&sqlite_storage)
-	router := rest.InitHandlers(ls, sis, as, rs)
+	aths := ath.NewService(&sqlite_storage)
+	adds := add.NewService(&sqlite_storage)
+	rdns := rdn.NewService(&sqlite_storage)
+	router := rest.InitHandlers(aths, adds, rdns)
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

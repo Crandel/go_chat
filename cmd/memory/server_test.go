@@ -10,10 +10,9 @@ import (
 	"time"
 
 	add "github.com/Crandel/go_chat/pkg/adding"
+	ath "github.com/Crandel/go_chat/pkg/auth"
 	rst "github.com/Crandel/go_chat/pkg/http/rest"
-	lgn "github.com/Crandel/go_chat/pkg/login"
 	rdn "github.com/Crandel/go_chat/pkg/reading"
-	sgn "github.com/Crandel/go_chat/pkg/signin"
 	mem "github.com/Crandel/go_chat/pkg/storage/memory"
 )
 
@@ -44,11 +43,10 @@ func TestRestHandlers(t *testing.T) {
 	testRooms[testRoom.Name] = testRoom
 	mStorage := mem.FilledStorage(testUsers, testRooms)
 	fmt.Printf("\n\n %v\n", mStorage.Users)
-	ls := lgn.NewService(&mStorage)
-	sis := sgn.NewService(&mStorage)
-	as := add.NewService(&mStorage)
-	rs := rdn.NewService(&mStorage)
-	router := rst.InitHandlers(ls, sis, as, rs)
+	aths := ath.NewService(&mStorage)
+	adds := add.NewService(&mStorage)
+	rdns := rdn.NewService(&mStorage)
+	router := rst.InitHandlers(aths, adds, rdns)
 	srv := httptest.NewServer(router)
 	defer srv.Close()
 	client := &http.Client{}
@@ -62,7 +60,7 @@ func TestRestHandlers(t *testing.T) {
 	}{
 		{
 			name:   "Signin",
-			url:    "/api/signin",
+			url:    "/api/users/signin",
 			method: http.MethodPost,
 			data: data{
 				"name":        "user1",
@@ -73,7 +71,7 @@ func TestRestHandlers(t *testing.T) {
 		},
 		{
 			name:   "Login",
-			url:    "/api/login",
+			url:    "/api/users/login",
 			method: http.MethodPost,
 			data:   data{"email": "example@post.com", "password": "pass"},
 		},
