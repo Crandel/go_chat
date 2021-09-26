@@ -7,6 +7,11 @@ import (
 	"github.com/Crandel/go_chat/pkg/adding"
 )
 
+type RoomResponse struct {
+	Name   string   `json:"name"`
+	Errors []string `json:"errors"`
+}
+
 func addRoomHandler(as adding.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var ar adding.Room
@@ -15,7 +20,7 @@ func addRoomHandler(as adding.Service) func(w http.ResponseWriter, r *http.Reque
 			return
 		}
 		name, err := as.AddRoom(ar)
-		if len(err) != 0 {
+		if name == "" {
 			err_msg := ""
 			for _, e := range err {
 				err_msg = err_msg + e.Error()
@@ -23,7 +28,14 @@ func addRoomHandler(as adding.Service) func(w http.ResponseWriter, r *http.Reque
 			http.Error(w, err_msg, http.StatusBadGateway)
 			return
 		}
-		json.NewEncoder(w).Encode(name)
+		var errors []string
+		for _, e := range err {
+			errors = append(errors, e.Error())
+		}
+		resp := RoomResponse{
+			Name: name, Errors: errors,
+		}
+		json.NewEncoder(w).Encode(resp)
 	}
 
 }

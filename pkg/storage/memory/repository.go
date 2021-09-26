@@ -5,11 +5,10 @@ import (
 	"sync"
 	"time"
 
-	a "github.com/Crandel/go_chat/pkg/adding"
+	add "github.com/Crandel/go_chat/pkg/adding"
+	"github.com/Crandel/go_chat/pkg/auth"
 	errs "github.com/Crandel/go_chat/pkg/errors"
-	l "github.com/Crandel/go_chat/pkg/login"
-	r "github.com/Crandel/go_chat/pkg/reading"
-	s "github.com/Crandel/go_chat/pkg/signin"
+	rdn "github.com/Crandel/go_chat/pkg/reading"
 )
 
 type Storage struct {
@@ -34,7 +33,7 @@ func FilledStorage(users map[UserId]User, rooms map[string]Room) Storage {
 	}
 }
 
-func (str *Storage) SigninUser(su s.User) (s.SigninResponse, error) {
+func (str *Storage) SigninUser(su auth.SigninUser) (string, error) {
 	const op errs.Op = "memory.Signin"
 	u := ConvertUserFromSigning(su)
 	if str.Users == nil {
@@ -43,29 +42,31 @@ func (str *Storage) SigninUser(su s.User) (s.SigninResponse, error) {
 	str.Lock()
 	_, exists := str.Users[u.Email]
 	if exists {
-		return s.SigninResponse{}, errs.New(
+		return "", errs.New(
 			op, errs.Info, fmt.Sprintf("User with email: '%s' exists", u.Email))
 	}
 	str.Users[u.Email] = u
 	str.Unlock()
-	return s.SigninResponse{Token: u.Token}, nil
+	return u.Token, nil
 }
 
-func (str *Storage) LoginUser(lu l.User) (string, error) {
+func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 	const op errs.Op = "memory.LoginUser"
 	str.RLock()
 	u, exists := str.Users[UserId(lu.Email)]
 	str.RUnlock()
 	if !exists {
-		return "", errs.New(op, errs.Info, "No user with email: "+lu.Email)
+		return "", errs.New(
+			op, errs.Info, fmt.Sprintf("No user with email '%s'", lu.Email))
 	}
 	if u.Password != lu.Password {
-		return "", errs.New(op, errs.Info, "User with email"+lu.Email+"has wrong password")
+		return "", errs.New(
+			op, errs.Info, fmt.Sprintf("User with email '%s' has wrong password", lu.Email))
 	}
 	return u.Token, nil
 }
 
-func (str *Storage) AddRoom(ar a.Room) (string, []error) {
+func (str *Storage) AddRoom(ar add.Room) (string, []error) {
 	const op errs.Op = "memory.AddRoom"
 	var error_list []error
 	str.Lock()
@@ -76,7 +77,8 @@ func (str *Storage) AddRoom(ar a.Room) (string, []error) {
 		if exists {
 			error_list = append(
 				error_list,
-				errs.New(op, errs.Info, fmt.Sprintf("Room with name %s already exists", ar.Name)))
+				errs.New(
+					op, errs.Info, fmt.Sprintf("Room with name %s already exists", ar.Name)))
 			return "", error_list
 		}
 	}
@@ -88,7 +90,8 @@ func (str *Storage) AddRoom(ar a.Room) (string, []error) {
 		u, exists := str.Users[uid]
 		str.RUnlock()
 		if !exists {
-			error_list = append(error_list, errs.New(op, errs.Info, "User with id "+user.ID+"does not exists"))
+			error_list = append(error_list, errs.New(
+				op, errs.Info, fmt.Sprintf("User with email '%s' does not exists", user.ID)))
 		} else {
 			messages[u.Email] = []Message{}
 		}
@@ -100,35 +103,31 @@ func (str *Storage) AddRoom(ar a.Room) (string, []error) {
 	return mr.Name, error_list
 }
 
-func (str *Storage) ReadRooms() ([]r.Room, error) {
+func (str *Storage) ReadRooms() ([]rdn.Room, error) {
 	const op errs.Op = "memory.ReadRooms"
-	var rooms = []r.Room{}
+	var rooms = []rdn.Room{}
 	str.RLock()
 	for _, room := range str.Rooms {
 		rooms = append(rooms, room.ConvertRoomToReading())
 	}
 	str.RUnlock()
-	var not_found error
-	if len(rooms) == 0 {
-		not_found = errs.New(op, errs.Info, "No rooms are here")
-	}
-	return rooms, not_found
+	return rooms, nil
 }
 
-func (str *Storage) ReadRoom(rid string) (r.Room, error) {
+func (str *Storage) ReadRoom(rid string) (rdn.Room, error) {
 	const op errs.Op = "memory.ReadRoom"
 	str.RLock()
 	room, exists := str.Rooms[rid]
 	str.RUnlock()
 	if !exists {
-		return r.Room{}, errs.New(op, errs.Info, "No rooms with id "+rid)
+		return rdn.Room{}, errs.New(op, errs.Info, "No rooms with id "+rid)
 	}
 	return room.ConvertRoomToReading(), nil
 }
 
-func (str *Storage) ReadUsers() ([]r.User, error) {
+func (str *Storage) ReadUsers() ([]rdn.User, error) {
 	const op errs.Op = "memory.ReadUsers"
-	var users = []r.User{}
+	var users = []rdn.User{}
 	str.RLock()
 	for _, u := range str.Users {
 		users = append(users, u.ConvertUserToReading())
@@ -141,14 +140,14 @@ func (str *Storage) ReadUsers() ([]r.User, error) {
 	return users, not_found
 }
 
-func (str *Storage) ReadUser(uid r.UserId) (r.User, error) {
+func (str *Storage) ReadUser(uid rdn.UserId) (rdn.User, error) {
 	const op errs.Op = "memory.ReadUser"
 	umid := ConvertUserIdFromReading(uid)
 	str.RLock()
 	s_user, exists := str.Users[umid]
 	str.RUnlock()
 	if !exists {
-		return r.User{}, errs.New(op, errs.Info, "No user with id "+string(uid))
+		return rdn.User{}, errs.New(op, errs.Info, "No user with id "+string(uid))
 	}
 	return s_user.ConvertUserToReading(), nil
 }

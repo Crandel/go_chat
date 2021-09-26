@@ -3,8 +3,8 @@ package memory
 import (
 	"time"
 
+	"github.com/Crandel/go_chat/pkg/auth"
 	r "github.com/Crandel/go_chat/pkg/reading"
-	s "github.com/Crandel/go_chat/pkg/signin"
 	"github.com/google/uuid"
 )
 
@@ -35,7 +35,7 @@ type User struct {
 	Created    time.Time
 }
 
-func ConvertUserFromSigning(su s.User) User {
+func ConvertUserFromSigning(su auth.SigninUser) User {
 	id := UserId(su.Email)
 	token := uuid.New().String()
 	return User{

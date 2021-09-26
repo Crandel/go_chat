@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -67,24 +66,32 @@ func TestRestHandlers(t *testing.T) {
 			method: http.MethodPost,
 			data: data{
 				"name":        "user1",
-				"email":       user_id,
+				"email":       user_id + "1",
 				"second_name": "second",
 				"password":    "pass",
 			},
-			response_keys: []string{"token"},
 		},
 		{
-			name:          "Login",
-			url:           "/api/login",
-			method:        http.MethodPost,
-			data:          data{"email": "example@post.com", "password": "pass"},
-			response_keys: []string{"token"},
+			name:   "Login",
+			url:    "/api/login",
+			method: http.MethodPost,
+			data:   data{"email": "example@post.com", "password": "pass"},
 		},
 		{
-			name:          "List users",
-			url:           "/api/users",
-			method:        http.MethodGet,
-			response_keys: []string{"id", "email", "name", "second_name"},
+			name:   "List users",
+			url:    "/api/users",
+			method: http.MethodGet,
+		},
+		{
+			name:   "Add rooms",
+			url:    "/api/rooms",
+			method: http.MethodPost,
+			data:   data{"name": "room 1", "users": `[{"id":"example@post.com"}]`},
+		},
+		{
+			name:   "List rooms",
+			url:    "/api/rooms",
+			method: http.MethodGet,
 		},
 	}
 	for _, tc := range tt {
@@ -94,6 +101,7 @@ func TestRestHandlers(t *testing.T) {
 				json.NewEncoder(data).Encode(tc.data)
 			}
 			fmt.Println(srv.URL + tc.url)
+			fmt.Println(data)
 			req, _ := http.NewRequest(tc.method, srv.URL+tc.url, data)
 			res, err := client.Do(req)
 			if err != nil {
@@ -104,13 +112,6 @@ func TestRestHandlers(t *testing.T) {
 			if res.StatusCode != http.StatusOK {
 				t.Errorf("expected status OK; got %v", res.Status)
 			}
-			body, err := ioutil.ReadAll(res.Body)
-			if err != nil {
-				t.Fatal(err)
-			}
-			sb := string(body)
-			fmt.Println(sb)
-			fmt.Printf("\n\n %v\n", mStorage.Users)
 		})
 	}
 }

@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	a "github.com/Crandel/go_chat/pkg/adding"
+	add "github.com/Crandel/go_chat/pkg/adding"
+	"github.com/Crandel/go_chat/pkg/auth"
 	errs "github.com/Crandel/go_chat/pkg/errors"
-	l "github.com/Crandel/go_chat/pkg/login"
-	r "github.com/Crandel/go_chat/pkg/reading"
-	s "github.com/Crandel/go_chat/pkg/signin"
+	rdn "github.com/Crandel/go_chat/pkg/reading"
 	"github.com/google/uuid"
 	"github.com/samonzeweb/godb"
 )
@@ -22,7 +21,7 @@ func NewStorage(db *godb.DB) Storage {
 	return Storage{db}
 }
 
-func (str *Storage) SigninUser(u s.User) (s.SigninResponse, error) {
+func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
 	const op errs.Op = "sqlite.SigninUser"
 	token := uuid.New().String()
 	su := User{
@@ -36,13 +35,13 @@ func (str *Storage) SigninUser(u s.User) (s.SigninResponse, error) {
 	}
 	error := str.db.Insert(&su).Do()
 	if error != nil {
-		return s.SigninResponse{}, errs.NewError(
+		return "", errs.NewError(
 			op, errs.Info, fmt.Sprintf("User with email %s already exists", u.Email), error)
 	}
-	return s.SigninResponse{Token: token}, nil
+	return token, nil
 }
 
-func (str *Storage) LoginUser(lu l.User) (string, error) {
+func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 	const op errs.Op = "sqlite.LoginUser"
 	user := User{}
 	error := str.db.Select(&user).WhereQ(
@@ -59,7 +58,7 @@ func (str *Storage) LoginUser(lu l.User) (string, error) {
 	return user.Token, nil
 }
 
-func (str *Storage) AddRoom(ar a.Room) (string, []error) {
+func (str *Storage) AddRoom(ar add.Room) (string, []error) {
 	const op errs.Op = "sqlite.AddRoom"
 	users := []UserMessage{}
 	list_errors := []error{}
@@ -90,18 +89,18 @@ func (str *Storage) AddRoom(ar a.Room) (string, []error) {
 	return res_str, list_errors
 }
 
-func (str *Storage) ReadUsers() ([]r.User, error) {
-	return []r.User{}, nil
+func (str *Storage) ReadUsers() ([]rdn.User, error) {
+	return []rdn.User{}, nil
 }
 
-func (str *Storage) ReadUser(r.UserId) (r.User, error) {
-	return r.User{}, nil
+func (str *Storage) ReadUser(rdn.UserId) (rdn.User, error) {
+	return rdn.User{}, nil
 }
 
-func (str *Storage) ReadRooms() ([]r.Room, error) {
-	return []r.Room{}, nil
+func (str *Storage) ReadRooms() ([]rdn.Room, error) {
+	return []rdn.Room{}, nil
 }
 
-func (str *Storage) ReadRoom(string) (r.Room, error) {
-	return r.Room{}, nil
+func (str *Storage) ReadRoom(string) (rdn.Room, error) {
+	return rdn.Room{}, nil
 }
