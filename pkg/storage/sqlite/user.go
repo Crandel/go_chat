@@ -3,6 +3,8 @@ package sqlite
 import (
 	"database/sql/driver"
 	"time"
+
+	rdn "github.com/Crandel/go_chat/pkg/reading"
 )
 
 const USERS = "users"
@@ -35,4 +37,13 @@ type User struct {
 
 func (*User) TableName() string {
 	return USERS
+}
+
+func (u *User) ConvertToReading() rdn.User {
+	return rdn.User{
+		ID:         rdn.UserId(u.ID),
+		Email:      u.Email,
+		Name:       u.Name,
+		SecondName: u.SecondName,
+	}
 }

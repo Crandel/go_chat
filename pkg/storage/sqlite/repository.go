@@ -60,6 +60,11 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 
 func (str *Storage) AddRoom(ar add.Room) (string, []error) {
 	const op errs.Op = "sqlite.AddRoom"
+	room := Room{}
+	err := str.db.Select(&room).Where("id = ?", ar.Name).Do()
+	if err == nil && &room == nil {
+		return "", []error{errs.New(op, errs.Info, "Room already exists")}
+	}
 	users := []UserMessage{}
 	list_errors := []error{}
 	for _, au := range ar.Users {
@@ -73,34 +78,50 @@ func (str *Storage) AddRoom(ar add.Room) (string, []error) {
 			users = append(users, UserMessage{User: su, Messages: []Message{}})
 		}
 	}
+	id := uuid.New().String()
+	room.ID = id
+	error := str.db.Insert(&room).Do()
 	res_str := ""
-	if len(list_errors) == 0 {
-		id := uuid.New().String()
-		room := Room{id, users}
-		error := str.db.Insert(&room).Do()
-		if error != nil {
-			res_str = room.ID
-		} else {
-			list_errors = append(
-				list_errors,
-				errs.NewError(op, errs.Info, "Failed to create room", error))
-		}
+	if error != nil {
+		res_str = room.ID
+	} else {
+		list_errors = append(
+			list_errors,
+			errs.NewError(op, errs.Info, "Failed to create room", error))
 	}
 	return res_str, list_errors
 }
 
 func (str *Storage) ReadUsers() ([]rdn.User, error) {
-	return []rdn.User{}, nil
+	const op errs.Op = "sqlite.LoginUser"
+	users := make([]User, 0)
+	rdnUsers := make([]rdn.User, 0)
+	err := str.db.Select(&users).Do()
+	if err != nil {
+		return nil, err
+	}
+	for _, u := range users {
+		rdnUsers = append(rdnUsers, u.ConvertToReading())
+	}
+	return rdnUsers, nil
 }
 
-func (str *Storage) ReadUser(rdn.UserId) (rdn.User, error) {
-	return rdn.User{}, nil
+func (str *Storage) ReadUser(ru rdn.UserId) (rdn.User, error) {
+	const op errs.Op = "sqlite.ReadUser"
+	user := User{}
+	err := str.db.Select(&user).Where("id = ?", ru).Do()
+	if err == sql.ErrNoRows {
+		return rdn.User{}, errs.New(op, errs.Info, "No user with id: "+string(ru))
+	} else if err != nil {
+		return rdn.User{}, errs.NewError(op, errs.Info, "Error with database connection", err)
+	}
+	return user.ConvertToReading(), nil
 }
 
 func (str *Storage) ReadRooms() ([]rdn.Room, error) {
 	return []rdn.Room{}, nil
 }
 
-func (str *Storage) ReadRoom(string) (rdn.Room, error) {
+func (str *Storage) ReadRoom(id string) (rdn.Room, error) {
 	return rdn.Room{}, nil
 }
