@@ -25,39 +25,82 @@ func main() {
 	}
 }
 
+func printError(e error) {
+	if e != nil {
+		fmt.Println("Error while creating DB:", e)
+	}
+}
+
 func SetupSqlite(db *godb.DB) {
-	createTable := `
+	createUsers := `
 	DROP TABLE IF EXISTS users;
 	CREATE TABLE users (
-		name        text not null,
-		second_name text null,
-		email       varchar(500) unique primary key,
-		password    text not null,
-		token       text not null,
-		role        text check( role in ('Admin', 'Member') ) not null default 'Member',
-		created     date not null
+		email        VARCHAR(50) UNIQUE PRIMARY KEY,
+		name         TEXT NOT NULL,
+		second_name  TEXT,
+		password     TEXT NOT NULL,
+		token        TEXT NOT NULL,
+		role         TEXT CHECK( role IN ('Admin', 'Member') ) NOT NULL DEFAULT 'Member',
+		created      DATE NOT NULL
 	);
 	`
-	_, err := db.CurrentDB().Exec(createTable)
-	if err != nil {
-		fmt.Println("Error while creating DB:", err)
-	}
+
+	createRooms := `
+	DROP TABLE IF EXISTS rooms;
+	CREATE TABLE rooms (
+		name         TEXT UNIQUE PRIMARY KEY,
+		created      DATE NOT NULL
+	);
+	`
+
+	createMessages := `
+	DROP TABLE IF EXISTS messages;
+	CREATE TABLE messages (
+		id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		user_id      TEXT NOT NULL UNIQUE,
+		room_name    TEXT NOT NULL,
+		payload      TEXT,
+		created      DATE NOT NULL,
+		FOREIGN KEY(user_id)   REFERENCES users(email),
+		FOREIGN KEY(room_name) REFERENCES rooms(name)
+	);
+	`
+	_, erru := db.CurrentDB().Exec(createUsers)
+	printError(erru)
+	_, errm := db.CurrentDB().Exec(createMessages)
+	printError(errm)
+	_, errr := db.CurrentDB().Exec(createRooms)
+	printError(errr)
+	fmt.Println("DB was successfully setup")
 }
 
 func FillSqlite(db *godb.DB) {
 	su := sqlite.User{
+		Email:      "test@email.com",
 		Name:       "test_name",
 		SecondName: "test_second_name",
-		Email:      "test@email.com",
 		Password:   "pass",
 		Token:      "token",
 		Role:       sqlite.Member,
 		Created:    time.Now(),
 	}
 	err := db.Insert(&su).Do()
-	fmt.Println("After insert")
-	if err != nil {
-		fmt.Println("Error while inserting", err)
+	printError(err)
+	fmt.Println("User with id:", su.Email, " and role ", su.Role, "was inserted")
+	sr := sqlite.Room{
+		Name:    "room 1",
+		Created: time.Now(),
 	}
-	fmt.Println("User with id:", su.Email, su.Role, "was inserted")
+	err = db.Insert(&sr).Do()
+	printError(err)
+	sm := sqlite.Message{
+		RoomName: sr.Name,
+		UserID:   su.Email,
+		Payload:  "Test message",
+		Created:  time.Now(),
+	}
+	err = db.Insert(sm).Do()
+	printError(err)
+
+	fmt.Printf("Message %v was created", sm)
 }

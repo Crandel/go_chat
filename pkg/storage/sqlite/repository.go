@@ -65,19 +65,7 @@ func (str *Storage) AddRoom(ar add.Room) (string, []error) {
 	if err == nil && &room == nil {
 		return "", []error{errs.New(op, errs.Info, "Room already exists")}
 	}
-	users := []UserMessage{}
 	list_errors := []error{}
-	for _, au := range ar.Users {
-		su := User{}
-		error := str.db.Select(&su).Where("email = ?", au.ID).Do()
-		if error != nil {
-			list_errors = append(
-				list_errors,
-				errs.NewError(op, errs.Info, "User with ID"+au.ID+"not found", error))
-		} else {
-			users = append(users, UserMessage{User: su, Messages: []Message{}})
-		}
-	}
 	id := uuid.New().String()
 	room.Name = id
 	room.Created = time.Now()
