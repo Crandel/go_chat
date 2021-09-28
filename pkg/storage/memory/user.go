@@ -51,9 +51,8 @@ func ConvertUserFromSigning(su auth.SigninUser) User {
 
 func (u User) ConvertUserToReading() r.User {
 	return r.User{
-		ID:         u.Email.ConvertUserIdToReading(),
 		Name:       u.Name,
 		SecondName: u.SecondName,
-		Email:      string(u.Email),
+		Email:      u.Email.ConvertUserIdToReading(),
 	}
 }

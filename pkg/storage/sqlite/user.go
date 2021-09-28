@@ -25,10 +25,9 @@ func (r Role) Value() (driver.Value, error) {
 }
 
 type User struct {
-	ID         string    `db:"id,key"`
 	Name       string    `db:"name"`
 	SecondName string    `db:"second_name"`
-	Email      string    `db:"email"`
+	Email      string    `db:"email,key"`
 	Password   string    `db:"password"`
 	Token      string    `db:"token"`
 	Role       Role      `db:"role"`
@@ -41,8 +40,7 @@ func (*User) TableName() string {
 
 func (u *User) ConvertToReading() rdn.User {
 	return rdn.User{
-		ID:         rdn.UserId(u.ID),
-		Email:      u.Email,
+		Email:      rdn.UserId(u.Email),
 		Name:       u.Name,
 		SecondName: u.SecondName,
 	}

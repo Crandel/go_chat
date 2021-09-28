@@ -61,7 +61,7 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 func (str *Storage) AddRoom(ar add.Room) (string, []error) {
 	const op errs.Op = "sqlite.AddRoom"
 	room := Room{}
-	err := str.db.Select(&room).Where("id = ?", ar.Name).Do()
+	err := str.db.Select(&room).Where("name = ?", ar.Name).Do()
 	if err == nil && &room == nil {
 		return "", []error{errs.New(op, errs.Info, "Room already exists")}
 	}
@@ -69,7 +69,7 @@ func (str *Storage) AddRoom(ar add.Room) (string, []error) {
 	list_errors := []error{}
 	for _, au := range ar.Users {
 		su := User{}
-		error := str.db.Select(&su).Where("id = ?", au.ID).Do()
+		error := str.db.Select(&su).Where("email = ?", au.ID).Do()
 		if error != nil {
 			list_errors = append(
 				list_errors,
@@ -79,11 +79,12 @@ func (str *Storage) AddRoom(ar add.Room) (string, []error) {
 		}
 	}
 	id := uuid.New().String()
-	room.ID = id
+	room.Name = id
+	room.Created = time.Now()
 	error := str.db.Insert(&room).Do()
 	res_str := ""
 	if error != nil {
-		res_str = room.ID
+		res_str = room.Name
 	} else {
 		list_errors = append(
 			list_errors,
@@ -108,10 +109,11 @@ func (str *Storage) ReadUsers() ([]rdn.User, error) {
 
 func (str *Storage) ReadUser(ru rdn.UserId) (rdn.User, error) {
 	const op errs.Op = "sqlite.ReadUser"
+	uid := string(ru)
 	user := User{}
-	err := str.db.Select(&user).Where("id = ?", ru).Do()
+	err := str.db.Select(&user).Where("email = ?", uid).Do()
 	if err == sql.ErrNoRows {
-		return rdn.User{}, errs.New(op, errs.Info, "No user with id: "+string(ru))
+		return rdn.User{}, errs.New(op, errs.Info, "No user with id: "+uid)
 	} else if err != nil {
 		return rdn.User{}, errs.NewError(op, errs.Info, "Error with database connection", err)
 	}

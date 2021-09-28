@@ -36,7 +36,7 @@ func signinHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Reques
 		response, err := athS.SigninUser(su)
 		if err != nil {
 			log.Println("Error during signing", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		json.NewEncoder(w).Encode(response)

@@ -1,13 +1,9 @@
 :content = application/json
 :host = http://localhost:8080
-# Root
 
-GET :host/api
-Accept: :content
-Content-Type: :content
 
 # Signin
-POST :host/api/signin
+POST :host/api/users/signin
 Accept: :content
 Content-Type: :content
 {
@@ -24,7 +20,7 @@ Content-Type: :content
 
 # Login
 
-POST :host/api/login
+POST :host/api/users/login
 Accept: :content
 Content-Type: :content
 {
