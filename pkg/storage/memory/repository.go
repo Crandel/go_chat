@@ -12,24 +12,27 @@ import (
 )
 
 type Storage struct {
-	Users map[UserId]User
-	Rooms map[string]Room
+	Users    map[UserId]User
+	Rooms    map[string]Room
+	Messages map[int]Message
 	*sync.RWMutex
 }
 
 func NewStorage() Storage {
 	return Storage{
-		Users:   map[UserId]User{},
-		Rooms:   map[string]Room{},
-		RWMutex: &sync.RWMutex{},
+		Users:    map[UserId]User{},
+		Rooms:    map[string]Room{},
+		Messages: map[int]Message{},
+		RWMutex:  &sync.RWMutex{},
 	}
 }
 
-func FilledStorage(users map[UserId]User, rooms map[string]Room) Storage {
+func FilledStorage(users map[UserId]User, rooms map[string]Room, messages map[int]Message) Storage {
 	return Storage{
-		Users:   users,
-		Rooms:   rooms,
-		RWMutex: &sync.RWMutex{},
+		Users:    users,
+		Rooms:    rooms,
+		Messages: messages,
+		RWMutex:  &sync.RWMutex{},
 	}
 }
 
@@ -83,24 +86,33 @@ func (str *Storage) AddRoom(ar add.Room) (string, []error) {
 		}
 	}
 	str.Unlock()
-	messages := make(map[UserId][]Message)
-	for _, user := range ar.Users {
-		uid := UserId(user.ID)
-		str.RLock()
-		u, exists := str.Users[uid]
-		str.RUnlock()
-		if !exists {
-			error_list = append(error_list, errs.New(
-				op, errs.Info, fmt.Sprintf("User with email '%s' does not exists", user.ID)))
-		} else {
-			messages[u.Email] = []Message{}
-		}
-	}
-	mr := Room{Name: ar.Name, Messages: messages, Created: time.Now()}
+	mr := Room{Name: ar.Name, Created: time.Now()}
 	str.Lock()
 	str.Rooms[mr.Name] = mr
 	str.Unlock()
 	return mr.Name, error_list
+}
+
+func collectRoomMessages(str *Storage, name string) rdn.Room {
+	rRoom := rdn.Room{Name: name}
+	rMessages := make(map[rdn.UserId][]rdn.Message)
+	for _, m := range str.Messages {
+		if m.RoomName == name {
+			ruid := m.UserId.ConvertUserIdToReading()
+			rMessage := rdn.Message{
+				ID:      m.ID,
+				UserId:  ruid,
+				Payload: m.Payload,
+			}
+			innerMessages, _ := rMessages[ruid]
+			innerMessages = append(innerMessages, rMessage)
+			rMessages[ruid] = innerMessages
+		}
+	}
+	if len(rMessages) > 0 {
+		rRoom.Messages = rMessages
+	}
+	return rRoom
 }
 
 func (str *Storage) ReadRooms() ([]rdn.Room, error) {
@@ -108,7 +120,7 @@ func (str *Storage) ReadRooms() ([]rdn.Room, error) {
 	var rooms = []rdn.Room{}
 	str.RLock()
 	for _, room := range str.Rooms {
-		rooms = append(rooms, room.ConvertRoomToReading())
+		rooms = append(rooms, collectRoomMessages(str, room.Name))
 	}
 	str.RUnlock()
 	return rooms, nil
@@ -122,7 +134,7 @@ func (str *Storage) ReadRoom(rid string) (rdn.Room, error) {
 	if !exists {
 		return rdn.Room{}, errs.New(op, errs.Info, "No rooms with id "+rid)
 	}
-	return room.ConvertRoomToReading(), nil
+	return collectRoomMessages(str, room.Name), nil
 }
 
 func (str *Storage) ReadUsers() ([]rdn.User, error) {
