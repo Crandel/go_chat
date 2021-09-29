@@ -93,13 +93,15 @@ func FillSqlite(db *godb.DB) {
 	}
 	err = db.Insert(&sr).Do()
 	printError(err)
+	fmt.Println("Room ", sr.Name, " was inserted")
+
 	sm := sqlite.Message{
 		RoomName: sr.Name,
 		UserID:   su.Email,
 		Payload:  "Test message",
 		Created:  time.Now(),
 	}
-	err = db.Insert(sm).Do()
+	err = db.Insert(&sm).Do()
 	printError(err)
 
 	fmt.Printf("Message %v was created", sm)
