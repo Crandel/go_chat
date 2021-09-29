@@ -61,17 +61,16 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 func (str *Storage) AddRoom(ar add.Room) (string, []error) {
 	const op errs.Op = "sqlite.AddRoom"
 	room := Room{}
-	err := str.db.Select(&room).Where("name = ?", ar.Name).Do()
-	if err == nil && &room == nil {
+	str.db.Select(&room).Where("name = ?", ar.Name).Do()
+	if room.Name == ar.Name {
 		return "", []error{errs.New(op, errs.Info, "Room already exists")}
 	}
 	list_errors := []error{}
-	id := uuid.New().String()
-	room.Name = id
+	room.Name = ar.Name
 	room.Created = time.Now()
 	error := str.db.Insert(&room).Do()
 	res_str := ""
-	if error != nil {
+	if error == nil {
 		res_str = room.Name
 	} else {
 		list_errors = append(

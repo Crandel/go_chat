@@ -51,7 +51,7 @@ POST :host/api/rooms
 Accept: :content
 Content-Type: :content
 {
-    "name": "room 1"
+    "name": "room 3"
 }
 
 #
