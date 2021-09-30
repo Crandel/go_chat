@@ -93,9 +93,10 @@ func (str *Storage) AddRoom(ar add.Room) (string, []error) {
 	return mr.Name, error_list
 }
 
-func collectRoomMessages(str *Storage, name string) rdn.Room {
+func (str *Storage) collectRoomMessages(name string) rdn.Room {
 	rRoom := rdn.Room{Name: name}
 	rMessages := make(map[rdn.UserId][]rdn.Message)
+	str.RLock()
 	for _, m := range str.Messages {
 		if m.RoomName == name {
 			ruid := m.UserId.ConvertUserIdToReading()
@@ -109,6 +110,7 @@ func collectRoomMessages(str *Storage, name string) rdn.Room {
 			rMessages[ruid] = innerMessages
 		}
 	}
+	str.RUnlock()
 	if len(rMessages) > 0 {
 		rRoom.Messages = rMessages
 	}
@@ -120,7 +122,7 @@ func (str *Storage) ReadRooms() ([]rdn.Room, error) {
 	var rooms = []rdn.Room{}
 	str.RLock()
 	for _, room := range str.Rooms {
-		rooms = append(rooms, collectRoomMessages(str, room.Name))
+		rooms = append(rooms, str.collectRoomMessages(room.Name))
 	}
 	str.RUnlock()
 	return rooms, nil
@@ -134,7 +136,7 @@ func (str *Storage) ReadRoom(rid string) (rdn.Room, error) {
 	if !exists {
 		return rdn.Room{}, errs.New(op, errs.Info, "No rooms with id "+rid)
 	}
-	return collectRoomMessages(str, room.Name), nil
+	return str.collectRoomMessages(room.Name), nil
 }
 
 func (str *Storage) ReadUsers() ([]rdn.User, error) {
