@@ -15,14 +15,19 @@ import (
 	mem "github.com/Crandel/go_chat/pkg/storage/memory"
 )
 
-const user_id = "example@post.com"
+const (
+	user_id   = "example@post.com"
+	room_name = "test room"
+)
 
 type data map[string]interface{}
 
 func TestRestHandlers(t *testing.T) {
+	cnow := time.Now()
 	uid := mem.UserId(user_id)
 	testUsers := make(map[mem.UserId]mem.User)
 	testRooms := make(map[string]mem.Room)
+	testMessages := make(map[int]mem.Message)
 	testUser := mem.User{
 		Email:      uid,
 		Name:       "name",
@@ -30,18 +35,22 @@ func TestRestHandlers(t *testing.T) {
 		Password:   "pass",
 		Token:      "token",
 		Role:       mem.Member,
-		Created:    time.Now(),
+		Created:    cnow,
 	}
-	testMessages := make(map[mem.UserId][]mem.Message)
-	testMessages[uid] = []mem.Message{}
+	testMessages[0] = mem.Message{
+		ID:       0,
+		UserId:   uid,
+		RoomName: room_name,
+		Payload:  "Test message",
+		Created:  cnow,
+	}
 	testRoom := mem.Room{
-		Name:     "test room",
-		Messages: testMessages,
+		Name:    room_name,
+		Created: cnow,
 	}
 	testUsers[testUser.Email] = testUser
 	testRooms[testRoom.Name] = testRoom
-	mStorage := mem.FilledStorage(testUsers, testRooms)
-	testAddingUser := add.User{ID: user_id}
+	mStorage := mem.FilledStorage(testUsers, testRooms, testMessages)
 	aths := ath.NewService(&mStorage)
 	adds := add.NewService(&mStorage)
 	rdns := rdn.NewService(&mStorage)
@@ -83,7 +92,7 @@ func TestRestHandlers(t *testing.T) {
 			name:   "Add rooms",
 			url:    "/api/rooms",
 			method: http.MethodPost,
-			data:   data{"name": "room 1", "users": []add.User{testAddingUser}},
+			data:   data{"name": "room 1"},
 		},
 		{
 			name:   "List rooms",
