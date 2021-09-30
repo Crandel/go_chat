@@ -81,7 +81,7 @@ func TestRestHandlers(t *testing.T) {
 			name:   "Login",
 			url:    "/api/users/login",
 			method: http.MethodPost,
-			data:   data{"email": user_id + "1", "password": "pass"},
+			data:   data{"email": user_id, "password": "pass"},
 		},
 		{
 			name:   "List users",
