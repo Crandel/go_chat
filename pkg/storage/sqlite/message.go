@@ -1,6 +1,10 @@
 package sqlite
 
-import "time"
+import (
+	"time"
+
+	"github.com/Crandel/go_chat/pkg/reading"
+)
 
 const MESSAGES = "messages"
 
@@ -14,4 +18,12 @@ type Message struct {
 
 func (*Message) TableName() string {
 	return MESSAGES
+}
+
+func (m *Message) ConvertToReading() reading.Message {
+	return reading.Message{
+		ID:      m.ID,
+		UserId:  reading.UserId(m.UserID),
+		Payload: m.Payload,
+	}
 }
