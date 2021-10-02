@@ -10,7 +10,7 @@ import (
 
 	add "github.com/Crandel/go_chat/pkg/adding"
 	ath "github.com/Crandel/go_chat/pkg/auth"
-	rst "github.com/Crandel/go_chat/pkg/http/rest"
+	ntw "github.com/Crandel/go_chat/pkg/network"
 	rdn "github.com/Crandel/go_chat/pkg/reading"
 	mem "github.com/Crandel/go_chat/pkg/storage/memory"
 )
@@ -22,7 +22,7 @@ const (
 
 type data map[string]interface{}
 
-func TestRestHandlers(t *testing.T) {
+func TestHandlers(t *testing.T) {
 	cnow := time.Now()
 	uid := mem.UserId(user_id)
 	testUsers := make(map[mem.UserId]mem.User)
@@ -54,7 +54,7 @@ func TestRestHandlers(t *testing.T) {
 	aths := ath.NewService(&mStorage)
 	adds := add.NewService(&mStorage)
 	rdns := rdn.NewService(&mStorage)
-	router := rst.InitHandlers(aths, adds, rdns)
+	router := ntw.InitHandlers(aths, adds, rdns)
 	srv := httptest.NewServer(router)
 	defer srv.Close()
 	client := &http.Client{}

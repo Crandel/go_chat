@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func listUsersHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request) {
+func ListUsersHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		users, err := rs.ReadUsers()
 		if err != nil {
@@ -20,7 +20,7 @@ func listUsersHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func getUserHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request) {
+func GetUserHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		user_id, exists := vars["user_id"]
@@ -39,7 +39,7 @@ func getUserHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func listRoomsHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request) {
+func ListRoomsHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rooms, err := rs.ReadRooms()
 		if err != nil {
@@ -52,7 +52,7 @@ func listRoomsHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func getRoomHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request) {
+func GetRoomHandler(rs rdg.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		room_id, exists := vars["room_id"]

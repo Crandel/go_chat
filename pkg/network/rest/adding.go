@@ -12,7 +12,7 @@ type RoomResponse struct {
 	Errors []string `json:"errors"`
 }
 
-func addRoomHandler(as adding.Service) func(w http.ResponseWriter, r *http.Request) {
+func AddRoomHandler(as adding.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var ar adding.Room
 		if err := json.NewDecoder(r.Body).Decode(&ar); err != nil {

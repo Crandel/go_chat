@@ -8,7 +8,7 @@ import (
 	"github.com/Crandel/go_chat/pkg/auth"
 )
 
-func loginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var lu auth.LoginUser
 		if err := json.NewDecoder(r.Body).Decode(&lu); err != nil {
@@ -25,7 +25,7 @@ func loginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func signinHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request) {
+func SigninHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var su auth.SigninUser
 		if err := json.NewDecoder(r.Body).Decode(&su); err != nil {
