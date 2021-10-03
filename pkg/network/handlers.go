@@ -1,10 +1,12 @@
 package network
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Crandel/go_chat/pkg/adding"
 	"github.com/Crandel/go_chat/pkg/auth"
+	hl "github.com/Crandel/go_chat/pkg/network/html"
 	"github.com/Crandel/go_chat/pkg/network/rest"
 	"github.com/Crandel/go_chat/pkg/network/ws"
 	"github.com/Crandel/go_chat/pkg/reading"
@@ -17,6 +19,8 @@ func InitHandlers(
 	rdns reading.Service,
 ) *mux.Router {
 	r := mux.NewRouter()
+	r.HandleFunc("/", hl.RootHandler())
+	r.Handle("/static/", http.StripPrefix("resources/public", hl.StaticHandler()))
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	apiRouter.HandleFunc("/ws", ws.Handler)
 	userRouter := apiRouter.PathPrefix("/users").Subrouter()
@@ -28,5 +32,6 @@ func InitHandlers(
 	roomRouter.HandleFunc("", rest.ListRoomsHandler(rdns)).Methods(http.MethodGet)
 	roomRouter.HandleFunc("", rest.AddRoomHandler(adds)).Methods(http.MethodPost)
 	roomRouter.HandleFunc("/{room_id}", rest.GetRoomHandler(rdns)).Methods(http.MethodGet)
+	fmt.Println(r)
 	return r
 }
