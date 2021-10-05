@@ -1,7 +1,6 @@
 package html
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -16,6 +15,6 @@ func RootHandler() func(w http.ResponseWriter, r *http.Request) {
 }
 
 func StaticHandler() http.Handler {
-	fmt.Println("Static handler")
-	return http.FileServer(http.Dir("./resources/public"))
+	dir := http.Dir("./resources/public")
+	return http.FileServer(dir)
 }
