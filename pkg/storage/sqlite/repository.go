@@ -116,21 +116,34 @@ func (str *Storage) ReadRooms() ([]rdn.Room, error) {
 		return nil, err
 	}
 	for _, r := range rooms {
-		room := Room{}
-		messages := make([]Message, 0)
-		rdnMessages := make(map[rdn.UserId][]rdn.Message, 0)
-		err = str.db.Select(messages).Where("room_name = ?", r.Name).Do()
-		if err == nil {
-			for _, m := range messages {
-				rdnMessages[rdn.UserId(m.UserID)] = append(rdnMessages[rdn.UserId(m.UserID)], m.ConvertToReading())
-			}
-			rdnRooms = append(rdnRooms, room.ConvertToReading(rdnMessages))
-		}
+		rdnMessages := str.getRoomMessages(r.Name)
+		rdnRooms = append(rdnRooms, r.ConvertToReading(rdnMessages))
 	}
 	return rdnRooms, nil
 }
 
 func (str *Storage) ReadRoom(id string) (rdn.Room, error) {
 	const op errs.Op = "sqlite.ReadRoom"
-	return rdn.Room{}, nil
+	room := Room{}
+	rdnRoom := rdn.Room{}
+	err := str.db.Select(&room).Where("name = ?", id).Do()
+	if err == sql.ErrNoRows {
+		return rdnRoom, errs.New(op, errs.Info, "No room with name: "+id)
+	} else if err != nil {
+		return rdnRoom, errs.NewError(op, errs.Info, "Error with database connection", err)
+	}
+	rdnMessages := str.getRoomMessages(room.Name)
+	return room.ConvertToReading(rdnMessages), nil
+}
+
+func (str *Storage) getRoomMessages(name string) map[rdn.UserId][]rdn.Message{
+	messages := make([]Message, 0)
+	rdnMessages := make(map[rdn.UserId][]rdn.Message, 0)
+	err := str.db.Select(messages).Where("room_name = ?", name).Do()
+	if err == nil {
+		for _, m := range messages {
+			rdnMessages[rdn.UserId(m.UserID)] = append(rdnMessages[rdn.UserId(m.UserID)], m.ConvertToReading())
+		}
+	}
+	return rdnMessages
 }
