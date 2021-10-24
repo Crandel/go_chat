@@ -28,6 +28,8 @@ func Handler() func(w http.ResponseWriter, r *http.Request) {
 				log.Println(err)
 				return
 			}
+			fmt.Println(string(p))
+			fmt.Println(messageType)
 			if err := conn.WriteMessage(messageType, p); err != nil {
 				log.Println(err)
 				return

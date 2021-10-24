@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	add "github.com/Crandel/go_chat/pkg/adding"
 	ath "github.com/Crandel/go_chat/pkg/auth"
@@ -20,5 +21,12 @@ func main() {
 	adds := add.NewService(&memory)
 	rdns := rdn.NewService(&memory)
 	router := ntw.InitHandlers(aths, adds, rdns)
-	log.Fatal(http.ListenAndServe(":8080", router))
+	srv := &http.Server{
+		Addr:         ":8080",
+		Handler:      router,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+	log.Fatal(srv.ListenAndServe())
 }

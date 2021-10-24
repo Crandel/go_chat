@@ -8,7 +8,6 @@
     {{block "head" .}}{{end}}
   </head>
   <body>
-    Hello
     {{block "content" .}}{{end}}
     <footer>
       <span>Property of Vitalii Drevenchuk 2021</span>
