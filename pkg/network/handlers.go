@@ -19,9 +19,9 @@ func InitHandlers(
 ) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/", hl.RootHandler())
+	r.HandleFunc("/ws", ws.Handler())
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", hl.StaticHandler()))
 	apiRouter := r.PathPrefix("/api").Subrouter()
-	apiRouter.HandleFunc("/ws", ws.Handler)
 	userRouter := apiRouter.PathPrefix("/users").Subrouter()
 	userRouter.HandleFunc("/login", rest.LoginHandler(aths)).Methods(http.MethodPost)
 	userRouter.HandleFunc("/signin", rest.SigninHandler(aths)).Methods(http.MethodPost)
