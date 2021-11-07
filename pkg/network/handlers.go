@@ -7,7 +7,7 @@ import (
 	"github.com/Crandel/go_chat/pkg/auth"
 	hl "github.com/Crandel/go_chat/pkg/network/html"
 	"github.com/Crandel/go_chat/pkg/network/rest"
-	"github.com/Crandel/go_chat/pkg/network/ws"
+	ws "github.com/Crandel/go_chat/pkg/network/websocket"
 	"github.com/Crandel/go_chat/pkg/reading"
 	"github.com/gorilla/mux"
 )
@@ -19,7 +19,7 @@ func InitHandlers(
 ) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/", hl.RootHandler())
-	r.HandleFunc("/ws", ws.Handler())
+	r.HandleFunc("/ws", ws.WSHandler())
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", hl.StaticHandler()))
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	userRouter := apiRouter.PathPrefix("/users").Subrouter()
