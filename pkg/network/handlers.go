@@ -7,7 +7,7 @@ import (
 	"github.com/Crandel/go_chat/pkg/auth"
 	hl "github.com/Crandel/go_chat/pkg/network/html"
 	"github.com/Crandel/go_chat/pkg/network/rest"
-	ws "github.com/Crandel/go_chat/pkg/network/websocket"
+	"github.com/Crandel/go_chat/pkg/network/ws"
 	"github.com/Crandel/go_chat/pkg/reading"
 	"github.com/gorilla/mux"
 )
