@@ -17,5 +17,6 @@ vendor/
 # Build executables
 **_server
 cli
+client
 !cmd/**
 storage.db
