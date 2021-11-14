@@ -1,7 +1,6 @@
 package ws
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -21,19 +20,5 @@ func WSHandler() func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer conn.Close()
-		fmt.Println("Client was successfuly connected")
-		for {
-			messageType, p, err := conn.ReadMessage()
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			fmt.Println(string(p))
-			fmt.Println(messageType)
-			if err := conn.WriteMessage(messageType, p); err != nil {
-				log.Println(err)
-				return
-			}
-		}
 	}
 }

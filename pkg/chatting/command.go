@@ -3,7 +3,8 @@ package chatting
 type CommandID int
 
 const (
-	CMD_JOIN CommandID = iota
+	CMD_MSG CommandID = iota
+	CMD_JOIN
 	CMD_ROOMS
 	CMD_USERS
 	CMD_QUIT

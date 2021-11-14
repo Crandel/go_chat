@@ -5,6 +5,14 @@ type User struct {
 	commands chan<- Command
 }
 
-func (u *User) readInput() {
-	f
+func (u *User) readCommand() {
+	for {
+		c <- u.commands
+		switch c.id {
+		case CMD_MSG:
+			c.args
+
+		}
+	}
+
 }
