@@ -2,7 +2,6 @@ package chatting
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/gorilla/websocket"
 )
@@ -22,20 +21,19 @@ func NewService() *service {
 func (s *service) NewUser(conn websocket.Conn, email string) {
 	u := &User{
 		Email:    email,
+		conn:     conn,
 		commands: s.commands,
 	}
 	fmt.Println("Client was successfuly connected")
+	u.ReadCommands()
+}
+
+func (s *service) Run() {
 	for {
-		_, p, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
+		c := <-s.commands
+		switch c.id {
+		case CMD_MSG:
+
 		}
-		fmt.Println(string(p))
-		c := Command{
-			id:   CMD_MSG,
-			user: u,
-		}
-		u.commands <- c
 	}
 }

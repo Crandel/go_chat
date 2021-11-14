@@ -1,13 +1,13 @@
 package chatting
 
-type CommandID int
+type CommandID string
 
 const (
-	CMD_MSG CommandID = iota
-	CMD_JOIN
-	CMD_ROOMS
-	CMD_USERS
-	CMD_QUIT
+	CMD_MSG   CommandID = ""
+	CMD_JOIN            = "/join"
+	CMD_ROOMS           = "/rooms"
+	CMD_USERS           = "/users"
+	CMD_QUIT            = "/quit"
 )
 
 type Command struct {
