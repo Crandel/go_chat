@@ -24,7 +24,7 @@ func (u *User) ReadCommands() {
 		raw_command := string(p)
 		args := strings.Split(raw_command, " ")
 		cmd := strings.TrimSpace(args[0])
-		fmt.Println(cmd)
+		fmt.Println("Command: " + cmd)
 		var cmdId CommandID
 		switch cmd {
 		case CMD_JOIN:
