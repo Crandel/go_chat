@@ -5,8 +5,8 @@ type Room struct {
 	Members map[string]*User
 }
 
-func (r *Room) broadcast() {
+func (r *Room) broadcast(message string) {
 	for _, m := range r.Members {
-		m.
+		m.WriteMsg(message)
 	}
 }

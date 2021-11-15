@@ -3,7 +3,7 @@ package chatting
 type CommandID string
 
 const (
-	CMD_MSG   CommandID = ""
+	CMD_MSG   CommandID = "/msg"
 	CMD_JOIN            = "/join"
 	CMD_ROOMS           = "/rooms"
 	CMD_USERS           = "/users"

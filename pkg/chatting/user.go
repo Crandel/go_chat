@@ -9,8 +9,8 @@ import (
 )
 
 type User struct {
-	Email    string
-	conn     websocket.Conn
+	Nick     string
+	conn     *websocket.Conn
 	commands chan<- Command
 }
 
@@ -46,10 +46,9 @@ func (u *User) ReadCommands() {
 	}
 }
 
-func (u *User) WriteMsg(args []string) {
+func (u *User) WriteMsg(message string) {
 	messageType := websocket.TextMessage
-	msg := strings.Join(args, " ")
-	if err := u.conn.WriteMessage(messageType, []byte(msg)); err != nil {
+	if err := u.conn.WriteMessage(messageType, []byte(message)); err != nil {
 		log.Println(err)
 		return
 	}

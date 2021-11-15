@@ -11,6 +11,11 @@ type service struct {
 	commands chan Command
 }
 
+type Service interface {
+	Run()
+	NewUser(conn *websocket.Conn, nick string)
+}
+
 func NewService() *service {
 	return &service{
 		rooms:    make(map[string]*Room),
@@ -18,13 +23,13 @@ func NewService() *service {
 	}
 }
 
-func (s *service) NewUser(conn websocket.Conn, email string) {
+func (s *service) NewUser(conn *websocket.Conn, nick string) {
 	u := &User{
-		Email:    email,
+		Nick:     nick,
 		conn:     conn,
 		commands: s.commands,
 	}
-	fmt.Println("Client was successfuly connected")
+	fmt.Printf("User %s was successfuly connected", nick)
 	u.ReadCommands()
 }
 

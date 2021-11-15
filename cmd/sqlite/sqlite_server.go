@@ -8,6 +8,7 @@ import (
 
 	add "github.com/Crandel/go_chat/pkg/adding"
 	ath "github.com/Crandel/go_chat/pkg/auth"
+	cht "github.com/Crandel/go_chat/pkg/chatting"
 	ntw "github.com/Crandel/go_chat/pkg/network"
 	rdn "github.com/Crandel/go_chat/pkg/reading"
 	sql "github.com/Crandel/go_chat/pkg/storage/sqlite"
@@ -24,7 +25,8 @@ func main() {
 	aths := ath.NewService(&sqlite_storage)
 	adds := add.NewService(&sqlite_storage)
 	rdns := rdn.NewService(&sqlite_storage)
-	router := ntw.InitHandlers(aths, adds, rdns)
+	chts := cht.NewService()
+	router := ntw.InitHandlers(aths, adds, rdns, chts)
 	srv := &http.Server{
 		Addr:         ":8080",
 		Handler:      router,

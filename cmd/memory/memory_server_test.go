@@ -10,6 +10,7 @@ import (
 
 	add "github.com/Crandel/go_chat/pkg/adding"
 	ath "github.com/Crandel/go_chat/pkg/auth"
+	cht "github.com/Crandel/go_chat/pkg/chatting"
 	ntw "github.com/Crandel/go_chat/pkg/network"
 	rdn "github.com/Crandel/go_chat/pkg/reading"
 	mem "github.com/Crandel/go_chat/pkg/storage/memory"
@@ -54,7 +55,8 @@ func TestHandlers(t *testing.T) {
 	aths := ath.NewService(&mStorage)
 	adds := add.NewService(&mStorage)
 	rdns := rdn.NewService(&mStorage)
-	router := ntw.InitHandlers(aths, adds, rdns)
+	chts := cht.NewService()
+	router := ntw.InitHandlers(aths, adds, rdns, chts)
 	srv := httptest.NewServer(router)
 	defer srv.Close()
 	client := &http.Client{}

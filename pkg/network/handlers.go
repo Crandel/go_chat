@@ -5,6 +5,7 @@ import (
 
 	"github.com/Crandel/go_chat/pkg/adding"
 	"github.com/Crandel/go_chat/pkg/auth"
+	"github.com/Crandel/go_chat/pkg/chatting"
 	hl "github.com/Crandel/go_chat/pkg/network/html"
 	"github.com/Crandel/go_chat/pkg/network/rest"
 	"github.com/Crandel/go_chat/pkg/network/ws"
@@ -16,10 +17,11 @@ func InitHandlers(
 	aths auth.Service,
 	adds adding.Service,
 	rdns reading.Service,
+	chts chatting.Service,
 ) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/", hl.RootHandler())
-	r.HandleFunc("/ws", ws.WSHandler())
+	r.HandleFunc("/ws", ws.WSHandler(chts))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", hl.StaticHandler()))
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	userRouter := apiRouter.PathPrefix("/users").Subrouter()

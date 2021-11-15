@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	cht "github.com/Crandel/go_chat/pkg/chatting"
 	"github.com/gorilla/websocket"
 )
 
@@ -12,7 +13,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func WSHandler() func(w http.ResponseWriter, r *http.Request) {
+func WSHandler(chts cht.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -20,5 +21,6 @@ func WSHandler() func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer conn.Close()
+		go chts.NewUser(conn, "You")
 	}
 }
