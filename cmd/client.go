@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -31,7 +32,7 @@ func main() {
 
 	for {
 		select {
-		case <-time.After(time.Duration(1) * time.Millisecond * 1000):
+		case <-time.After(time.Duration(1) * time.Millisecond * 5000):
 			err := conn.WriteMessage(websocket.TextMessage, []byte("/ping"))
 			if err != nil {
 				log.Println("Error during writing to websocket:", err)
@@ -52,5 +53,10 @@ func main() {
 			}
 			return
 		}
+		_, p, err := conn.ReadMessage()
+		if err != nil {
+			fmt.Printf("Err: %s\n", err.Error())
+		}
+		fmt.Printf("MSG: %s\n", p)
 	}
 }

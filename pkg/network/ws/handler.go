@@ -20,7 +20,6 @@ func WSHandler(chts cht.Service) func(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			return
 		}
-		defer conn.Close()
 		go chts.NewUser(conn, "You")
 	}
 }

@@ -26,6 +26,7 @@ func main() {
 	adds := add.NewService(&sqlite_storage)
 	rdns := rdn.NewService(&sqlite_storage)
 	chts := cht.NewService()
+	go chts.Run()
 	router := ntw.InitHandlers(aths, adds, rdns, chts)
 	srv := &http.Server{
 		Addr:         ":8080",

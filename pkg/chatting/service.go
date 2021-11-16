@@ -30,12 +30,14 @@ func (s *service) NewUser(conn *websocket.Conn, nick string) {
 		conn:     conn,
 		commands: s.commands,
 	}
-	fmt.Printf("User %s was successfuly connected", nick)
+	fmt.Printf("chatting#NewUser User %s was successfuly connected\n", nick)
 	u.ReadCommands()
 }
 
 func (s *service) Run() {
+	fmt.Println("chatting#Run Before loop")
 	for c := range s.commands {
+		fmt.Println("chatting#Run#command " + c.id)
 		switch c.id {
 		case CMD_MSG:
 			for _, r := range s.rooms {
@@ -47,6 +49,9 @@ func (s *service) Run() {
 					r.broadcast(msg.String())
 				}
 			}
+		case CMD_PING:
+			c.user.WriteMsg("pong")
+
 		case CMD_JOIN:
 			if len(c.args) > 2 {
 				c.user.WriteMsg("Please provide only correct room name")
