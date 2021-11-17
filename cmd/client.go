@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -10,15 +11,30 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var input chan string
 var done chan interface{}
 var interrupt chan os.Signal
 
 func msgHandler(conn *websocket.Conn) {
 	defer close(done)
+	for {
+		select {
+		case <-interrupt:
+			err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			if err != nil {
+				return
+			}
+		default:
+			i := bufio.NewScanner(os.Stdin)
+			i.Scan()
+			input <- i.Text()
+		}
+	}
+
 }
 
 func main() {
-	done = make(chan interface{})
+	input = make(chan string)
 	interrupt = make(chan os.Signal)
 
 	signal.Notify(interrupt, os.Interrupt) // Notify the interrupt channel for SIGINT
@@ -32,8 +48,9 @@ func main() {
 
 	for {
 		select {
-		case <-time.After(time.Duration(1) * time.Millisecond * 5000):
-			err := conn.WriteMessage(websocket.TextMessage, []byte("/ping"))
+		case 
+		case i := <-input:
+			err := conn.WriteMessage(websocket.TextMessage, []byte(i))
 			if err != nil {
 				log.Println("Error during writing to websocket:", err)
 				return
@@ -53,10 +70,5 @@ func main() {
 			}
 			return
 		}
-		_, p, err := conn.ReadMessage()
-		if err != nil {
-			fmt.Printf("Err: %s\n", err.Error())
-		}
-		fmt.Printf("MSG: %s\n", p)
 	}
 }
