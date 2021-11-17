@@ -1,15 +1,23 @@
 package chatting
 
-import errs "github.com/Crandel/go_chat/pkg/errors"
+import (
+	"fmt"
+
+	errs "github.com/Crandel/go_chat/pkg/errors"
+)
 
 type Room struct {
 	Name    string
 	Members map[string]*User
 }
 
-func (r *Room) broadcast(message string) {
+func (r *Room) broadcast(sender *User, message string) {
 	for _, m := range r.Members {
-		m.WriteMsg(message)
+		if m != sender {
+			fmt.Printf("message %s \n", message)
+
+			m.WriteMsg(message)
+		}
 	}
 }
 

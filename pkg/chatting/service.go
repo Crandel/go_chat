@@ -40,13 +40,16 @@ func (s *service) Run() {
 		fmt.Println("chatting#Run#command " + c.id)
 		switch c.id {
 		case CMD_MSG:
+			fmt.Println("chatting#Run#command#MSG ")
 			for _, r := range s.rooms {
 				if r.haveUser(c.user) {
 					var msg strings.Builder
 					msg.WriteString(c.user.Nick)
 					msg.WriteString(" ")
 					msg.WriteString(strings.Join(c.args, " "))
-					r.broadcast(msg.String())
+					fmt.Printf("%s\n", msg.String())
+
+					r.broadcast(c.user, msg.String())
 				}
 			}
 		case CMD_PING:
@@ -55,19 +58,27 @@ func (s *service) Run() {
 		case CMD_JOIN:
 			if len(c.args) > 2 {
 				c.user.WriteMsg("Please provide only correct room name")
+				continue
 			}
 			roomName := c.args[1]
-			r, ok := s.rooms[roomName]
-			if ok {
+			r, exists := s.rooms[roomName]
+			if exists {
 				if r.haveUser(c.user) {
 					c.user.WriteMsg("You are in room " + roomName)
 				} else {
+					s.excludeFromRooms(c.user)
 					r.addUser(c.user)
+					r.broadcast(c.user, fmt.Sprintf("User %s join the room", c.user.Nick))
 				}
 			} else {
+				r = &Room{
+					Name:    roomName,
+					Members: make(map[string]*User),
+				}
 				r.addUser(c.user)
 				s.rooms[roomName] = r
 			}
+			c.user.WriteMsg("Welcome to the room " + r.Name)
 		case CMD_ROOMS:
 			names := make([]string, 0, len(s.rooms))
 			for name := range s.rooms {
@@ -90,12 +101,16 @@ func (s *service) Run() {
 				}
 			}
 		case CMD_QUIT:
-			for _, r := range s.rooms {
-				if r.haveUser(c.user) {
-					delete(r.Members, c.user.Nick)
-					r.broadcast("User " + c.user.Nick + " leave the room")
-				}
-			}
+			s.excludeFromRooms(c.user)
+		}
+	}
+}
+
+func (s *service) excludeFromRooms(u *User) {
+	for _, r := range s.rooms {
+		if r.haveUser(u) {
+			delete(r.Members, u.Nick)
+			r.broadcast(u, "User "+u.Nick+" leave the room")
 		}
 	}
 }

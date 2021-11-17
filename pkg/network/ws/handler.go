@@ -1,8 +1,10 @@
 package ws
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	cht "github.com/Crandel/go_chat/pkg/chatting"
 	"github.com/gorilla/websocket"
@@ -20,6 +22,6 @@ func WSHandler(chts cht.Service) func(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			return
 		}
-		go chts.NewUser(conn, "You")
+		go chts.NewUser(conn, fmt.Sprintf("Anonymous%d", time.Now().UnixNano()))
 	}
 }

@@ -20,6 +20,10 @@ func (u *User) ReadCommands() {
 		_, p, err := u.conn.ReadMessage()
 		if err != nil {
 			log.Println("chatting#user#ReadCommands " + err.Error())
+			u.commands <- Command{
+				id:   CMD_QUIT,
+				user: u,
+			}
 			return
 		}
 		raw_command := string(p)
