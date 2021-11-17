@@ -17,10 +17,11 @@ var done chan interface{}
 var interrupt chan os.Signal
 
 func msgHandler(conn *websocket.Conn) {
-	defer close(done)
 	defer close(input)
 	for {
 		select {
+		case <-done:
+			return
 		case <-interrupt:
 			return
 		default:
@@ -36,6 +37,9 @@ func reader(conn *websocket.Conn) {
 	for {
 		select {
 		case <-interrupt:
+			close(done)
+			return
+		case <-done:
 			return
 		case <-time.After(1 * time.Second):
 			_, p, err := conn.ReadMessage()

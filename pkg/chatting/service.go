@@ -65,19 +65,18 @@ func (s *service) Run() {
 			if exists {
 				if r.haveUser(c.user) {
 					c.user.WriteMsg("You are in room " + roomName)
-				} else {
-					s.excludeFromRooms(c.user)
-					r.addUser(c.user)
-					r.broadcast(c.user, fmt.Sprintf("User %s join the room", c.user.Nick))
+					continue
 				}
 			} else {
 				r = &Room{
 					Name:    roomName,
 					Members: make(map[string]*User),
 				}
-				r.addUser(c.user)
 				s.rooms[roomName] = r
 			}
+			s.excludeFromRooms(c.user)
+			r.addUser(c.user)
+			r.broadcast(c.user, fmt.Sprintf("User %s join the room", c.user.Nick))
 			c.user.WriteMsg("Welcome to the room " + r.Name)
 		case CMD_ROOMS:
 			names := make([]string, 0, len(s.rooms))
