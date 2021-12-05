@@ -7,20 +7,33 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type service struct {
-	rooms    map[string]*Room
-	commands chan Command
+type Repository interface {
+	WriteMessage(u User, msg string) error
+	ExcludeFromRoom(name string, u User) error
+	AddUserToRoom(name string, u User) error
+	RoomHasUser(name string, u User) bool
 }
 
 type Service interface {
 	Run()
 	NewUser(conn *websocket.Conn, nick string)
+	WriteMessage(u User, msg string) error
+	ExcludeFromRoom(name string, u User) error
+	AddUserToRoom(name string, u User) error
+	RoomHasUser(name string, u User) bool
 }
 
-func NewService() *service {
+type service struct {
+	rooms    map[string]*Room
+	commands chan Command
+	r        Repository
+}
+
+func NewService(r Repository) *service {
 	return &service{
 		rooms:    make(map[string]*Room),
 		commands: make(chan Command),
+		r:        r,
 	}
 }
 

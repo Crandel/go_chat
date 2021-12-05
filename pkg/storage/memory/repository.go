@@ -7,6 +7,7 @@ import (
 
 	add "github.com/Crandel/go_chat/pkg/adding"
 	"github.com/Crandel/go_chat/pkg/auth"
+	cht "github.com/Crandel/go_chat/pkg/chatting"
 	errs "github.com/Crandel/go_chat/pkg/errors"
 	rdn "github.com/Crandel/go_chat/pkg/reading"
 )
@@ -164,4 +165,20 @@ func (str *Storage) ReadUser(uid rdn.UserId) (rdn.User, error) {
 		return rdn.User{}, errs.New(op, errs.Info, "No user with id "+string(uid))
 	}
 	return s_user.ConvertUserToReading(), nil
+}
+
+func (str *Storage) WriteMessage(u cht.User, msg string) error {
+	return nil
+}
+
+func (str *Storage) ExcludeFromRoom(name string, u cht.User) error {
+	return nil
+}
+
+func (str *Storage) AddUserToRoom(name string, u cht.User) error {
+	return nil
+}
+
+func (str *Storage) RoomHasUser(name string, u cht.User) bool {
+	return false
 }
