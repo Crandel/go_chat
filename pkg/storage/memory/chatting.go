@@ -2,7 +2,7 @@ package memory
 
 import cht "github.com/Crandel/go_chat/pkg/chatting"
 
-func (str *Storage) WriteMessage(u cht.User, msg string) error {
+func (str *Storage) WriteMessage(u cht.User, r cht.Room, msg string) error {
 	return nil
 }
 

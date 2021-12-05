@@ -8,7 +8,7 @@ import (
 )
 
 type Repository interface {
-	WriteMessage(u User, msg string) error
+	WriteMessage(u User, r Room, msg string) error
 	ExcludeFromRoom(name string, u User) error
 	AddUserToRoom(name string, u User) error
 	RoomHasUser(name string, u User) bool
@@ -17,7 +17,7 @@ type Repository interface {
 type Service interface {
 	Run()
 	NewUser(conn *websocket.Conn, nick string)
-	WriteMessage(u User, msg string) error
+	WriteMessage(u User, r Room, msg string) error
 	ExcludeFromRoom(name string, u User) error
 	AddUserToRoom(name string, u User) error
 	RoomHasUser(name string, u User) bool
@@ -127,8 +127,8 @@ func (s *service) excludeFromRooms(u *User) {
 	}
 }
 
-func (s *service) WriteMessage(u User, msg string) error {
-	return s.r.WriteMessage(u, msg)
+func (s *service) WriteMessage(u User, r Room, msg string) error {
+	return s.r.WriteMessage(u, r, msg)
 }
 
 func (s *service) ExcludeFromRoom(name string, u User) error {
