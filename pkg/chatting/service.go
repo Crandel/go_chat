@@ -126,3 +126,19 @@ func (s *service) excludeFromRooms(u *User) {
 		}
 	}
 }
+
+func (s *service) WriteMessage(u User, msg string) error {
+	return s.r.WriteMessage(u, msg)
+}
+
+func (s *service) ExcludeFromRoom(name string, u User) error {
+	return s.r.ExcludeFromRoom(name, u)
+}
+
+func (s *service) AddUserToRoom(name string, u User) error {
+	return s.r.AddUserToRoom(name, u)
+}
+
+func (s *service) RoomHasUser(name string, u User) bool {
+	return s.r.RoomHasUser(name, u)
+}
