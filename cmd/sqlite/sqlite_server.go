@@ -25,7 +25,7 @@ func main() {
 	aths := ath.NewService(&sqlite_storage)
 	adds := add.NewService(&sqlite_storage)
 	rdns := rdn.NewService(&sqlite_storage)
-	chts := cht.NewService()
+	chts := cht.NewService(&sqlite_storage)
 	go chts.Run()
 	router := ntw.InitHandlers(aths, adds, rdns, chts)
 	srv := &http.Server{
