@@ -14,8 +14,7 @@ type Room struct {
 func (r *Room) broadcast(sender *User, message string) {
 	for _, m := range r.Members {
 		if m != sender {
-			fmt.Printf("message %s \n", message)
-
+			fmt.Printf("Broadcast message %s \n", message)
 			m.WriteMsg(message)
 		}
 	}

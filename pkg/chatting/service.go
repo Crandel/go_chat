@@ -131,14 +131,14 @@ func (s *service) WriteMessage(u User, r Room, msg string) error {
 	return s.r.WriteMessage(u, r, msg)
 }
 
-func (s *service) ExcludeFromRoom(name string, u User) error {
-	return s.r.ExcludeFromRoom(name, u)
+func (s *service) ExcludeFromRoom(roomName string, u User) error {
+	return s.r.ExcludeFromRoom(roomName, u)
 }
 
-func (s *service) AddUserToRoom(name string, u User) error {
-	return s.r.AddUserToRoom(name, u)
+func (s *service) AddUserToRoom(roomName string, u User) error {
+	return s.r.AddUserToRoom(roomName, u)
 }
 
-func (s *service) RoomHasUser(name string, u User) bool {
-	return s.r.RoomHasUser(name, u)
+func (s *service) RoomHasUser(roomName string, u User) bool {
+	return s.r.RoomHasUser(roomName, u)
 }
