@@ -19,7 +19,7 @@ func AddRoomHandler(as adding.Service) func(w http.ResponseWriter, r *http.Reque
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		name, err := as.AddRoom(ar)
+		name, err := as.AddRoom(ar.Name)
 		if name == "" {
 			err_msg := ""
 			for _, e := range err {

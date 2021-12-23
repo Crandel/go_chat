@@ -3,19 +3,18 @@ package sqlite
 import (
 	"time"
 
-	add "github.com/Crandel/go_chat/pkg/adding"
 	errs "github.com/Crandel/go_chat/pkg/errors"
 )
 
-func (str *Storage) AddRoom(ar add.Room) (string, []error) {
+func (str *Storage) AddRoom(rn string) (string, []error) {
 	const op errs.Op = "sqlite.AddRoom"
 	room := Room{}
-	str.db.Select(&room).Where("name = ?", ar.Name).Do()
-	if room.Name == ar.Name {
+	str.db.Select(&room).Where("name = ?", rn).Do()
+	if room.Name == rn {
 		return "", []error{errs.New(op, errs.Info, "Room already exists")}
 	}
 	list_errors := []error{}
-	room.Name = ar.Name
+	room.Name = rn
 	room.Created = time.Now()
 	error := str.db.Insert(&room).Do()
 	res_str := ""
