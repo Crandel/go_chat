@@ -8,8 +8,7 @@ import (
 )
 
 type RoomResponse struct {
-	Name   string   `json:"name"`
-	Errors []string `json:"errors"`
+	Name string `json:"name"`
 }
 
 func AddRoomHandler(as adding.Service) func(w http.ResponseWriter, r *http.Request) {
@@ -21,19 +20,11 @@ func AddRoomHandler(as adding.Service) func(w http.ResponseWriter, r *http.Reque
 		}
 		name, err := as.AddRoom(ar.Name)
 		if name == "" {
-			err_msg := ""
-			for _, e := range err {
-				err_msg = err_msg + e.Error()
-			}
-			http.Error(w, err_msg, http.StatusBadGateway)
+			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
 		}
-		var errors []string
-		for _, e := range err {
-			errors = append(errors, e.Error())
-		}
 		resp := RoomResponse{
-			Name: name, Errors: errors,
+			Name: name,
 		}
 		json.NewEncoder(w).Encode(resp)
 	}

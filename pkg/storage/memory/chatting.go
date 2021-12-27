@@ -13,20 +13,20 @@ func (str *Storage) ExcludeFromRoom(roomName string, u cht.User) error {
 	return nil
 }
 
-func (str *Storage) AddUserToRoom(roomName string, u cht.User) []error {
+func (str *Storage) AddUserToRoom(roomName string, u cht.User) error {
 	const op errs.Op = "memory.AddUserToRoom"
 	var mr Room
 	mr, exists := str.Rooms[roomName]
 	if !exists {
-		mrname, errors := str.AddRoom(roomName)
-		if errors != nil {
-			return errors
+		mrname, error := str.AddRoom(roomName)
+		if error != nil {
+			return error
 		}
 		mr = str.Rooms[mrname]
 	}
 	ru, exists := str.Users[UserId(u.Nick)]
 	if !exists {
-		return []error{errs.New(op, errs.Info, "No user with id "+u.Nick)}
+		return errs.New(op, errs.Info, "No user with id "+u.Nick)
 	}
 	mr.Members = append(mr.Members, ru.Email)
 	return nil

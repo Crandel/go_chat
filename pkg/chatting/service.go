@@ -10,7 +10,7 @@ import (
 type Repository interface {
 	WriteMessage(u User, r Room, msg string) error
 	ExcludeFromRoom(name string, u User) error
-	AddUserToRoom(name string, u User) []error
+	AddUserToRoom(name string, u User) error
 	RoomHasUser(name string, u User) bool
 }
 
@@ -19,7 +19,7 @@ type Service interface {
 	NewUser(conn *websocket.Conn, nick string)
 	WriteMessage(u User, r Room, msg string) error
 	ExcludeFromRoom(name string, u User) error
-	AddUserToRoom(name string, u User) []error
+	AddUserToRoom(name string, u User) error
 	RoomHasUser(name string, u User) bool
 }
 
@@ -135,7 +135,7 @@ func (s *service) ExcludeFromRoom(roomName string, u User) error {
 	return s.r.ExcludeFromRoom(roomName, u)
 }
 
-func (s *service) AddUserToRoom(roomName string, u User) []error {
+func (s *service) AddUserToRoom(roomName string, u User) error {
 	return s.r.AddUserToRoom(roomName, u)
 }
 
