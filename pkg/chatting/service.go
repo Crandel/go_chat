@@ -101,7 +101,7 @@ func (s *service) Run() {
 			for _, room := range s.rooms {
 				if room.haveUser(c.client) {
 					clients := make([]string, 0, len(room.Clients))
-					for _, client := range room.Clients {
+					for client := range room.Clients {
 						clients = append(clients, client.Nick)
 					}
 					var msg strings.Builder
@@ -120,9 +120,8 @@ func (s *service) Run() {
 
 func (s *service) excludeFromRooms(u *Client) {
 	for _, r := range s.rooms {
-		if ok, ind := r.haveUser(u); ok {
-			r.Clients = append(r.Clients[:ind], r.Clients[ind+1:]...)
-
+		if r.haveUser(u) {
+			delete(r.Clients, u)
 			r.broadcast(u, "User "+u.Nick+" leave the room")
 		}
 	}
