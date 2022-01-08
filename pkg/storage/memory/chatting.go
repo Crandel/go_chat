@@ -8,7 +8,7 @@ import (
 	errs "github.com/Crandel/go_chat/pkg/errors"
 )
 
-func (str *Storage) WriteMessage(u cht.User, r cht.Room, msg string) error {
+func (str *Storage) WriteMessage(u cht.Client, r cht.Room, msg string) error {
 	const op errs.Op = "memory.WriteMessage"
 	rand.Seed(time.Now().UnixNano())
 	id := rand.Int()
@@ -22,7 +22,7 @@ func (str *Storage) WriteMessage(u cht.User, r cht.Room, msg string) error {
 	return nil
 }
 
-func (str *Storage) ExcludeFromRoom(roomName string, u cht.User) error {
+func (str *Storage) ExcludeFromRoom(roomName string, u cht.Client) error {
 	const op errs.Op = "memory.ExcludeFromRoom"
 	var mr Room
 	mr, exists := str.Rooms[roomName]
@@ -37,7 +37,7 @@ func (str *Storage) ExcludeFromRoom(roomName string, u cht.User) error {
 	return nil
 }
 
-func (str *Storage) AddUserToRoom(roomName string, u cht.User) error {
+func (str *Storage) AddUserToRoom(roomName string, u cht.Client) error {
 	const op errs.Op = "memory.AddUserToRoom"
 	var mr Room
 	mr, exists := str.Rooms[roomName]
@@ -56,7 +56,7 @@ func (str *Storage) AddUserToRoom(roomName string, u cht.User) error {
 	return nil
 }
 
-func (str *Storage) RoomHasUser(roomName string, cu cht.User) bool {
+func (str *Storage) RoomHasUser(roomName string, cu cht.Client) bool {
 	const op errs.Op = "memory.RoomHasUser"
 	mr, exists := str.Rooms[roomName]
 	if !exists {

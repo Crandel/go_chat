@@ -8,21 +8,21 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type User struct {
+type Client struct {
 	Nick     string
 	conn     *websocket.Conn
 	commands chan<- Command
 }
 
-func (u *User) ReadCommands() {
+func (u *Client) ReadCommands() {
 	defer u.conn.Close()
 	for {
 		_, p, err := u.conn.ReadMessage()
 		if err != nil {
 			log.Println("chatting#user#ReadCommands " + err.Error())
 			u.commands <- Command{
-				id:   CMD_QUIT,
-				user: u,
+				id:     CMD_QUIT,
+				client: u,
 			}
 			return
 		}
@@ -51,14 +51,14 @@ func (u *User) ReadCommands() {
 			}
 		}
 		u.commands <- Command{
-			id:   cmdId,
-			user: u,
-			args: args,
+			id:     cmdId,
+			client: u,
+			args:   args,
 		}
 	}
 }
 
-func (u *User) WriteMsg(message string) {
+func (u *Client) WriteMsg(message string) {
 	messageType := websocket.TextMessage
 	if err := u.conn.WriteMessage(messageType, []byte(message)); err != nil {
 		log.Println("chatting#user#WriteMsg " + err.Error())

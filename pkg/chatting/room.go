@@ -8,11 +8,11 @@ import (
 
 type Room struct {
 	Name    string
-	Members map[string]*User
+	Clients []*Client
 }
 
-func (r *Room) broadcast(sender *User, message string) {
-	for _, m := range r.Members {
+func (r *Room) broadcast(sender *Client, message string) {
+	for _, m := range r.Clients {
 		if m != sender {
 			fmt.Printf("Broadcast message %s \n", message)
 			m.WriteMsg(message)
@@ -20,20 +20,21 @@ func (r *Room) broadcast(sender *User, message string) {
 	}
 }
 
-func (r *Room) addUser(u *User) error {
+func (r *Room) addUser(u *Client) error {
 	const op errs.Op = "chatting.Room.addUser"
-	if r.haveUser(u) {
+	if ok, _ := r.haveUser(u); ok {
 		return errs.New(op, errs.Info, "User already in room")
 	}
-	r.Members[u.Nick] = u
+	r.Clients = append(r.Clients, u)
 	return nil
 }
 
-func (r *Room) haveUser(u *User) bool {
+func (r *Room) haveUser(u *Client) (bool, int) {
 	const op errs.Op = "chatting.Room.haveUser"
-	u, ok := r.Members[u.Nick]
-	if ok {
-		return true
+	for i, m := range r.Clients {
+		if m == u {
+			return true, i
+		}
 	}
-	return false
+	return false, 0
 }

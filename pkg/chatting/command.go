@@ -12,7 +12,7 @@ const (
 )
 
 type Command struct {
-	id   CommandID
-	user *User
-	args []string
+	id     CommandID
+	client *Client
+	args   []string
 }

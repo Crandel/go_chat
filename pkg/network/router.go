@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func InitHandlers(
+func NewRouter(
 	aths auth.Service,
 	adds adding.Service,
 	rdns reading.Service,

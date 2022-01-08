@@ -22,7 +22,7 @@ func main() {
 	adds := add.NewService(&memory)
 	rdns := rdn.NewService(&memory)
 	chts := cht.NewService(&memory)
-	router := ntw.InitHandlers(aths, adds, rdns, chts)
+	router := ntw.NewRouter(aths, adds, rdns, chts)
 	srv := &http.Server{
 		Addr:         ":8080",
 		Handler:      router,

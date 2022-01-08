@@ -56,7 +56,7 @@ func TestHandlers(t *testing.T) {
 	adds := add.NewService(&mStorage)
 	rdns := rdn.NewService(&mStorage)
 	chts := cht.NewService(&mStorage)
-	router := ntw.InitHandlers(aths, adds, rdns, chts)
+	router := ntw.NewRouter(aths, adds, rdns, chts)
 	srv := httptest.NewServer(router)
 	defer srv.Close()
 	client := &http.Client{}
