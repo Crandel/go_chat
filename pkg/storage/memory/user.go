@@ -26,13 +26,13 @@ func ConvertUserIdFromReading(rid r.UserId) UserId {
 }
 
 type User struct {
-	Email      UserId
+	Created    time.Time
 	Name       string
 	SecondName string
 	Password   string
 	Token      string
 	Role       Role
-	Created    time.Time
+	Email      UserId
 }
 
 func ConvertUserFromSigning(su auth.SigninUser) User {

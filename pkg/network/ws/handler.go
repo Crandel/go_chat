@@ -22,6 +22,6 @@ func WSHandler(chts cht.Service) func(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			return
 		}
-		go chts.NewUser(conn, fmt.Sprintf("Anonymous%d", time.Now().UnixNano()))
+		go chts.NewClient(conn, fmt.Sprintf("Anonymous%d", time.Now().UnixNano()))
 	}
 }

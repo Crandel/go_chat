@@ -9,8 +9,8 @@ import (
 const ROOMS = "rooms"
 
 type Room struct {
-	Name    string    `db:"name,key"`
 	Created time.Time `db:"created"`
+	Name    string    `db:"name,key"`
 }
 
 func (*Room) TableName() string {

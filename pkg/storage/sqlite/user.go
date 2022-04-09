@@ -25,13 +25,13 @@ func (r Role) Value() (driver.Value, error) {
 }
 
 type User struct {
-	Name       string    `db:"name"`
+	Created    time.Time `db:"created"`
 	SecondName string    `db:"second_name"`
 	Email      string    `db:"email,key"`
 	Password   string    `db:"password"`
 	Token      string    `db:"token"`
 	Role       Role      `db:"role"`
-	Created    time.Time `db:"created"`
+	Name       string    `db:"name"`
 }
 
 func (*User) TableName() string {

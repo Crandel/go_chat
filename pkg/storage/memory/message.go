@@ -7,11 +7,11 @@ import (
 )
 
 type Message struct {
-	ID       int
+	Created  time.Time
 	UserId   UserId
 	RoomName string
 	Payload  string
-	Created  time.Time
+	ID       int
 }
 
 func (mm *Message) ConvertMessageToReading() r.Message {

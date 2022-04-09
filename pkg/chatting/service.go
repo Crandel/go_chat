@@ -16,7 +16,7 @@ type Repository interface {
 
 type Service interface {
 	Run()
-	NewUser(conn *websocket.Conn, nick string)
+	NewClient(conn *websocket.Conn, nick string)
 	WriteMessage(u Client, r Room, msg string) error
 	ExcludeFromRoom(name string, u Client) error
 	AddUserToRoom(name string, u Client) error
@@ -37,13 +37,13 @@ func NewService(rep Repository) *service {
 	}
 }
 
-func (s *service) NewUser(conn *websocket.Conn, nick string) {
+func (s *service) NewClient(conn *websocket.Conn, nick string) {
 	u := &Client{
 		Nick:     nick,
 		conn:     conn,
 		commands: s.commands,
 	}
-	fmt.Printf("chatting#NewUser User %s was successfuly connected\n", nick)
+	fmt.Printf("chatting#NewClient User %s was successfuly connected\n", nick)
 	u.ReadCommands()
 }
 

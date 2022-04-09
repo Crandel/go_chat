@@ -5,7 +5,7 @@ import (
 )
 
 type Room struct {
+	Created time.Time
 	Name    string
 	Members []UserId
-	Created time.Time
 }
