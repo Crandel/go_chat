@@ -51,7 +51,11 @@ func TestHandlers(t *testing.T) {
 	}
 	testUsers[testUser.Email] = testUser
 	testRooms[testRoom.Name] = testRoom
-	mStorage := mem.FilledStorage(testUsers, testRooms, testMessages)
+	mStorage := mem.NewStorage()
+	mStorage.Users = testUsers
+	mStorage.Rooms = testRooms
+	mStorage.Messages = testMessages
+
 	aths := ath.NewService(&mStorage)
 	adds := add.NewService(&mStorage)
 	rdns := rdn.NewService(&mStorage)

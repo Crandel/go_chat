@@ -19,12 +19,3 @@ func NewStorage() Storage {
 		RWMutex:  &sync.RWMutex{},
 	}
 }
-
-func FilledStorage(users map[UserId]User, rooms map[string]Room, messages map[int]Message) Storage {
-	return Storage{
-		Users:    users,
-		Rooms:    rooms,
-		Messages: messages,
-		RWMutex:  &sync.RWMutex{},
-	}
-}
