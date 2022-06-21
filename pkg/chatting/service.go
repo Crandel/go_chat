@@ -52,7 +52,7 @@ func (s *service) Run() {
 	for c := range s.commands {
 		fmt.Println("chatting#Run#command " + c.id)
 		switch c.id {
-		case CMD_MSG:
+		case CmdMsg:
 			fmt.Println("chatting#Run#command#MSG ")
 			for _, r := range s.rooms {
 				if r.haveUser(c.client) {
@@ -65,10 +65,10 @@ func (s *service) Run() {
 					r.broadcast(c.client, msg.String())
 				}
 			}
-		case CMD_PING:
+		case CmdPing:
 			c.client.WriteMsg("pong")
 
-		case CMD_JOIN:
+		case CmdJoin:
 			if len(c.args) > 2 {
 				c.client.WriteMsg("Please provide only correct room name")
 				continue
@@ -91,13 +91,13 @@ func (s *service) Run() {
 			room.addUser(c.client)
 			room.broadcast(c.client, fmt.Sprintf("User %s join the room", c.client.Nick))
 			c.client.WriteMsg("Welcome to the room " + room.Name)
-		case CMD_ROOMS:
+		case CmdRooms:
 			names := make([]string, 0, len(s.rooms))
 			for name := range s.rooms {
 				names = append(names, name)
 			}
 			c.client.WriteMsg("Rooms:\n" + strings.Join(names, "\n"))
-		case CMD_USERS:
+		case CmdUsers:
 			for _, room := range s.rooms {
 				if room.haveUser(c.client) {
 					clients := make([]string, 0, len(room.Clients))
@@ -112,7 +112,7 @@ func (s *service) Run() {
 					c.client.WriteMsg(msg.String())
 				}
 			}
-		case CMD_QUIT:
+		case CmdQuit:
 			s.excludeFromRooms(c.client)
 		}
 	}

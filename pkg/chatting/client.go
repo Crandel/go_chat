@@ -21,37 +21,37 @@ func (u *Client) ReadCommands() {
 		if err != nil {
 			log.Println("chatting#user#ReadCommands " + err.Error())
 			u.commands <- Command{
-				id:     CMD_QUIT,
+				id:     CmdQuit,
 				client: u,
 			}
 			return
 		}
-		raw_command := string(p)
-		args := strings.Split(raw_command, " ")
+		rawCommand := string(p)
+		args := strings.Split(rawCommand, " ")
 		cmd := strings.TrimSpace(args[0])
 		fmt.Println("chatting#user#ReadCommands Command: " + cmd)
-		var cmdId CommandID
+		var cmdID CommandID
 		if !strings.HasPrefix(cmd, "/") {
-			cmdId = CMD_MSG
+			cmdID = CmdMsg
 		} else {
 			switch cmd {
-			case CMD_PING:
-				cmdId = CMD_PING
-			case CMD_JOIN:
-				cmdId = CMD_JOIN
-			case CMD_USERS:
-				cmdId = CMD_USERS
-			case CMD_ROOMS:
-				cmdId = CMD_ROOMS
-			case CMD_QUIT:
-				cmdId = CMD_QUIT
+			case CmdPing:
+				cmdID = CmdPing
+			case CmdJoin:
+				cmdID = CmdJoin
+			case CmdUsers:
+				cmdID = CmdUsers
+			case CmdRooms:
+				cmdID = CmdRooms
+			case CmdQuit:
+				cmdID = CmdQuit
 			default:
 				u.WriteMsg("ERR: Unknown command " + cmd)
 				continue
 			}
 		}
 		u.commands <- Command{
-			id:     cmdId,
+			id:     cmdID,
 			client: u,
 			args:   args,
 		}
