@@ -29,7 +29,7 @@ type service struct {
 	rep      Repository
 }
 
-func NewService(rep Repository) *service {
+func NewService(rep Repository) Service {
 	return &service{
 		rooms:    make(map[string]*Room),
 		commands: make(chan Command),

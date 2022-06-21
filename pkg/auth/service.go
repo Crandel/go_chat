@@ -22,7 +22,7 @@ type AuthResponse struct {
 	Token string `json:"token"`
 }
 
-func NewService(r Repository) *service {
+func NewService(r Repository) Service {
 	return &service{r}
 }
 

@@ -60,10 +60,10 @@ func main() {
 	interrupt = make(chan os.Signal)
 
 	signal.Notify(interrupt, os.Interrupt) // Notify the interrupt channel for SIGINT
-	socketUrl := "ws://localhost:8080/ws"
-	conn, _, err := websocket.DefaultDialer.Dial(socketUrl, nil)
+	socketURL := "ws://localhost:8080/ws"
+	conn, _, err := websocket.DefaultDialer.Dial(socketURL, nil)
 	if err != nil {
-		log.Fatal("Could not connect to WebSocker server '"+socketUrl+"'.", err)
+		log.Fatal("Could not connect to WebSocker server '"+socketURL+"'.", err)
 	}
 	defer conn.Close()
 	go msgHandler(conn)

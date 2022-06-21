@@ -31,6 +31,7 @@ func printError(e error) {
 	}
 }
 
+// SetupSqlite will create a new DB
 func SetupSqlite(db *godb.DB) {
 	createUsers := `
 	DROP TABLE IF EXISTS users;
@@ -74,6 +75,7 @@ func SetupSqlite(db *godb.DB) {
 	fmt.Println("DB was successfully setup")
 }
 
+// FillSqlite will fill DB with test data
 func FillSqlite(db *godb.DB) {
 	su := sqlite.User{
 		Email:      "test@email.com",

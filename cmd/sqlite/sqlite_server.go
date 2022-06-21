@@ -20,12 +20,12 @@ const port = 8080
 
 func main() {
 	fmt.Println("Starting server on port", port)
-	sql_db, _ := godb.Open(sqlite.Adapter, "./storage.db")
-	sqlite_storage := sql.NewStorage(sql_db)
-	aths := ath.NewService(&sqlite_storage)
-	adds := add.NewService(&sqlite_storage)
-	rdns := rdn.NewService(&sqlite_storage)
-	chts := cht.NewService(&sqlite_storage)
+	sqlDB, _ := godb.Open(sqlite.Adapter, "./storage.db")
+	sqliteStorage := sql.NewStorage(sqlDB)
+	aths := ath.NewService(&sqliteStorage)
+	adds := add.NewService(&sqliteStorage)
+	rdns := rdn.NewService(&sqliteStorage)
+	chts := cht.NewService(&sqliteStorage)
 	go chts.Run()
 	router := ntw.NewRouter(aths, adds, rdns, chts)
 	srv := &http.Server{
