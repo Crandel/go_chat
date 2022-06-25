@@ -6,6 +6,7 @@ import (
 	errs "github.com/Crandel/go_chat/pkg/errors"
 )
 
+// Room is the place for clients
 type Room struct {
 	Name    string
 	Clients map[*Client]struct{}

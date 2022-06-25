@@ -1,5 +1,6 @@
 package chatting
 
+// CommandID helper type for commands
 type CommandID string
 
 const (
@@ -11,6 +12,7 @@ const (
 	CmdQuit            = "/quit"
 )
 
+// Command used by client to manage interaction with chat
 type Command struct {
 	id     CommandID
 	client *Client
