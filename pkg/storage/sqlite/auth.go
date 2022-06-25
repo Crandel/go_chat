@@ -45,5 +45,7 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 	} else if error != nil {
 		return "", errs.NewError(op, errs.Info, "Internal error", error)
 	}
+	fmt.Printf("User: \n%v\n", user)
+
 	return user.Token, nil
 }

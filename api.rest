@@ -16,7 +16,7 @@ Content-Type: :content
 #{"token":"c1148d4b-f671-4598-a318-1958785d0260"}
 
 
-:token = c1148d4b-f671-4598-a318-1958785d0260
+:token = b6aae4eb-ed78-4654-b6d4-b8272bbf499c
 
 # Login
 

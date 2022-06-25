@@ -3,10 +3,13 @@ package main_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
-	"time"
 
 	add "github.com/Crandel/go_chat/pkg/adding"
 	ath "github.com/Crandel/go_chat/pkg/auth"
@@ -23,38 +26,41 @@ const (
 
 type data map[string]interface{}
 
+type Login struct {
+	Token string `json:"token"`
+}
+
+func runRequest(d data, method string, url string) ([]byte, error) {
+	data := new(bytes.Buffer)
+	if d != nil {
+		err := json.NewEncoder(data).Encode(d)
+		if err != nil {
+			return []byte{}, err
+		}
+	}
+	req, err := http.NewRequest(method, url, data)
+	if err != nil {
+		return []byte{}, err
+	}
+	client := &http.Client{}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return []byte{}, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return []byte{}, errors.New(fmt.Sprintf("Expected status OK; got %v", res.Status))
+	}
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return []byte{}, err
+	}
+	return bytes.TrimSpace(b), nil
+}
+
 func TestHandlers(t *testing.T) {
-	cnow := time.Now()
-	uid := mem.UserId(user_id)
-	testUsers := make(map[mem.UserId]mem.User)
-	testRooms := make(map[string]mem.Room)
-	testMessages := make(map[int]mem.Message)
-	testUser := mem.User{
-		Email:      uid,
-		Name:       "name",
-		SecondName: "second",
-		Password:   "pass",
-		Token:      "token",
-		Role:       mem.Member,
-		Created:    cnow,
-	}
-	testMessages[0] = mem.Message{
-		ID:       0,
-		UserId:   uid,
-		RoomName: room_name,
-		Payload:  "Test message",
-		Created:  cnow,
-	}
-	testRoom := mem.Room{
-		Name:    room_name,
-		Created: cnow,
-	}
-	testUsers[testUser.Email] = testUser
-	testRooms[testRoom.Name] = testRoom
 	mStorage := mem.NewStorage()
-	mStorage.Users = testUsers
-	mStorage.Rooms = testRooms
-	mStorage.Messages = testMessages
 
 	aths := ath.NewService(&mStorage)
 	adds := add.NewService(&mStorage)
@@ -63,76 +69,136 @@ func TestHandlers(t *testing.T) {
 	router := ntw.NewRouter(aths, adds, rdns, chts)
 	srv := httptest.NewServer(router)
 	defer srv.Close()
-	client := &http.Client{}
+
+	signRes, err := runRequest(
+		data{
+			"name":        "user",
+			"email":       user_id,
+			"second_name": "second",
+			"password":    "pass",
+		},
+		http.MethodPost,
+		srv.URL+"/api/users/signin",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var token Login
+	err = json.Unmarshal(signRes, &token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	logRes, err := runRequest(
+		data{
+			"email":    user_id,
+			"password": "pass",
+		},
+		http.MethodPost,
+		srv.URL+"/api/users/login",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var login Login
+	err = json.Unmarshal(logRes, &login)
+
+	if token != login {
+		t.Fatalf("Token from signing '%s' != '%s' token from login", token.Token, login.Token)
+	}
+
 	tt := []struct {
-		name          string
-		url           string
-		method        string
-		data          data
-		response_keys []string
-		err           string
+		name        string
+		url         string
+		method      string
+		data        data
+		compareResp func(resp interface{}) bool
+		err         string
 	}{
-		{
-			name:   "Signin",
-			url:    "/api/users/signin",
-			method: http.MethodPost,
-			data: data{
-				"name":        "user1",
-				"email":       user_id + "1",
-				"second_name": "second",
-				"password":    "pass",
-			},
-		},
-		{
-			name:   "Login",
-			url:    "/api/users/login",
-			method: http.MethodPost,
-			data:   data{"email": user_id, "password": "pass"},
-		},
 		{
 			name:   "List users",
 			url:    "/api/users",
 			method: http.MethodGet,
+			compareResp: func(resp interface{}) bool {
+				respConv := resp.([]interface{})
+				testResp := []data{
+					{
+						"email":       "example@post.com",
+						"name":        "user",
+						"second_name": "second",
+					},
+				}
+				if len(testResp) != len(respConv) {
+					return false
+				}
+
+				for i, d := range respConv {
+					if reflect.DeepEqual(d, testResp[i]) {
+						fmt.Printf("Test is not equal with resp:\n%v != %v\n", d, testResp[i])
+						return false
+					}
+				}
+				return true
+			},
 		},
 		{
 			name:   "Add rooms",
 			url:    "/api/rooms",
 			method: http.MethodPost,
 			data:   data{"name": "room 1"},
+			compareResp: func(resp interface{}) bool {
+				respConv := resp.(map[string]interface{})
+				testResp := map[string]string{
+					"name": "room 1",
+				}
+
+				if reflect.DeepEqual(testResp, respConv) {
+					fmt.Printf("Test is not equal with resp:\n%v != %v\n", testResp, respConv)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name:   "List rooms",
 			url:    "/api/rooms",
 			method: http.MethodGet,
+			compareResp: func(resp interface{}) bool {
+				respConv := resp.([]interface{})
+				testResp := []data{
+					{
+						"messages": nil,
+						"name":     "room 1",
+					},
+				}
+				if len(testResp) != len(respConv) {
+					fmt.Printf("Different length of test and resp:\n%v\n\n%v\n", testResp, respConv)
+					return false
+				}
+				for i, d := range testResp {
+					if reflect.DeepEqual(d, respConv[i]) {
+						fmt.Printf("Test is not equal with resp:\n%v != %v\n", d, respConv[i])
+						return false
+					}
+				}
+				return true
+			},
 		},
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			data := new(bytes.Buffer)
-			if tc.data != nil {
-				err := json.NewEncoder(data).Encode(tc.data)
-				if err != nil {
-					t.Fatal(err)
-				}
-			}
-			req, err := http.NewRequest(tc.method, srv.URL+tc.url, data)
+			response, err := runRequest(tc.data, tc.method, srv.URL+tc.url)
 			if err != nil {
-				t.Fatalf("Could not create request %v", err)
+				t.Fatal(err)
 			}
-			res, err := client.Do(req)
+			var unmResponse interface{}
+			err = json.Unmarshal(response, &unmResponse)
 			if err != nil {
-				t.Fatalf("Could not send %s request: %v", tc.method, err)
+				t.Fatal(err)
 			}
-			defer res.Body.Close()
 
-			if res.StatusCode != http.StatusOK {
-				t.Errorf("Expected status OK; got %v", res.Status)
+			if !tc.compareResp(unmResponse) {
+				t.Fatalf("Response :%v is not equal with testing", unmResponse)
 			}
-			// b, err := ioutil.ReadAll(res.Body)
-			// if err != nil {
-			// 	t.Fatalf("could not read response: %v", err)
-			// }
-			// fmt.Println(string(bytes.TrimSpace(b)))
 		})
 	}
 }
