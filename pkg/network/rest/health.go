@@ -8,7 +8,7 @@ import (
 func HealthHandler() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		response := map[string]string{
-			"Status": "OK",
+			"status": "OK",
 		}
 		json.NewEncoder(w).Encode(response)
 	}

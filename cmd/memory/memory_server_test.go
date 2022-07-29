@@ -115,6 +115,26 @@ func TestHandlers(t *testing.T) {
 		err         string
 	}{
 		{
+			name:   "Health",
+			url:    "/health",
+			method: http.MethodGet,
+			compareResp: func(resp interface{}) bool {
+				respConv := resp.(map[string]interface{})
+				testResp := data{
+					"status": "OK",
+				}
+				if len(testResp) != len(respConv) {
+					return false
+				}
+
+				if reflect.DeepEqual(respConv, testResp) {
+					fmt.Printf("Test is not equal with resp:\n%v != %v\n", respConv, testResp)
+					return false
+				}
+				return true
+			},
+		},
+		{
 			name:   "List users",
 			url:    "/api/users",
 			method: http.MethodGet,
