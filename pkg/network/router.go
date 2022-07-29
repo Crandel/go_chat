@@ -21,6 +21,7 @@ func NewRouter(
 ) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/", hl.RootHandler())
+	r.HandleFunc("/health", rest.HealthHandler())
 	r.HandleFunc("/ws", ws.WSHandler(chts))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", hl.StaticHandler()))
 	apiRouter := r.PathPrefix("/api").Subrouter()
