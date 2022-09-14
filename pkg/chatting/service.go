@@ -97,7 +97,9 @@ func (s *service) Run() {
 			}
 			s.excludeFromRooms(c.client)
 			room.addUser(c.client)
-			room.broadcast(c.client, fmt.Sprintf("User %s join the room", *c.client.Nick))
+			message := fmt.Sprintf("User %s join the room", *c.client.Nick)
+
+			room.broadcast(c.client, message)
 			c.client.WriteMsg("Welcome to the room " + room.Name)
 		case CmdRooms:
 			names := make([]string, 0, len(s.rooms))

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -26,13 +27,12 @@ func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 			return
 		default:
 			line, err := rdr.ReadString('\n')
-			log.Println(line + " was readed")
 			if err != nil {
 				log.Println("Could not scan the message")
 				close(done)
 				return
 			}
-			input <- line
+			input <- strings.Trim(line, "\n")
 		}
 	}
 }
@@ -86,7 +86,11 @@ func main() {
 
 	// Join test room
 	// TODO: replace this with correct authentication
-	err = conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("/join %s %s", roomName, userName)))
+	err = conn.WriteMessage(websocket.TextMessage,
+		[]byte(
+			fmt.Sprintf("/join %s %s",
+				strings.Trim(roomName, "\n"),
+				strings.Trim(userName, "\n"))))
 
 	go msgHandler(conn, *rdr)
 	go reader(conn)
