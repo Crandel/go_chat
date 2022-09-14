@@ -16,7 +16,7 @@ var chat chan string
 var done chan interface{}
 var interrupt chan os.Signal
 
-func msgHandler(conn *websocket.Conn) {
+func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 	defer close(input)
 	for {
 		select {
@@ -25,9 +25,14 @@ func msgHandler(conn *websocket.Conn) {
 		case <-interrupt:
 			return
 		default:
-			i := bufio.NewScanner(os.Stdin)
-			i.Scan()
-			input <- i.Text()
+			line, err := rdr.ReadString('\n')
+			log.Println(line + " was readed")
+			if err != nil {
+				log.Println("Could not scan the message")
+				close(done)
+				return
+			}
+			input <- line
 		}
 	}
 }
@@ -44,7 +49,7 @@ func reader(conn *websocket.Conn) {
 		case <-time.After(1 * time.Second):
 			_, p, err := conn.ReadMessage()
 			if err != nil {
-				fmt.Printf("Err: %s\n", err.Error())
+				log.Printf("Err: %s\n", err.Error())
 				close(done)
 				return
 			}
@@ -58,6 +63,7 @@ func main() {
 	chat = make(chan string)
 	done = make(chan interface{})
 	interrupt = make(chan os.Signal)
+	rdr := bufio.NewReader(os.Stdin)
 
 	signal.Notify(interrupt, os.Interrupt) // Notify the interrupt channel for SIGINT
 	socketURL := "ws://localhost:8080/ws"
@@ -66,18 +72,33 @@ func main() {
 		log.Fatal("Could not connect to WebSocker server '"+socketURL+"'.", err)
 	}
 	defer conn.Close()
-	go msgHandler(conn)
-	go reader(conn)
+	log.Println("Please provide room name:")
+	roomName, err := rdr.ReadString('\n')
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Please provide user name:")
+	userName, err := rdr.ReadString('\n')
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Join test room
-	err = conn.WriteMessage(websocket.TextMessage, []byte("/join test"))
+	// TODO: replace this with correct authentication
+	err = conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("/join %s %s", roomName, userName)))
+
+	go msgHandler(conn, *rdr)
+	go reader(conn)
 	if err != nil {
 		log.Println("Error during writing to websocket:", err)
 		return
 	}
+	log.Printf("You are in room %s", roomName)
 	for {
 		select {
 		case m := <-chat:
-			fmt.Printf("> %s\n", m)
+			log.Println("> ", m)
 		case i := <-input:
 			err := conn.WriteMessage(websocket.TextMessage, []byte(i))
 			if err != nil {

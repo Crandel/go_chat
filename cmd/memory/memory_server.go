@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -16,12 +15,13 @@ import (
 
 func main() {
 	port := 8080
-	fmt.Println("Starting server on port", port)
+	log.Println("Starting server on port", port)
 	memory := mem.NewStorage()
 	aths := ath.NewService(&memory)
 	adds := add.NewService(&memory)
 	rdns := rdn.NewService(&memory)
 	chts := cht.NewService(&memory)
+	go chts.Run()
 	router := ntw.NewRouter(aths, adds, rdns, chts)
 	srv := &http.Server{
 		Addr:         ":8080",

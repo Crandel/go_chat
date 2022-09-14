@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -19,7 +18,7 @@ import (
 const port = 8080
 
 func main() {
-	fmt.Println("Starting server on port", port)
+	log.Println("Starting server on port", port)
 	sqlDB, _ := godb.Open(sqlite.Adapter, "./storage.db")
 	sqliteStorage := sql.NewStorage(sqlDB)
 	aths := ath.NewService(&sqliteStorage)

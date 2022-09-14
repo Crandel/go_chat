@@ -2,6 +2,7 @@ package chatting
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -16,7 +17,7 @@ type Repository interface {
 
 type Service interface {
 	Run()
-	NewClient(conn *websocket.Conn, nick string)
+	NewClient(conn *websocket.Conn)
 	WriteMessage(u Client, r Room, msg string) error
 	ExcludeFromRoom(name string, u Client) error
 	AddUserToRoom(name string, u Client) error
@@ -37,31 +38,34 @@ func NewService(rep Repository) Service {
 	}
 }
 
-func (s *service) NewClient(conn *websocket.Conn, nick string) {
+func (s *service) NewClient(conn *websocket.Conn) {
 	u := &Client{
-		Nick:     nick,
+		Nick:     nil,
 		conn:     conn,
 		commands: s.commands,
 	}
-	fmt.Printf("chatting#NewClient User %s was successfuly connected\n", nick)
+	log.Printf("chatting#NewClient: New User was successfuly connected\n")
 	u.ReadCommands()
 }
 
 func (s *service) Run() {
-	fmt.Println("chatting#Run Before loop")
+	log.SetPrefix("chatting#Run ")
+	log.Println("Before loop")
 	for c := range s.commands {
-		fmt.Println("chatting#Run#command " + c.id)
+		if c.client.Nick == nil && c.id != CmdJoin {
+			c.client.WriteMsg("Please provide join room and specify your name")
+			continue
+		}
+		log.Println("command " + c.id)
 		switch c.id {
 		case CmdMsg:
-			fmt.Println("chatting#Run#command#MSG ")
+			log.Println("MSG ")
 			for _, r := range s.rooms {
 				if r.haveUser(c.client) {
 					var msg strings.Builder
-					msg.WriteString(c.client.Nick)
+					msg.WriteString(*c.client.Nick)
 					msg.WriteString(" ")
 					msg.WriteString(strings.Join(c.args, " "))
-					fmt.Printf("%s\n", msg.String())
-
 					r.broadcast(c.client, msg.String())
 				}
 			}
@@ -69,11 +73,15 @@ func (s *service) Run() {
 			c.client.WriteMsg("pong")
 
 		case CmdJoin:
-			if len(c.args) > 2 {
-				c.client.WriteMsg("Please provide only correct room name")
+
+			if len(c.args) != 3 {
+				c.client.WriteMsg("Please provide correct room and user name")
 				continue
 			}
+
 			roomName := c.args[1]
+			userName := c.args[2]
+			c.client.Nick = &userName
 			room, exists := s.rooms[roomName]
 			if exists {
 				if room.haveUser(c.client) {
@@ -83,13 +91,13 @@ func (s *service) Run() {
 			} else {
 				room = &Room{
 					Name:    roomName,
-					Clients: nil,
+					Clients: make(map[*Client]struct{}),
 				}
 				s.rooms[roomName] = room
 			}
 			s.excludeFromRooms(c.client)
 			room.addUser(c.client)
-			room.broadcast(c.client, fmt.Sprintf("User %s join the room", c.client.Nick))
+			room.broadcast(c.client, fmt.Sprintf("User %s join the room", *c.client.Nick))
 			c.client.WriteMsg("Welcome to the room " + room.Name)
 		case CmdRooms:
 			names := make([]string, 0, len(s.rooms))
@@ -102,7 +110,7 @@ func (s *service) Run() {
 				if room.haveUser(c.client) {
 					clients := make([]string, 0, len(room.Clients))
 					for client := range room.Clients {
-						clients = append(clients, client.Nick)
+						clients = append(clients, *client.Nick)
 					}
 					var msg strings.Builder
 					msg.WriteString("Users in room ")
@@ -122,7 +130,7 @@ func (s *service) excludeFromRooms(u *Client) {
 	for _, r := range s.rooms {
 		if r.haveUser(u) {
 			delete(r.Clients, u)
-			r.broadcast(u, "User "+u.Nick+" leave the room")
+			r.broadcast(u, "User "+*u.Nick+" leave the room")
 		}
 	}
 }

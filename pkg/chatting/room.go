@@ -1,21 +1,21 @@
 package chatting
 
 import (
-	"fmt"
+	"log"
 
 	errs "github.com/Crandel/go_chat/pkg/errors"
 )
 
 // Room is the place for clients
 type Room struct {
-	Name    string
 	Clients map[*Client]struct{}
+	Name    string
 }
 
 func (r *Room) broadcast(sender *Client, message string) {
 	for m := range r.Clients {
 		if m != sender {
-			fmt.Printf("Broadcast message %s \n", message)
+			log.Printf("Broadcast message %s \n", message)
 			m.WriteMsg(message)
 		}
 	}
