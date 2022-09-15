@@ -1,0 +1,22 @@
+#+title: Architecture
+
+* Deployment
+- Local docker deployment
+- k8s deployment
+- cloud deployment
+
+* Chat functionality
+- 1 to 1 chats
+
+* Security
+- Add basic authentication
+- Add token authentication
+
+* Storage
+- Add postgresql support
+
+* Web client
+- Add rich text support
+- Add media support
+- Add links preview support
+
