@@ -21,15 +21,24 @@ func (str *Storage) ReadUsers() ([]rdn.User, error) {
 	return rdnUsers, nil
 }
 
-func (str *Storage) ReadUser(ru rdn.UserId) (rdn.User, error) {
-	const op errs.Op = "sqlite.ReadUser"
+func (str *Storage) GetUser(ru rdn.UserId) (User, error) {
+	const op errs.Op = "sqlite.GetUser"
 	uid := string(ru)
 	user := User{}
-	err := str.db.Select(&user).Where("email = ?", uid).Do()
+	err := str.db.Select(&user).Where("nick = ?", uid).Do()
 	if err == sql.ErrNoRows {
-		return rdn.User{}, errs.New(op, errs.Info, "No user with id: "+uid)
+		return User{}, errs.New(op, errs.Info, "No user with nick: "+uid)
 	} else if err != nil {
-		return rdn.User{}, errs.NewError(op, errs.Info, "Error with database connection", err)
+		return User{}, errs.NewError(op, errs.Info, "Error with database connection", err)
+	}
+	return user, nil
+}
+
+func (str *Storage) ReadUser(ru rdn.UserId) (rdn.User, error) {
+	const op errs.Op = "sqlite.ReadUser"
+	user, err := str.GetUser(ru)
+	if err != nil {
+		return rdn.User{}, errs.New(op, errs.Info, "No user with nick: "+string(ru))
 	}
 	return user.ConvertToReading(), nil
 }
@@ -69,7 +78,7 @@ func (str *Storage) getRoomMessages(name string) map[rdn.UserId][]rdn.Message {
 	err := str.db.Select(messages).Where("room_name = ?", name).Do()
 	if err == nil {
 		for _, m := range messages {
-			rdnMessages[rdn.UserId(m.UserID)] = append(rdnMessages[rdn.UserId(m.UserID)], m.ConvertToReading())
+			rdnMessages[rdn.UserId(m.UserNick)] = append(rdnMessages[rdn.UserId(m.UserNick)], m.ConvertToReading())
 		}
 	}
 	return rdnMessages

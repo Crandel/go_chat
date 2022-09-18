@@ -13,6 +13,13 @@ type Client struct {
 	commands chan<- Command
 }
 
+func (c *Client) GetNick() string {
+	if c.Nick == nil {
+		return *c.Nick
+	}
+	return ""
+}
+
 func (u *Client) ReadCommands() {
 	log.SetPrefix("chatting#user#ReadCommands ")
 	defer u.conn.Close()

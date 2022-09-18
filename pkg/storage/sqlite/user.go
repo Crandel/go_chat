@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"time"
 
@@ -25,23 +26,41 @@ func (r Role) Value() (driver.Value, error) {
 }
 
 type User struct {
-	Created    time.Time `db:"created"`
-	SecondName string    `db:"second_name"`
-	Email      string    `db:"email,key"`
-	Password   string    `db:"password"`
-	Token      string    `db:"token"`
-	Role       Role      `db:"role"`
-	Name       string    `db:"name"`
+	Nick       string         `db:"nick,key"`
+	Name       string         `db:"name"`
+	SecondName sql.NullString `db:"second_name"`
+	Email      sql.NullString `db:"email"`
+	Password   string         `db:"password"`
+	Token      string         `db:"token"`
+	Role       Role           `db:"role"`
+	Created    time.Time      `db:"created"`
 }
 
 func (*User) TableName() string {
 	return USERS
 }
 
+func (u *User) GetSecondName() string {
+	secondName := ""
+	if u.SecondName.Valid {
+		secondName = u.Email.String
+	}
+	return secondName
+}
+
+func (u *User) GetEmail() string {
+	email := ""
+	if u.Email.Valid {
+		email = u.Email.String
+	}
+	return email
+}
+
 func (u *User) ConvertToReading() rdn.User {
 	return rdn.User{
-		Email:      rdn.UserId(u.Email),
+		Nick:       rdn.UserId(u.Nick),
+		Email:      u.GetEmail(),
 		Name:       u.Name,
-		SecondName: u.SecondName,
+		SecondName: u.GetSecondName(),
 	}
 }

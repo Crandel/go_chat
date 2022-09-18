@@ -8,7 +8,7 @@ import (
 
 type Message struct {
 	Created  time.Time
-	UserId   UserId
+	UserID   UserId
 	RoomName string
 	Payload  string
 	ID       int
@@ -18,6 +18,6 @@ func (mm *Message) ConvertMessageToReading() r.Message {
 	return r.Message{
 		ID:      mm.ID,
 		Payload: mm.Payload,
-		UserId:  mm.UserId.ConvertUserIdToReading(),
+		Nick:    mm.UserID.ConvertUserIdToReading(),
 	}
 }

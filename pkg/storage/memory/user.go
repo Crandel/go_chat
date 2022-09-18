@@ -27,21 +27,23 @@ func ConvertUserIdFromReading(rid r.UserId) UserId {
 
 type User struct {
 	Created    time.Time
+	Role       Role
+	Nick       UserId
 	Name       string
-	SecondName string
+	SecondName *string
 	Password   string
 	Token      string
-	Role       Role
-	Email      UserId
+	Email      *string
 }
 
 func ConvertUserFromSigning(su auth.SigninUser) User {
-	id := UserId(su.Email)
+	id := UserId(su.Nick)
 	token := uuid.New().String()
 	return User{
-		Email:      id,
+		Email:      su.Email,
 		Name:       su.Name,
 		SecondName: su.SecondName,
+		Nick:       id,
 		Password:   su.Password,
 		Token:      token,
 		Role:       Member,
@@ -52,7 +54,8 @@ func ConvertUserFromSigning(su auth.SigninUser) User {
 func (u User) ConvertUserToReading() r.User {
 	return r.User{
 		Name:       u.Name,
-		SecondName: u.SecondName,
-		Email:      u.Email.ConvertUserIdToReading(),
+		SecondName: *u.SecondName,
+		Email:      *u.Email,
+		Nick:       u.Nick.ConvertUserIdToReading(),
 	}
 }

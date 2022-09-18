@@ -60,10 +60,10 @@ func (str *Storage) collectRoomMessages(name string) rdn.Room {
 	str.RLock()
 	for _, m := range str.Messages {
 		if m.RoomName == name {
-			ruid := m.UserId.ConvertUserIdToReading()
+			ruid := m.UserID.ConvertUserIdToReading()
 			rMessage := rdn.Message{
 				ID:      m.ID,
-				UserId:  ruid,
+				Nick:    ruid,
 				Payload: m.Payload,
 			}
 			innerMessages, _ := rMessages[ruid]

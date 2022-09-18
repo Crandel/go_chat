@@ -1,7 +1,7 @@
 package reading
 
 type Message struct {
-	UserId  UserId `json:"user_id"`
+	Nick    UserId `json:"nick"`
 	Payload string `json:"payload"`
 	ID      int    `json:"id"`
 }

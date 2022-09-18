@@ -9,6 +9,7 @@ import (
 	errs "github.com/Crandel/go_chat/pkg/errors"
 	"github.com/google/uuid"
 	"github.com/samonzeweb/godb"
+	"github.com/samonzeweb/godb/types"
 )
 
 func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
@@ -16,17 +17,17 @@ func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
 	token := uuid.New().String()
 	su := User{
 		Name:       u.Name,
-		SecondName: u.SecondName,
-		Email:      u.Email,
+		SecondName: types.NullStringFrom(*u.SecondName),
+		Email:      types.NullStringFrom(*u.Email),
 		Password:   u.Password,
 		Token:      token,
 		Role:       Member,
 		Created:    time.Now(),
 	}
-	error := str.db.Insert(&su).Do()
-	if error != nil {
+	err := str.db.Insert(&su).Do()
+	if err != nil {
 		return "", errs.NewError(
-			op, errs.Info, fmt.Sprintf("User with email %s already exists", u.Email), error)
+			op, errs.Info, fmt.Sprintf("User with nick %s already exists", u.Nick), err)
 	}
 	return token, nil
 }
@@ -34,16 +35,16 @@ func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
 func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 	const op errs.Op = "sqlite.LoginUser"
 	user := User{}
-	error := str.db.Select(&user).WhereQ(
+	err := str.db.Select(&user).WhereQ(
 		godb.And(
-			godb.Q("email = ?", lu.Email),
+			godb.Q("nick = ?", lu.Nick),
 			godb.Q("password = ? ", lu.Password),
 		),
 	).Do()
-	if error == sql.ErrNoRows {
-		return "", errs.New(op, errs.Info, "No user with email: "+lu.Email)
-	} else if error != nil {
-		return "", errs.NewError(op, errs.Info, "Internal error", error)
+	if err == sql.ErrNoRows {
+		return "", errs.New(op, errs.Info, "No user with nick: "+lu.Nick)
+	} else if err != nil {
+		return "", errs.NewError(op, errs.Info, "Internal error", err)
 	}
 
 	return user.Token, nil

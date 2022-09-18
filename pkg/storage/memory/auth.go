@@ -14,12 +14,12 @@ func (str *Storage) SigninUser(su auth.SigninUser) (string, error) {
 		str.Users = make(map[UserId]User)
 	}
 	str.Lock()
-	_, exists := str.Users[u.Email]
+	_, exists := str.Users[u.Nick]
 	if exists {
 		return "", errs.New(
-			op, errs.Info, fmt.Sprintf("User with email: '%s' exists", u.Email))
+			op, errs.Info, fmt.Sprintf("User with nick: '%s' exists", u.Nick))
 	}
-	str.Users[u.Email] = u
+	str.Users[u.Nick] = u
 	str.Unlock()
 	return u.Token, nil
 }
@@ -27,15 +27,15 @@ func (str *Storage) SigninUser(su auth.SigninUser) (string, error) {
 func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 	const op errs.Op = "memory.LoginUser"
 	str.RLock()
-	u, exists := str.Users[UserId(lu.Email)]
+	u, exists := str.Users[UserId(lu.Nick)]
 	str.RUnlock()
 	if !exists {
 		return "", errs.New(
-			op, errs.Info, fmt.Sprintf("No user with email '%s'", lu.Email))
+			op, errs.Info, fmt.Sprintf("No user with nick '%s'", lu.Nick))
 	}
 	if u.Password != lu.Password {
 		return "", errs.New(
-			op, errs.Info, fmt.Sprintf("User with email '%s' has wrong password", lu.Email))
+			op, errs.Info, fmt.Sprintf("User with nick '%s' has wrong password", lu.Nick))
 	}
 	return u.Token, nil
 }
