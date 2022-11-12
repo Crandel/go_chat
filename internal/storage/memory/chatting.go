@@ -56,16 +56,16 @@ func (str *Storage) AddUserToRoom(roomName string, u cht.Client) error {
 	return nil
 }
 
-func (str *Storage) RoomHasUser(roomName string, cu cht.Client) bool {
+func (str *Storage) RoomHasUser(roomName string, cu cht.Client) (bool, int) {
 	const op errs.Op = "memory.RoomHasUser"
 	mr, exists := str.Rooms[roomName]
 	if !exists {
-		return false
+		return false, 0
 	}
 	for _, mu := range mr.Members {
 		if mu == UserId(cu.GetNick()) {
-			return true
+			return true, 0
 		}
 	}
-	return false
+	return false, 0
 }

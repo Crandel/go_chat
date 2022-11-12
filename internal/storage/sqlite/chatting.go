@@ -12,6 +12,7 @@ import (
 const USER_ROOMS = "user_rooms"
 
 type UserRoom struct {
+	id       int    `db:"id,key,auto"`
 	roomName string `db:",rel=rooms"`
 	userNick string `db:",rel=users"`
 }
@@ -22,18 +23,16 @@ func (*UserRoom) TableName() string {
 
 func (str *Storage) WriteMessage(u cht.Client, r cht.Room, msg string) error {
 	const op errs.Op = "sqlite.WriteMessage"
-	if str.RoomHasUser(r.Name, u) {
+	exists, id := str.RoomHasUser(r.Name, u)
+	if !exists {
 		return errs.New(
 			op, errs.Info, "User "+*u.Nick+"is not in room "+r.Name)
 	}
 	rand.Seed(time.Now().UnixNano())
-	id := rand.Int()
 	message := Message{
-		ID:       id,
-		RoomName: r.Name,
-		UserNick: u.GetNick(),
-		Payload:  msg,
-		Created:  time.Now(),
+		UserRoomID: id,
+		Payload:    msg,
+		Created:    time.Now(),
 	}
 	error := str.db.Insert(&message).Do()
 	if error != nil {
@@ -46,15 +45,14 @@ func (str *Storage) WriteMessage(u cht.Client, r cht.Room, msg string) error {
 
 func (str *Storage) ExcludeFromRoom(name string, u cht.Client) error {
 	const op errs.Op = "sqlite.ExcludeFromRoom"
-	if !str.RoomHasUser(name, u) {
+	exists, id := str.RoomHasUser(name, u)
+
+	if !exists {
 		return errs.New(
 			op, errs.Info, "User "+*u.Nick+"is not in room "+name)
 	}
 	_, err := str.db.DeleteFrom(
-		USER_ROOMS).WhereQ(
-		godb.And(
-			godb.Q("room_name = ?", name),
-			godb.Q("", u.Nick))).Do()
+		USER_ROOMS).Where("id = ?", id).Do()
 	if err != nil {
 		return errs.New(
 			op, errs.Info, "User "+*u.Nick+"is not in room "+name)
@@ -64,7 +62,8 @@ func (str *Storage) ExcludeFromRoom(name string, u cht.Client) error {
 
 func (str *Storage) AddUserToRoom(name string, u cht.Client) error {
 	const op errs.Op = "sqlite.AddUserToRoom"
-	if str.RoomHasUser(name, u) {
+	exists, _ := str.RoomHasUser(name, u)
+	if exists {
 		return errs.New(
 			op, errs.Info, "User "+*u.Nick+" is already in a room "+name)
 	}
@@ -81,7 +80,16 @@ func (str *Storage) AddUserToRoom(name string, u cht.Client) error {
 	return nil
 }
 
-func (str *Storage) RoomHasUser(name string, u cht.Client) bool {
+func (str *Storage) getRoomUsers(name string) []UserRoom {
+	var usersInRoom []UserRoom
+	_ = str.db.Select(&usersInRoom).WhereQ(
+		godb.And(
+			godb.Q("room_name = ?", name),
+		)).Do()
+	return usersInRoom
+}
+
+func (str *Storage) RoomHasUser(name string, u cht.Client) (bool, int) {
 	var userInRoom UserRoom
 	_ = str.db.Select(&userInRoom).WhereQ(
 		godb.And(
@@ -89,7 +97,7 @@ func (str *Storage) RoomHasUser(name string, u cht.Client) bool {
 			godb.Q("user_nick = ?", u.Nick),
 		)).Do()
 	if userInRoom != (UserRoom{}) {
-		return true
+		return true, userInRoom.id
 	}
-	return false
+	return false, 0
 }

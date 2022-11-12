@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"fmt"
 	"time"
@@ -36,9 +37,10 @@ func SetupSqlite(db *godb.DB) {
 	createUsers := `
 	DROP TABLE IF EXISTS users;
 	CREATE TABLE users (
-		email        VARCHAR(50) UNIQUE PRIMARY KEY,
-		name         TEXT NOT NULL,
+		nick         VARCHAR(50) UNIQUE PRIMARY KEY,
+		name         TEXT,
 		second_name  TEXT,
+		email        TEXT,
 		password     TEXT NOT NULL,
 		token        TEXT NOT NULL,
 		role         TEXT CHECK( role IN ('Admin', 'Member') ) NOT NULL DEFAULT 'Member',
@@ -58,11 +60,11 @@ func SetupSqlite(db *godb.DB) {
 	DROP TABLE IF EXISTS messages;
 	CREATE TABLE messages (
 		id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-		user_id      TEXT NOT NULL UNIQUE,
+		user_nick    TEXT NOT NULL UNIQUE,
 		room_name    TEXT NOT NULL,
 		payload      TEXT,
 		created      DATE NOT NULL,
-		FOREIGN KEY(user_id)   REFERENCES users(email),
+		FOREIGN KEY(user_nick) REFERENCES users(nick),
 		FOREIGN KEY(room_name) REFERENCES rooms(name)
 	);
 	`
@@ -77,14 +79,16 @@ func SetupSqlite(db *godb.DB) {
 
 // FillSqlite will fill DB with test data
 func FillSqlite(db *godb.DB) {
+	name := sql.NullString{
+		String: "test_name",
+	}
 	su := sqlite.User{
-		Email:      "test@email.com",
-		Name:       "test_name",
-		SecondName: "test_second_name",
-		Password:   "pass",
-		Token:      "token",
-		Role:       sqlite.Member,
-		Created:    time.Now(),
+		Nick:     "test@email.com",
+		Name:     name,
+		Password: "pass",
+		Token:    "token",
+		Role:     sqlite.Member,
+		Created:  time.Now(),
 	}
 	err := db.Insert(&su).Do()
 	printError(err)
@@ -99,7 +103,7 @@ func FillSqlite(db *godb.DB) {
 
 	sm := sqlite.Message{
 		RoomName: sr.Name,
-		UserID:   su.Email,
+		UserNick: su.Nick,
 		Payload:  "Test message",
 		Created:  time.Now(),
 	}

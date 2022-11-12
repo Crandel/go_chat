@@ -86,11 +86,15 @@ func (str *Storage) ReadRoom(id string) (rdn.Room, error) {
 func (str *Storage) getRoomMessages(name string) map[rdn.UserId][]rdn.Message {
 	messages := make([]Message, 0)
 	rdnMessages := make(map[rdn.UserId][]rdn.Message, 0)
-	err := str.db.Select(messages).Where("room_name = ?", name).Do()
-	if err == nil {
-		for _, m := range messages {
-			rdnMessages[rdn.UserId(m.UserNick)] = append(rdnMessages[rdn.UserId(m.UserNick)], m.ConvertToReading())
+	users := str.getRoomUsers(name)
+	for _, ur := range users {
+		err := str.db.Select(messages).Where("user_room_id = ?", ur.id).Do()
+		if err == nil {
+			for _, m := range messages {
+				rdnMessages[rdn.UserId(ur.userNick)] = append(rdnMessages[rdn.UserId(ur.userNick)], m.ConvertToReading(ur.userNick))
+			}
 		}
+
 	}
 	return rdnMessages
 }
