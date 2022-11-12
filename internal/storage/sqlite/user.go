@@ -5,7 +5,7 @@ import (
 	"database/sql/driver"
 	"time"
 
-	rdn "github.com/Crandel/go_chat/pkg/reading"
+	rdn "github.com/Crandel/go_chat/internal/reading"
 )
 
 const USERS = "users"

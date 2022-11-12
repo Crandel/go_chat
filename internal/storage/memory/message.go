@@ -3,7 +3,7 @@ package memory
 import (
 	"time"
 
-	r "github.com/Crandel/go_chat/pkg/reading"
+	r "github.com/Crandel/go_chat/internal/reading"
 )
 
 type Message struct {

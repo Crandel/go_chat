@@ -3,8 +3,8 @@ package memory
 import (
 	"fmt"
 
-	"github.com/Crandel/go_chat/pkg/auth"
-	errs "github.com/Crandel/go_chat/pkg/errors"
+	"github.com/Crandel/go_chat/internal/auth"
+	errs "github.com/Crandel/go_chat/internal/errors"
 )
 
 func (str *Storage) SigninUser(su auth.SigninUser) (string, error) {

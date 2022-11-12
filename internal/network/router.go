@@ -3,13 +3,13 @@ package network
 import (
 	"net/http"
 
-	"github.com/Crandel/go_chat/pkg/adding"
-	"github.com/Crandel/go_chat/pkg/auth"
-	"github.com/Crandel/go_chat/pkg/chatting"
-	hl "github.com/Crandel/go_chat/pkg/network/html"
-	"github.com/Crandel/go_chat/pkg/network/rest"
-	"github.com/Crandel/go_chat/pkg/network/ws"
-	"github.com/Crandel/go_chat/pkg/reading"
+	"github.com/Crandel/go_chat/internal/adding"
+	"github.com/Crandel/go_chat/internal/auth"
+	"github.com/Crandel/go_chat/internal/chatting"
+	hl "github.com/Crandel/go_chat/internal/network/html"
+	"github.com/Crandel/go_chat/internal/network/rest"
+	"github.com/Crandel/go_chat/internal/network/ws"
+	"github.com/Crandel/go_chat/internal/reading"
 	"github.com/gorilla/mux"
 )
 

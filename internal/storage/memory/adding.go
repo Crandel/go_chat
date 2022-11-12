@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	errs "github.com/Crandel/go_chat/pkg/errors"
+	errs "github.com/Crandel/go_chat/internal/errors"
 )
 
 func (str *Storage) AddRoom(rn string) (string, error) {

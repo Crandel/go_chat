@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Crandel/go_chat/pkg/auth"
+	"github.com/Crandel/go_chat/internal/auth"
 )
 
 func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request) {

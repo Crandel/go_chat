@@ -3,7 +3,7 @@ package chatting
 import (
 	"log"
 
-	errs "github.com/Crandel/go_chat/pkg/errors"
+	errs "github.com/Crandel/go_chat/internal/errors"
 )
 
 // Room is the place for clients

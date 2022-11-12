@@ -3,7 +3,7 @@ package sqlite
 import (
 	"time"
 
-	rdn "github.com/Crandel/go_chat/pkg/reading"
+	rdn "github.com/Crandel/go_chat/internal/reading"
 )
 
 const ROOMS = "rooms"

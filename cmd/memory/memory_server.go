@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	add "github.com/Crandel/go_chat/pkg/adding"
-	ath "github.com/Crandel/go_chat/pkg/auth"
-	cht "github.com/Crandel/go_chat/pkg/chatting"
-	ntw "github.com/Crandel/go_chat/pkg/network"
-	rdn "github.com/Crandel/go_chat/pkg/reading"
-	mem "github.com/Crandel/go_chat/pkg/storage/memory"
+	add "github.com/Crandel/go_chat/internal/adding"
+	ath "github.com/Crandel/go_chat/internal/auth"
+	cht "github.com/Crandel/go_chat/internal/chatting"
+	ntw "github.com/Crandel/go_chat/internal/network"
+	rdn "github.com/Crandel/go_chat/internal/reading"
+	mem "github.com/Crandel/go_chat/internal/storage/memory"
 )
 
 func main() {

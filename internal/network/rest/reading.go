@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	rdg "github.com/Crandel/go_chat/pkg/reading"
+	rdg "github.com/Crandel/go_chat/internal/reading"
 	"github.com/gorilla/mux"
 )
 

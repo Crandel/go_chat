@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Crandel/go_chat/pkg/storage/sqlite"
+	"github.com/Crandel/go_chat/internal/storage/sqlite"
 	"github.com/samonzeweb/godb"
 	as "github.com/samonzeweb/godb/adapters/sqlite"
 )

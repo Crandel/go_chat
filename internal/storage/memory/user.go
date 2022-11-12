@@ -3,8 +3,8 @@ package memory
 import (
 	"time"
 
-	"github.com/Crandel/go_chat/pkg/auth"
-	r "github.com/Crandel/go_chat/pkg/reading"
+	"github.com/Crandel/go_chat/internal/auth"
+	r "github.com/Crandel/go_chat/internal/reading"
 	"github.com/google/uuid"
 )
 

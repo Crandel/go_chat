@@ -3,8 +3,8 @@ package sqlite
 import (
 	"database/sql"
 
-	errs "github.com/Crandel/go_chat/pkg/errors"
-	rdn "github.com/Crandel/go_chat/pkg/reading"
+	errs "github.com/Crandel/go_chat/internal/errors"
+	rdn "github.com/Crandel/go_chat/internal/reading"
 )
 
 func (str *Storage) ReadUsers() ([]rdn.User, error) {

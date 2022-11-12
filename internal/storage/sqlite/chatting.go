@@ -4,8 +4,8 @@ import (
 	"math/rand"
 	"time"
 
-	cht "github.com/Crandel/go_chat/pkg/chatting"
-	errs "github.com/Crandel/go_chat/pkg/errors"
+	cht "github.com/Crandel/go_chat/internal/chatting"
+	errs "github.com/Crandel/go_chat/internal/errors"
 	"github.com/samonzeweb/godb"
 )
 

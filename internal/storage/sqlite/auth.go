@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Crandel/go_chat/pkg/auth"
-	errs "github.com/Crandel/go_chat/pkg/errors"
+	"github.com/Crandel/go_chat/internal/auth"
+	errs "github.com/Crandel/go_chat/internal/errors"
 	"github.com/google/uuid"
 	"github.com/samonzeweb/godb"
 	"github.com/samonzeweb/godb/types"

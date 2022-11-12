@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	cht "github.com/Crandel/go_chat/pkg/chatting"
+	cht "github.com/Crandel/go_chat/internal/chatting"
 	"github.com/gorilla/websocket"
 )
 

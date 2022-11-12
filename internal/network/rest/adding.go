@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/Crandel/go_chat/pkg/adding"
+	"github.com/Crandel/go_chat/internal/adding"
 )
 
 type RoomResponse struct {
