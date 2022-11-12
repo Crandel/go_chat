@@ -6,26 +6,31 @@ import (
 
 	cht "github.com/Crandel/go_chat/pkg/chatting"
 	errs "github.com/Crandel/go_chat/pkg/errors"
+	"github.com/samonzeweb/godb"
 )
 
+const USER_ROOMS = "user_rooms"
+
 type UserRoom struct {
-	RoomName string `db:",rel=rooms"`
-	UserID   string `db:",rel=users"`
+	roomName string `db:",rel=rooms"`
+	userNick string `db:",rel=users"`
+}
+
+func (*UserRoom) TableName() string {
+	return USER_ROOMS
 }
 
 func (str *Storage) WriteMessage(u cht.Client, r cht.Room, msg string) error {
 	const op errs.Op = "sqlite.WriteMessage"
-	room := Room{}
-	err := str.db.Select(&room).Where("name = ?", r.Name).Do()
-	if err != nil {
-		return errs.NewError(
-			op, errs.Info, "Room is not available", err)
+	if str.RoomHasUser(r.Name, u) {
+		return errs.New(
+			op, errs.Info, "User "+*u.Nick+"is not in room "+r.Name)
 	}
 	rand.Seed(time.Now().UnixNano())
 	id := rand.Int()
 	message := Message{
 		ID:       id,
-		RoomName: room.Name,
+		RoomName: r.Name,
 		UserNick: u.GetNick(),
 		Payload:  msg,
 		Created:  time.Now(),
@@ -41,29 +46,50 @@ func (str *Storage) WriteMessage(u cht.Client, r cht.Room, msg string) error {
 
 func (str *Storage) ExcludeFromRoom(name string, u cht.Client) error {
 	const op errs.Op = "sqlite.ExcludeFromRoom"
-	// var mr Room
-	// mr, exists := str.Rooms[roomName]
-	// if !exists {
-	// 	return errs.New(op, errs.Info, "No room with name "+roomName)
-	// }
-	// for i, ru := range mr.Members {
-	// 	if string(ru) == *u.Nick {
-	// 		mr.Members = append(mr.Members[:i], mr.Members[i+1:]...)
-	// 	}
-	// }
-	// return nil
-	// user, err := str.GetUser(reading.UserId(*u.Nick))
-	// if err != nil {
-	// 	return errs.New(op, errs.Info, "No user with nick: "+u.GetNick())
-	// }
-	// err = str.db.Delete()
+	if !str.RoomHasUser(name, u) {
+		return errs.New(
+			op, errs.Info, "User "+*u.Nick+"is not in room "+name)
+	}
+	_, err := str.db.DeleteFrom(
+		USER_ROOMS).WhereQ(
+		godb.And(
+			godb.Q("room_name = ?", name),
+			godb.Q("", u.Nick))).Do()
+	if err != nil {
+		return errs.New(
+			op, errs.Info, "User "+*u.Nick+"is not in room "+name)
+	}
 	return nil
 }
 
 func (str *Storage) AddUserToRoom(name string, u cht.Client) error {
+	const op errs.Op = "sqlite.AddUserToRoom"
+	if str.RoomHasUser(name, u) {
+		return errs.New(
+			op, errs.Info, "User "+*u.Nick+" is already in a room "+name)
+	}
+
+	userInRoom := UserRoom{
+		roomName: name,
+		userNick: *u.Nick,
+	}
+	error := str.db.Insert(&userInRoom).Do()
+	if error != nil {
+		return errs.NewError(
+			op, errs.Info, "", error)
+	}
 	return nil
 }
 
 func (str *Storage) RoomHasUser(name string, u cht.Client) bool {
+	var userInRoom UserRoom
+	_ = str.db.Select(&userInRoom).WhereQ(
+		godb.And(
+			godb.Q("room_name = ?", name),
+			godb.Q("user_nick = ?", u.Nick),
+		)).Do()
+	if userInRoom != (UserRoom{}) {
+		return true
+	}
 	return false
 }

@@ -58,16 +58,27 @@ func (str *Storage) ReadRooms() ([]rdn.Room, error) {
 	return rdnRooms, nil
 }
 
-func (str *Storage) ReadRoom(id string) (rdn.Room, error) {
-	const op errs.Op = "sqlite.ReadRoom"
+func (str *Storage) getRoom(id string) (Room, error) {
+	const op errs.Op = "sqlite.getRoom"
 	room := Room{}
-	rdnRoom := rdn.Room{}
+	var newError error
 	err := str.db.Select(&room).Where("name = ?", id).Do()
 	if err == sql.ErrNoRows {
-		return rdnRoom, errs.New(op, errs.Info, "No room with name: "+id)
+		newError = errs.New(op, errs.Info, "No room with name: "+id)
 	} else if err != nil {
-		return rdnRoom, errs.NewError(op, errs.Info, "Error with database connection", err)
+		newError = errs.NewError(op, errs.Info, "Error with database connection", err)
 	}
+	return room, newError
+
+}
+func (str *Storage) ReadRoom(id string) (rdn.Room, error) {
+	const op errs.Op = "sqlite.ReadRoom"
+	rdnRoom := rdn.Room{}
+	room, err := str.getRoom(id)
+	if err != nil {
+		return rdnRoom, errs.NewError(op, errs.Info, "Can't get room", err)
+	}
+
 	rdnMessages := str.getRoomMessages(room.Name)
 	return room.ConvertToReading(rdnMessages), nil
 }
