@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Crandel/go_chat/cmd/sqlite/migrations"
 	add "github.com/Crandel/go_chat/internal/adding"
 	ath "github.com/Crandel/go_chat/internal/auth"
 	cht "github.com/Crandel/go_chat/internal/chatting"
@@ -20,6 +21,11 @@ const port = 8080
 func main() {
 	log.Println("Starting server on port", port)
 	sqlDB, _ := godb.Open(sqlite.Adapter, "./storage.db")
+	err := migrations.RunMigrations(sqlDB)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 	sqliteStorage := sql.NewStorage(sqlDB)
 	aths := ath.NewService(&sqliteStorage)
 	adds := add.NewService(&sqliteStorage)

@@ -9,7 +9,7 @@ type LoginUser struct {
 // SigninUser is for signin
 type SigninUser struct {
 	Nick       string  `json:"nick"`
-	Name       string  `json:"name"`
+	Name       *string `json:"name"`
 	SecondName *string `json:"second_name"`
 	Email      *string `json:"email"`
 	Password   string  `json:"password"`

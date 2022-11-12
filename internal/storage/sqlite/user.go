@@ -26,14 +26,14 @@ func (r Role) Value() (driver.Value, error) {
 }
 
 type User struct {
+	Created    time.Time      `db:"created"`
 	Nick       string         `db:"nick,key"`
-	Name       string         `db:"name"`
-	SecondName sql.NullString `db:"second_name"`
-	Email      sql.NullString `db:"email"`
 	Password   string         `db:"password"`
 	Token      string         `db:"token"`
 	Role       Role           `db:"role"`
-	Created    time.Time      `db:"created"`
+	Name       sql.NullString `db:"name"`
+	SecondName sql.NullString `db:"second_name"`
+	Email      sql.NullString `db:"email"`
 }
 
 func (*User) TableName() string {
@@ -60,7 +60,7 @@ func (u *User) ConvertToReading() rdn.User {
 	return rdn.User{
 		Nick:       rdn.UserId(u.Nick),
 		Email:      u.GetEmail(),
-		Name:       u.Name,
+		Name:       u.Name.String,
 		SecondName: u.GetSecondName(),
 	}
 }

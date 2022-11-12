@@ -9,21 +9,20 @@ import (
 const MESSAGES = "messages"
 
 type Message struct {
-	ID       int       `db:"id,key,auto"`
-	Created  time.Time `db:"created"`
-	RoomName string    `db:",rel=rooms"`
-	UserNick string    `db:",rel=users"`
-	Payload  string    `db:"payload"`
+	ID         int       `db:"id,key,auto"`
+	Created    time.Time `db:"created"`
+	UserRoomID int       `db:",rel=user_rooms"`
+	Payload    string    `db:"payload"`
 }
 
 func (*Message) TableName() string {
 	return MESSAGES
 }
 
-func (m *Message) ConvertToReading() reading.Message {
+func (m *Message) ConvertToReading(nick string) reading.Message {
 	return reading.Message{
 		ID:      m.ID,
-		Nick:    reading.UserId(m.UserNick),
+		Nick:    reading.UserId(nick),
 		Payload: m.Payload,
 	}
 }

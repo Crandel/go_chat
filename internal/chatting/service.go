@@ -12,7 +12,7 @@ type Repository interface {
 	WriteMessage(u Client, r Room, msg string) error
 	ExcludeFromRoom(name string, u Client) error
 	AddUserToRoom(name string, u Client) error
-	RoomHasUser(name string, u Client) bool
+	RoomHasUser(name string, u Client) (bool, int)
 }
 
 type Service interface {
@@ -21,7 +21,7 @@ type Service interface {
 	WriteMessage(u Client, r Room, msg string) error
 	ExcludeFromRoom(name string, u Client) error
 	AddUserToRoom(name string, u Client) error
-	RoomHasUser(name string, u Client) bool
+	RoomHasUser(name string, u Client) (bool, int)
 }
 
 type service struct {
@@ -149,6 +149,6 @@ func (s *service) AddUserToRoom(roomName string, u Client) error {
 	return s.rep.AddUserToRoom(roomName, u)
 }
 
-func (s *service) RoomHasUser(roomName string, u Client) bool {
+func (s *service) RoomHasUser(roomName string, u Client) (bool, int) {
 	return s.rep.RoomHasUser(roomName, u)
 }

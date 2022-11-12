@@ -16,7 +16,8 @@ func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
 	const op errs.Op = "sqlite.SigninUser"
 	token := uuid.New().String()
 	su := User{
-		Name:       u.Name,
+		Nick:       u.Nick,
+		Name:       types.NullStringFrom(*u.Name),
 		SecondName: types.NullStringFrom(*u.SecondName),
 		Email:      types.NullStringFrom(*u.Email),
 		Password:   u.Password,
