@@ -9,146 +9,153 @@ import (
 )
 
 type Repository interface {
-	WriteMessage(u Client, r Room, msg string) error
-	ExcludeFromRoom(name string, u Client) error
-	AddUserToRoom(name string, u Client) error
-	RoomHasUser(name string, u Client) (bool, int)
+	WriteMessage(c *Client, r *Room, msg string) error
+	ExcludeFromRoom(name string, c *Client) error
+	AddUserToRoom(name string, c *Client) error
+	RoomHasUser(name string, c *Client) (bool, int)
 }
 
 type Service interface {
 	Run()
 	NewClient(conn *websocket.Conn)
-	WriteMessage(u Client, r Room, msg string) error
-	ExcludeFromRoom(name string, u Client) error
-	AddUserToRoom(name string, u Client) error
-	RoomHasUser(name string, u Client) (bool, int)
+	Repository
 }
 
 type service struct {
-	rooms    map[string]*Room
+	roomHandler
 	commands chan Command
 	rep      Repository
 }
 
 func NewService(rep Repository) Service {
 	return &service{
-		rooms:    make(map[string]*Room),
+		roomHandler: roomHandler{
+			rooms: make(map[string]*Room),
+		},
 		commands: make(chan Command),
 		rep:      rep,
 	}
 }
 
 func (s *service) NewClient(conn *websocket.Conn) {
+	log.SetPrefix("chatting#NewClient: ")
 	u := &Client{
 		Nick:     nil,
 		conn:     conn,
 		commands: s.commands,
 	}
-	log.Printf("chatting#NewClient: New User was successfuly connected\n")
+	log.Println("New User was successfuly connected")
 	u.ReadCommands()
 }
 
 func (s *service) Run() {
 	log.SetPrefix("chatting#Run ")
 	log.Println("Before loop")
-	for c := range s.commands {
-		if c.client.Nick == nil && c.id != CmdJoin {
-			c.client.WriteMsg("Please provide join room and specify your name")
+	for command := range s.commands {
+		if command.client.Nick == nil && command.id != CmdJoin {
+			command.client.WriteMsg("Please provide join room and specify your name")
 			continue
 		}
-		log.Println("command " + c.id)
-		switch c.id {
+		log.Println("command " + command.id)
+		switch command.id {
 		case CmdMsg:
 			log.Println("MSG ")
 			for _, r := range s.rooms {
-				if r.haveUser(c.client) {
+				if r.haveUser(command.client) {
 					var msg strings.Builder
-					msg.WriteString(*c.client.Nick)
+					finalMsg := strings.Join(command.args, " ")
+					s.WriteMessage(command.client, r, finalMsg)
+					msg.WriteString(*command.client.Nick)
 					msg.WriteString(" ")
-					msg.WriteString(strings.Join(c.args, " "))
-					r.broadcast(c.client, msg.String())
+					msg.WriteString(finalMsg)
+					r.broadcast(command.client, msg.String())
 				}
 			}
 		case CmdPing:
-			c.client.WriteMsg("pong")
-
+			command.client.WriteMsg("pong")
 		case CmdJoin:
-
-			if len(c.args) != 3 {
-				c.client.WriteMsg("Please provide correct room and user name")
+			if len(command.args) != 3 {
+				command.client.WriteMsg("Please provide correct room and user name")
 				continue
 			}
 
-			roomName := c.args[1]
-			userName := c.args[2]
-			c.client.Nick = &userName
-			room, exists := s.rooms[roomName]
+			roomName := command.args[1]
+			userName := command.args[2]
+			command.client.Nick = &userName
+			exists, _ := s.RoomHasUser(roomName, command.client)
 			if exists {
-				if room.haveUser(c.client) {
-					c.client.WriteMsg("You are in room " + roomName)
-					continue
-				}
+				continue
 			} else {
-				room = &Room{
-					Name:    roomName,
-					Clients: make(map[*Client]struct{}),
-				}
-				s.rooms[roomName] = room
+				s.excludeFromRooms(command.client)
 			}
-			s.excludeFromRooms(c.client)
-			room.addUser(c.client)
-			message := fmt.Sprintf("User %s join the room", *c.client.Nick)
-
-			room.broadcast(c.client, message)
-			c.client.WriteMsg("Welcome to the room " + room.Name)
+			if err := s.AddUserToRoom(roomName, command.client); err == nil {
+				command.client.WriteMsg("Welcome to the room " + roomName)
+			}
 		case CmdRooms:
-			names := make([]string, 0, len(s.rooms))
-			for name := range s.rooms {
-				names = append(names, name)
-			}
-			c.client.WriteMsg("Rooms:\n" + strings.Join(names, "\n"))
+			names := s.roomHandler.listRooms()
+			command.client.WriteMsg("Rooms:\n" + strings.Join(names, "\n"))
 		case CmdUsers:
-			for _, room := range s.rooms {
-				if room.haveUser(c.client) {
-					clients := make([]string, 0, len(room.Clients))
-					for client := range room.Clients {
-						clients = append(clients, *client.Nick)
-					}
-					var msg strings.Builder
-					msg.WriteString("Users in room ")
-					msg.WriteString(room.Name)
-					msg.WriteString("\n")
-					msg.WriteString(strings.Join(clients, "\n"))
-					c.client.WriteMsg(msg.String())
-				}
-			}
+			roomName, clients := s.roomHandler.listUsers(command.client)
+			var msg strings.Builder
+			msg.WriteString("Users in room ")
+			msg.WriteString(roomName)
+			msg.WriteString("\n")
+			msg.WriteString(strings.Join(clients, "\n"))
+			command.client.WriteMsg(msg.String())
 		case CmdQuit:
-			s.excludeFromRooms(c.client)
+			s.excludeFromRooms(command.client)
 		}
 	}
 }
 
-func (s *service) excludeFromRooms(u *Client) {
+func (s *service) excludeFromRooms(c *Client) {
 	for _, r := range s.rooms {
-		if r.haveUser(u) {
-			delete(r.Clients, u)
-			r.broadcast(u, "User "+*u.Nick+" leave the room")
+		done := s.roomHandler.excludeFromRoom(r.Name, c)
+		if done {
+			err := s.ExcludeFromRoom(r.Name, c)
+			if err != nil {
+				r.broadcast(c, "User "+*c.Nick+" leave the room")
+			}
 		}
 	}
 }
 
-func (s *service) WriteMessage(u Client, r Room, msg string) error {
-	return s.rep.WriteMessage(u, r, msg)
+func (s *service) WriteMessage(c *Client, r *Room, msg string) error {
+	err := s.rep.WriteMessage(c, r, msg)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (s *service) ExcludeFromRoom(roomName string, u Client) error {
-	return s.rep.ExcludeFromRoom(roomName, u)
+func (s *service) ExcludeFromRoom(roomName string, c *Client) error {
+	err := s.rep.ExcludeFromRoom(roomName, c)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (s *service) AddUserToRoom(roomName string, u Client) error {
-	return s.rep.AddUserToRoom(roomName, u)
+func (s *service) AddUserToRoom(roomName string, c *Client) error {
+	err := s.rep.AddUserToRoom(roomName, c)
+	if err != nil {
+		return err
+	}
+	message := fmt.Sprintf("User %s join the room", *c.Nick)
+
+	if done := s.roomHandler.addUser(roomName, c); done {
+		s.roomHandler.broadcast(roomName, c, message)
+	}
+
+	return nil
 }
 
-func (s *service) RoomHasUser(roomName string, u Client) (bool, int) {
-	return s.rep.RoomHasUser(roomName, u)
+func (s *service) RoomHasUser(roomName string, c *Client) (bool, int) {
+	if done := s.roomHandler.roomHasUser(roomName, c); done {
+		exists, id := s.rep.RoomHasUser(roomName, c)
+		if exists {
+			return true, id
+		}
+	}
+	return false, 0
 }

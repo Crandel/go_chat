@@ -78,10 +78,10 @@ func (str *Storage) collectRoomMessages(name string) rdn.Room {
 	return rRoom
 }
 
-// func (sr *Room) ConvertRoomToReading() r.Room {
-// 	var m_messages = map[r.UserId][]r.Message{}
-// 	for s_ui, s_messages := range sr.Messages {
-// 		var l_messages = []r.Message{}
+// func (sr *Room) ConvertRoomToReading(messages []Message) rdn.Room {
+// 	var m_messages = map[rdn.UserId][]rdn.Message{}
+// 	for _, s_messages := range messages {
+// 		var l_messages = []rdn.Message{}
 // 		for _, s_message := range s_messages {
 // 			l_messages = append(l_messages, s_message.ConvertMessageToReading())
 // 		}
