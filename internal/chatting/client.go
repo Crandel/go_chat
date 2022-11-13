@@ -20,16 +20,16 @@ func (c *Client) GetNick() string {
 	return ""
 }
 
-func (u *Client) ReadCommands() {
+func (c *Client) ReadCommands() {
 	log.SetPrefix("chatting#user#ReadCommands ")
-	defer u.conn.Close()
+	defer c.conn.Close()
 	for {
-		_, p, err := u.conn.ReadMessage()
+		_, p, err := c.conn.ReadMessage()
 		if err != nil {
 			log.Println(err.Error())
-			u.commands <- Command{
+			c.commands <- Command{
 				id:     CmdQuit,
-				client: u,
+				client: c,
 			}
 			return
 		}
@@ -53,21 +53,21 @@ func (u *Client) ReadCommands() {
 			case CmdQuit:
 				cmdID = CmdQuit
 			default:
-				u.WriteMsg("ERR: Unknown command " + cmd)
+				c.WriteMsg("ERR: Unknown command " + cmd)
 				continue
 			}
 		}
-		u.commands <- Command{
+		c.commands <- Command{
 			id:     cmdID,
-			client: u,
+			client: c,
 			args:   args,
 		}
 	}
 }
 
-func (u *Client) WriteMsg(message string) {
+func (c *Client) WriteMsg(message string) {
 	messageType := websocket.TextMessage
-	if err := u.conn.WriteMessage(messageType, []byte(message)); err != nil {
+	if err := c.conn.WriteMessage(messageType, []byte(message)); err != nil {
 		log.Println("WriteMsg " + err.Error())
 		return
 	}

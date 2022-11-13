@@ -21,7 +21,7 @@ func (*UserRoom) TableName() string {
 	return USER_ROOMS
 }
 
-func (str *Storage) WriteMessage(u cht.Client, r cht.Room, msg string) error {
+func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
 	const op errs.Op = "sqlite.WriteMessage"
 	exists, id := str.RoomHasUser(r.Name, u)
 	if !exists {
@@ -43,7 +43,7 @@ func (str *Storage) WriteMessage(u cht.Client, r cht.Room, msg string) error {
 	return nil
 }
 
-func (str *Storage) ExcludeFromRoom(name string, u cht.Client) error {
+func (str *Storage) ExcludeFromRoom(name string, u *cht.Client) error {
 	const op errs.Op = "sqlite.ExcludeFromRoom"
 	exists, id := str.RoomHasUser(name, u)
 
@@ -60,17 +60,17 @@ func (str *Storage) ExcludeFromRoom(name string, u cht.Client) error {
 	return nil
 }
 
-func (str *Storage) AddUserToRoom(name string, u cht.Client) error {
+func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 	const op errs.Op = "sqlite.AddUserToRoom"
-	exists, _ := str.RoomHasUser(name, u)
+	exists, _ := str.RoomHasUser(name, c)
 	if exists {
 		return errs.New(
-			op, errs.Info, "User "+*u.Nick+" is already in a room "+name)
+			op, errs.Info, "User "+*c.Nick+" is already in a room "+name)
 	}
 
 	userInRoom := UserRoom{
 		roomName: name,
-		userNick: *u.Nick,
+		userNick: *c.Nick,
 	}
 	error := str.db.Insert(&userInRoom).Do()
 	if error != nil {
@@ -89,12 +89,12 @@ func (str *Storage) getRoomUsers(name string) []UserRoom {
 	return usersInRoom
 }
 
-func (str *Storage) RoomHasUser(name string, u cht.Client) (bool, int) {
+func (str *Storage) RoomHasUser(name string, c *cht.Client) (bool, int) {
 	var userInRoom UserRoom
 	_ = str.db.Select(&userInRoom).WhereQ(
 		godb.And(
 			godb.Q("room_name = ?", name),
-			godb.Q("user_nick = ?", u.Nick),
+			godb.Q("user_nick = ?", c.Nick),
 		)).Do()
 	if userInRoom != (UserRoom{}) {
 		return true, userInRoom.id
