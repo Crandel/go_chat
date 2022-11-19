@@ -65,13 +65,6 @@ func main() {
 	interrupt = make(chan os.Signal)
 	rdr := bufio.NewReader(os.Stdin)
 
-	signal.Notify(interrupt, os.Interrupt) // Notify the interrupt channel for SIGINT
-	socketURL := "ws://localhost:8080/ws"
-	conn, _, err := websocket.DefaultDialer.Dial(socketURL, nil)
-	if err != nil {
-		log.Fatal("Could not connect to WebSocker server '"+socketURL+"'.", err)
-	}
-	defer conn.Close()
 	log.Println("Please provide room name:")
 	roomName, err := rdr.ReadString('\n')
 	if err != nil {
@@ -83,6 +76,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	signal.Notify(interrupt, os.Interrupt) // Notify the interrupt channel for SIGINT
+	socketURL := "ws://localhost:8080/ws"
+	conn, _, err := websocket.DefaultDialer.Dial(socketURL, nil)
+	if err != nil {
+		log.Fatal("Could not connect to WebSocker server '"+socketURL+"'.", err)
+	}
+	defer conn.Close()
 
 	// Join test room
 	// TODO: replace this with correct authentication
