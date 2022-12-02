@@ -8,7 +8,6 @@ import (
 )
 
 func (str *Storage) ReadUsers() ([]rdn.User, error) {
-	const op errs.Op = "sqlite.LoginUser"
 	users := make([]User, 0)
 	rdnUsers := make([]rdn.User, 0)
 	err := str.db.Select(&users).Do()
@@ -44,7 +43,6 @@ func (str *Storage) ReadUser(ru rdn.UserId) (rdn.User, error) {
 }
 
 func (str *Storage) ReadRooms() ([]rdn.Room, error) {
-	const op errs.Op = "sqlite.ReadRooms"
 	rooms := make([]Room, 0)
 	rdnRooms := make([]rdn.Room, 0)
 	err := str.db.Select(&rooms).Do()
