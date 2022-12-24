@@ -13,9 +13,9 @@ import (
 const USER_ROOMS = "user_rooms"
 
 type UserRoom struct {
-	roomName Room `db:",rel=rooms"`
-	userNick User `db:",rel=users"`
-	id       int  `db:"id,key,auto"`
+	roomName string `db:"room_name"`
+	userNick string `db:"user_nick"`
+	id       int    `db:"id,key,auto"`
 }
 
 func (*UserRoom) TableName() string {
@@ -81,8 +81,8 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 	}
 
 	userInRoom := UserRoom{
-		roomName: room,
-		userNick: user,
+		roomName: room.Name,
+		userNick: user.Nick,
 	}
 
 	error = str.db.Insert(&userInRoom).Do()

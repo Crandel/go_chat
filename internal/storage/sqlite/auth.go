@@ -3,28 +3,32 @@ package sqlite
 import (
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/Crandel/go_chat/internal/auth"
 	errs "github.com/Crandel/go_chat/internal/errors"
-	"github.com/google/uuid"
 	"github.com/samonzeweb/godb"
 	"github.com/samonzeweb/godb/types"
 )
 
 func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
 	const op errs.Op = "sqlite.SigninUser"
-	token := uuid.New().String()
+
+	token := auth.MakeToken(u.Nick, u.Password)
 	su := User{
-		Nick:       u.Nick,
-		Name:       types.NullStringFrom(*u.Name),
-		SecondName: types.NullStringFrom(*u.SecondName),
-		Email:      types.NullStringFrom(*u.Email),
-		Password:   u.Password,
-		Token:      token,
-		Role:       Member,
-		Created:    time.Now(),
+		Nick:  u.Nick,
+		Token: token,
+		Role:  Member,
 	}
+	if u.Name != nil {
+		su.Name = types.NullStringFrom(*u.Name)
+	}
+	if u.SecondName != nil {
+		su.SecondName = types.NullStringFrom(*u.SecondName)
+	}
+	if u.Email != nil {
+		su.Email = types.NullStringFrom(*u.Email)
+	}
+
 	err := str.db.Insert(&su).Do()
 	if err != nil {
 		return "", errs.NewError(
@@ -35,11 +39,13 @@ func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
 
 func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 	const op errs.Op = "sqlite.LoginUser"
+
 	user := User{}
+	token := auth.MakeToken(lu.Nick, lu.Password)
 	err := str.db.Select(&user).WhereQ(
 		godb.And(
 			godb.Q("nick = ?", lu.Nick),
-			godb.Q("password = ? ", lu.Password),
+			godb.Q("token = ? ", token),
 		),
 	).Do()
 	if err == sql.ErrNoRows {

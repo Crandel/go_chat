@@ -33,7 +33,8 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 		return "", errs.New(
 			op, errs.Info, fmt.Sprintf("No user with nick '%s'", lu.Nick))
 	}
-	if u.Password != lu.Password {
+	token := auth.MakeToken(lu.Nick, lu.Password)
+	if u.Token != token {
 		return "", errs.New(
 			op, errs.Info, fmt.Sprintf("User with nick '%s' has wrong password", lu.Nick))
 	}

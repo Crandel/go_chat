@@ -90,7 +90,7 @@ func (str *Storage) getRoomMessages(name string) map[rdn.UserId][]rdn.Message {
 		err := str.db.Select(messages).Where("user_room_id = ?", ur.id).Do()
 		if err == nil {
 			for _, m := range messages {
-				rdnMessages[rdn.UserId(ur.userNick.Nick)] = append(rdnMessages[rdn.UserId(ur.userNick.Nick)], m.ConvertToReading(ur.userNick.Nick))
+				rdnMessages[rdn.UserId(ur.userNick)] = append(rdnMessages[rdn.UserId(ur.userNick)], m.ConvertToReading(ur.userNick))
 			}
 		}
 

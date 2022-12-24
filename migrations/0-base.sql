@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS users(
   name         TEXT,
   second_name  TEXT,
   email        TEXT,
-  password     TEXT NOT NULL,
   token        TEXT NOT NULL,
   role         TEXT CHECK( role IN ('Admin', 'Member') ) NOT NULL DEFAULT 'Member',
   created      DATETIME DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))

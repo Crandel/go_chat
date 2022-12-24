@@ -19,20 +19,26 @@ func NewRouter(
 	rdns reading.Service,
 	chts chatting.Service,
 ) *mux.Router {
+	authMiddleware := NewAuthMiddleware()
 	r := mux.NewRouter()
 	r.HandleFunc("/", hl.RootHandler())
 	r.HandleFunc("/health", rest.HealthHandler())
-	r.HandleFunc("/ws", ws.WSHandler(chts))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", hl.StaticHandler()))
 	apiRouter := r.PathPrefix("/api").Subrouter()
+	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
+	authRouter.HandleFunc("/login", rest.LoginHandler(aths)).Methods(http.MethodPost)
+	authRouter.HandleFunc("/signin", rest.SigninHandler(aths)).Methods(http.MethodPost)
 	userRouter := apiRouter.PathPrefix("/users").Subrouter()
-	userRouter.HandleFunc("/login", rest.LoginHandler(aths)).Methods(http.MethodPost)
-	userRouter.HandleFunc("/signin", rest.SigninHandler(aths)).Methods(http.MethodPost)
 	userRouter.HandleFunc("", rest.ListUsersHandler(rdns)).Methods(http.MethodGet)
 	userRouter.HandleFunc("/{user_id}", rest.GetUserHandler(rdns)).Methods(http.MethodGet)
+	userRouter.Use(authMiddleware.Middleware)
+	chatRouter := apiRouter.PathPrefix("/ws").Subrouter()
+	chatRouter.HandleFunc("", ws.WSHandler(chts))
+	chatRouter.Use(authMiddleware.Middleware)
 	roomRouter := apiRouter.PathPrefix("/rooms").Subrouter()
 	roomRouter.HandleFunc("", rest.ListRoomsHandler(rdns)).Methods(http.MethodGet)
 	roomRouter.HandleFunc("", rest.AddRoomHandler(adds)).Methods(http.MethodPost)
 	roomRouter.HandleFunc("/{room_id}", rest.GetRoomHandler(rdns)).Methods(http.MethodGet)
+	roomRouter.Use(authMiddleware.Middleware)
 	return r
 }
