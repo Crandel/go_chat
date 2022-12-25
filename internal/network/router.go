@@ -28,6 +28,7 @@ func NewRouter(
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	authRouter.HandleFunc("/login", rest.LoginHandler(aths)).Methods(http.MethodPost)
 	authRouter.HandleFunc("/signin", rest.SigninHandler(aths)).Methods(http.MethodPost)
+	authRouter.Use(authMiddleware.Populate)
 	userRouter := apiRouter.PathPrefix("/users").Subrouter()
 	userRouter.HandleFunc("", rest.ListUsersHandler(rdns)).Methods(http.MethodGet)
 	userRouter.HandleFunc("/{user_id}", rest.GetUserHandler(rdns)).Methods(http.MethodGet)

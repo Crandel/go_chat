@@ -3,28 +3,34 @@ package network
 import (
 	"log"
 	"net/http"
-
-	"github.com/Crandel/go_chat/internal/auth"
 )
 
 // Define our struct
-type authenticationMiddleware struct {
+type AuthenticationMiddleware struct {
 	tokenUsers map[string]string
 }
 
-func NewAuthMiddleware() *authenticationMiddleware {
+func NewAuthMiddleware() *AuthenticationMiddleware {
 	tokenUsers := make(map[string]string)
-	return &authenticationMiddleware{
+	return &AuthenticationMiddleware{
 		tokenUsers: tokenUsers,
 	}
 }
 
-func (amw *authenticationMiddleware) Populate(auth.LoginUser) {
-
+func (amw *AuthenticationMiddleware) Populate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+		token := r.Context().Value("token")
+		nick := r.Context().Value("nick")
+		log.Println("Populate token and nick", token, nick)
+		if token != nil && nick != nil {
+			amw.tokenUsers[token.(string)] = nick.(string)
+		}
+	})
 }
 
 // Middleware function, which will be called for each request
-func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler {
+func (amw *AuthenticationMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 
