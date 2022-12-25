@@ -2,6 +2,8 @@ package auth
 
 import b64 "encoding/base64"
 
+const AuthKey = "authUser"
+
 // LoginUser is for logging
 type LoginUser struct {
 	Nick     string `json:"nick"`
@@ -15,6 +17,11 @@ type SigninUser struct {
 	SecondName *string `json:"second_name"`
 	Email      *string `json:"email"`
 	Password   string  `json:"password"`
+}
+
+type CtxUser struct {
+	Nick  string
+	Token string
 }
 
 func MakeToken(nick string, password string) string {

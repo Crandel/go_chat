@@ -3,9 +3,8 @@ package main_test
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -50,9 +49,9 @@ func runRequest(d data, method string, url string) ([]byte, error) {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return []byte{}, errors.New(fmt.Sprintf("Expected status OK; got %v", res.Status))
+		return []byte{}, fmt.Errorf("Expected status OK; got %v", res.Status)
 	}
-	b, err := ioutil.ReadAll(res.Body)
+	b, err := io.ReadAll(res.Body)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -101,6 +100,9 @@ func TestHandlers(t *testing.T) {
 	}
 	var login Login
 	err = json.Unmarshal(logRes, &login)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if token != login {
 		t.Fatalf("Token from signing '%s' != '%s' token from login", token.Token, login.Token)

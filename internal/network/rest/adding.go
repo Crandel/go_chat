@@ -26,7 +26,10 @@ func AddRoomHandler(as adding.Service) func(w http.ResponseWriter, r *http.Reque
 		resp := RoomResponse{
 			Name: name,
 		}
-		json.NewEncoder(w).Encode(resp)
+		err = json.NewEncoder(w).Encode(resp)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+		}
 	}
 
 }

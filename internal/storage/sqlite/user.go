@@ -28,7 +28,6 @@ func (r Role) Value() (driver.Value, error) {
 type User struct {
 	Created    time.Time      `db:"created"`
 	Nick       string         `db:"nick,key"`
-	Password   string         `db:"password"`
 	Token      string         `db:"token"`
 	Role       Role           `db:"role"`
 	Name       sql.NullString `db:"name"`

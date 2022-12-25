@@ -9,7 +9,6 @@ import (
 )
 
 func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
-	const op errs.Op = "memory.WriteMessage"
 	rand.Seed(time.Now().UnixNano())
 	id := rand.Int()
 	str.Messages[id] = Message{
@@ -57,7 +56,6 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 }
 
 func (str *Storage) RoomHasUser(name string, c *cht.Client) (bool, int) {
-	const op errs.Op = "memory.RoomHasUser"
 	mr, exists := str.Rooms[name]
 	if !exists {
 		return false, 0
