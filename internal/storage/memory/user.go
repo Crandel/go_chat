@@ -5,7 +5,6 @@ import (
 
 	"github.com/Crandel/go_chat/internal/auth"
 	r "github.com/Crandel/go_chat/internal/reading"
-	"github.com/google/uuid"
 )
 
 type Role string
@@ -32,19 +31,17 @@ type User struct {
 	Email      *string
 	Role       Role
 	Nick       UserId
-	Password   string
 	Token      string
 }
 
 func ConvertUserFromSigning(su auth.SigninUser) User {
 	id := UserId(su.Nick)
-	token := uuid.New().String()
+	token := auth.MakeToken(su.Nick, su.Password)
 	return User{
 		Email:      su.Email,
 		Name:       su.Name,
 		SecondName: su.SecondName,
 		Nick:       id,
-		Password:   su.Password,
 		Token:      token,
 		Role:       Member,
 		Created:    time.Now(),

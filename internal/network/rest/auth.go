@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -21,6 +22,8 @@ func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request
 			http.Error(w, "User not found", http.StatusNotFound)
 			return
 		}
+		r.WithContext(context.WithValue(r.Context(), "nick", lu.Nick))
+		r.WithContext(context.WithValue(r.Context(), "token", response.Token))
 		json.NewEncoder(w).Encode(response)
 	}
 }
@@ -39,6 +42,9 @@ func SigninHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Reques
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		r.WithContext(context.WithValue(r.Context(), "nick", su.Nick))
+		r.WithContext(context.WithValue(r.Context(), "token", response.Token))
+
 		json.NewEncoder(w).Encode(response)
 	}
 }

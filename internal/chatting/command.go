@@ -5,11 +5,11 @@ type CommandID string
 
 const (
 	CmdMsg   CommandID = "/msg"
-	CmdPing            = "/ping"
 	CmdJoin            = "/join"
+	CmdPing            = "/ping"
+	CmdQuit            = "/quit"
 	CmdRooms           = "/rooms"
 	CmdUsers           = "/users"
-	CmdQuit            = "/quit"
 )
 
 // Command used by client to manage interaction with chat

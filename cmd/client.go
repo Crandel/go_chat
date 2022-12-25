@@ -2,15 +2,23 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
 	"time"
 
+	"github.com/Crandel/go_chat/internal/auth"
 	"github.com/gorilla/websocket"
 )
+
+const host = "localhost:8080"
+const apiHost = host + "/api"
 
 var input chan string
 var chat chan string
@@ -65,24 +73,46 @@ func main() {
 	interrupt = make(chan os.Signal)
 	rdr := bufio.NewReader(os.Stdin)
 
-	signal.Notify(interrupt, os.Interrupt) // Notify the interrupt channel for SIGINT
-	socketURL := "ws://localhost:8080/ws"
-	conn, _, err := websocket.DefaultDialer.Dial(socketURL, nil)
+	log.Println("Please provide user name:")
+	userName, err := rdr.ReadString('\n')
 	if err != nil {
-		log.Fatal("Could not connect to WebSocker server '"+socketURL+"'.", err)
+		log.Fatal(err)
 	}
-	defer conn.Close()
+
+	log.Println("Please provide password:")
+	password, err := rdr.ReadString('\n')
+	if err != nil {
+		log.Fatal(err)
+	}
+	resp, err := http.PostForm("http://"+apiHost+"/login",
+		url.Values{"nick": {userName}, "password": {password}})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	var auth auth.Response
+	json.Unmarshal(body, &auth)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
 	log.Println("Please provide room name:")
 	roomName, err := rdr.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println("Please provide user name:")
-	userName, err := rdr.ReadString('\n')
+	signal.Notify(interrupt, os.Interrupt) // Notify the interrupt channel for SIGINT
+	socketURL := "ws://" + apiHost + "/ws"
+	conn, _, err := websocket.DefaultDialer.Dial(socketURL, http.Header{"Authorization": []string{auth.Token}})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Could not connect to WebSocker server '"+socketURL+"'.", err)
 	}
+	defer conn.Close()
 
 	// Join test room
 	// TODO: replace this with correct authentication

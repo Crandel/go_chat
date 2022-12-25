@@ -3,28 +3,24 @@
 
 
 # Signin
-POST :host/api/users/signin
+POST :host/api/auth/signin
 Accept: :content
 Content-Type: :content
 {
-    "name": "Name",
+    "nick": "example@post.com",
+    "name": "test",
     "second_name": "Second",
-    "email": "example@post.com",
     "password": "pass"
 }
-
-#{"token":"c1148d4b-f671-4598-a318-1958785d0260"}
-
-
-:token = b6aae4eb-ed78-4654-b6d4-b8272bbf499c
+# {"token":"ZXhhbXBsZUBwb3N0LmNvbX4vI3Bhc3M="}
 
 # Login
 
-POST :host/api/users/login
+POST :host/api/auth/login
 Accept: :content
 Content-Type: :content
 {
-    "email": "example@post.com",
+    "nick": "example@post.com",
     "password": "pass"
 }
 

@@ -3,6 +3,7 @@ package migrations
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"sort"
@@ -22,7 +23,7 @@ COMMIT;`
 )
 
 func RunMigrations(db *godb.DB) error {
-	files, err := ioutil.ReadDir(migrationFolder)
+	files, err := os.ReadDir(migrationFolder)
 	if err != nil {
 		return err
 	}
@@ -57,9 +58,8 @@ func RunMigrations(db *godb.DB) error {
 	}
 	if sb.Len() > 0 {
 		sqlQueryRaw := sb.String()
-		fmt.Printf("\nRawSQL\n%#v\n", sqlQueryRaw)
 		sqlQueryRaw = strings.ReplaceAll(sqlQueryRaw, "\n", " ")
-		fmt.Printf("\nSQL\n%#v\n", sqlQueryRaw)
+		fmt.Printf("\nsqlQuery\n%#v\n", sqlQueryRaw)
 		_, err = db.CurrentDB().Exec(sqlQueryRaw)
 	}
 	return err

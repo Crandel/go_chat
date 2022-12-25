@@ -6,15 +6,16 @@ import (
 
 	cht "github.com/Crandel/go_chat/internal/chatting"
 	errs "github.com/Crandel/go_chat/internal/errors"
+	"github.com/Crandel/go_chat/internal/reading"
 	"github.com/samonzeweb/godb"
 )
 
 const USER_ROOMS = "user_rooms"
 
 type UserRoom struct {
+	roomName string `db:"room_name"`
+	userNick string `db:"user_nick"`
 	id       int    `db:"id,key,auto"`
-	roomName string `db:",rel=rooms"`
-	userNick string `db:",rel=users"`
 }
 
 func (*UserRoom) TableName() string {
@@ -68,11 +69,23 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 			op, errs.Info, "User "+*c.Nick+" is already in a room "+name)
 	}
 
-	userInRoom := UserRoom{
-		roomName: name,
-		userNick: *c.Nick,
+	user, error := str.GetUser(reading.UserId(c.GetNick()))
+	if error != nil {
+		return errs.NewError(
+			op, errs.Info, "User not found", error)
 	}
-	error := str.db.Insert(&userInRoom).Do()
+	room, error := str.getRoom(name)
+	if error != nil {
+		return errs.NewError(
+			op, errs.Info, "Room not found", error)
+	}
+
+	userInRoom := UserRoom{
+		roomName: room.Name,
+		userNick: user.Nick,
+	}
+
+	error = str.db.Insert(&userInRoom).Do()
 	if error != nil {
 		return errs.NewError(
 			op, errs.Info, "", error)
