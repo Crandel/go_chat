@@ -10,6 +10,6 @@ func HealthHandler() func(w http.ResponseWriter, r *http.Request) {
 		response := map[string]string{
 			"status": "OK",
 		}
-		json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(response)
 	}
 }

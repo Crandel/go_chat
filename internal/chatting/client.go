@@ -41,7 +41,7 @@ func (c *Client) ReadCommands() {
 		if !strings.HasPrefix(cmd, "/") {
 			cmdID = CmdMsg
 		} else {
-			switch cmd {
+			switch CommandID(cmd) {
 			case CmdPing:
 				cmdID = CmdPing
 			case CmdJoin:

@@ -31,7 +31,6 @@ func (r *Room) addUser(c *Client) error {
 }
 
 func (r *Room) haveUser(c *Client) bool {
-	const op errs.Op = "chatting.Room.haveUser"
 	if _, ok := r.Clients[c]; ok {
 		return true
 	}
@@ -55,14 +54,6 @@ func (rh *roomHandler) getRoom(roomName string) (*Room, bool) {
 	return r, exists
 }
 
-func (rh *roomHandler) roomExists(roomName string) bool {
-	_, exists := rh.getRoom(roomName)
-	if exists {
-		return true
-	}
-	return false
-}
-
 func (rh *roomHandler) roomHasUser(roomName string, c *Client) bool {
 	r, exists := rh.getRoom(roomName)
 	if !exists {
@@ -78,9 +69,12 @@ func (rh *roomHandler) addUser(roomName string, c *Client) bool {
 	if rh.roomHasUser(roomName, c) {
 		return false
 	}
-	r, _ := rh.getRoom(roomName)
-	r.addUser(c)
-	return true
+	r, ok := rh.getRoom(roomName)
+	if !ok {
+		return false
+	}
+	err := r.addUser(c)
+	return err == nil
 }
 
 func (rh *roomHandler) excludeFromRoom(roomName string, c *Client) bool {

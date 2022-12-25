@@ -10,7 +10,7 @@ const TEMPLATE_ROOT = "resources/templates"
 func RootHandler() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.Must(template.ParseFiles(TEMPLATE_ROOT+"/base.gtpl", TEMPLATE_ROOT+"/room.gtpl"))
-		tmpl.Execute(w, nil)
+		_ = tmpl.Execute(w, nil)
 	}
 }
 

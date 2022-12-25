@@ -64,11 +64,13 @@ func (s *service) Run() {
 				if r.haveUser(command.client) {
 					var msg strings.Builder
 					finalMsg := strings.Join(command.args, " ")
-					s.WriteMessage(command.client, r, finalMsg)
-					msg.WriteString(*command.client.Nick)
-					msg.WriteString(" ")
-					msg.WriteString(finalMsg)
-					r.broadcast(command.client, msg.String())
+					err := s.WriteMessage(command.client, r, finalMsg)
+					if err == nil {
+						msg.WriteString(*command.client.Nick)
+						msg.WriteString(" ")
+						msg.WriteString(finalMsg)
+						r.broadcast(command.client, msg.String())
+					}
 				}
 			}
 		case CmdPing:

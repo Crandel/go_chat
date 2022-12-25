@@ -2,7 +2,6 @@ package migrations
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -39,8 +38,8 @@ func RunMigrations(db *godb.DB) error {
 		if strings.ToLower(ext) != ".sql" {
 			continue
 		}
-
-		b, err := ioutil.ReadFile(filepath.Join(migrationFolder, fileName))
+		var b []byte
+		b, err = os.ReadFile(filepath.Join(migrationFolder, fileName))
 		if err != nil {
 			return err
 		}

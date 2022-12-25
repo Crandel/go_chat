@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -92,9 +92,14 @@ func main() {
 	}
 
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
 	var auth auth.Response
-	json.Unmarshal(body, &auth)
+	err = json.Unmarshal(body, &auth)
 	if err != nil {
 		log.Fatal(err)
 		return

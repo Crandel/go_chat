@@ -1,36 +1,42 @@
 package network
 
 import (
+	"context"
 	"log"
 	"net/http"
+
+	"github.com/Crandel/go_chat/internal/auth"
 )
 
-// Define our struct
-type AuthenticationMiddleware struct {
+// Define authenticationMiddleware struct
+type authenticationMiddleware struct {
 	tokenUsers map[string]string
 }
 
-func NewAuthMiddleware() *AuthenticationMiddleware {
+func NewAuthMiddleware() *authenticationMiddleware {
 	tokenUsers := make(map[string]string)
-	return &AuthenticationMiddleware{
+	return &authenticationMiddleware{
 		tokenUsers: tokenUsers,
 	}
 }
 
-func (amw *AuthenticationMiddleware) Populate(next http.Handler) http.Handler {
+func (amw *authenticationMiddleware) Populate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		next.ServeHTTP(w, r)
-		token := r.Context().Value("token")
-		nick := r.Context().Value("nick")
-		log.Println("Populate token and nick", token, nick)
-		if token != nil && nick != nil {
-			amw.tokenUsers[token.(string)] = nick.(string)
+		ctx := r.Context()
+		ctxUser := &auth.CtxUser{}
+		ctx = context.WithValue(ctx, auth.AuthKey, ctxUser)
+		next.ServeHTTP(w, r.WithContext(ctx))
+		authUserCtx := ctx.Value(auth.AuthKey)
+		log.Println("authUserCtx", authUserCtx)
+		if authUserCtx != nil {
+			authUser := authUserCtx.(*auth.CtxUser)
+			amw.tokenUsers[authUser.Token] = authUser.Nick
 		}
 	})
 }
 
 // Middleware function, which will be called for each request
-func (amw *AuthenticationMiddleware) Middleware(next http.Handler) http.Handler {
+func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 

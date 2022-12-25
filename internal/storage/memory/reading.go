@@ -6,7 +6,6 @@ import (
 )
 
 func (str *Storage) ReadRooms() ([]rdn.Room, error) {
-	const op errs.Op = "memory.ReadRooms"
 	var rooms = []rdn.Room{}
 	str.RLock()
 	for _, room := range str.Rooms {
@@ -66,9 +65,7 @@ func (str *Storage) collectRoomMessages(name string) rdn.Room {
 				Nick:    ruid,
 				Payload: m.Payload,
 			}
-			innerMessages, _ := rMessages[ruid]
-			innerMessages = append(innerMessages, rMessage)
-			rMessages[ruid] = innerMessages
+			rMessages[ruid] = append(rMessages[ruid], rMessage)
 		}
 	}
 	str.RUnlock()

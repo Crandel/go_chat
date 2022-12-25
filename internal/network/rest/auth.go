@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -22,9 +21,21 @@ func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request
 			http.Error(w, "User not found", http.StatusNotFound)
 			return
 		}
-		r.WithContext(context.WithValue(r.Context(), "nick", lu.Nick))
-		r.WithContext(context.WithValue(r.Context(), "token", response.Token))
-		json.NewEncoder(w).Encode(response)
+		ctx := r.Context()
+		ctxUser := ctx.Value(auth.AuthKey)
+		if ctxUser != nil {
+			authUser := &auth.CtxUser{
+				Nick:  lu.Nick,
+				Token: response.Token,
+			}
+			ctxUser = authUser
+		}
+		err = json.NewEncoder(w).Encode(response)
+		if err != nil {
+			log.Println("Error during login", err)
+			http.Error(w, "User not found", http.StatusNotFound)
+			return
+		}
 	}
 }
 
@@ -42,9 +53,21 @@ func SigninHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Reques
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		r.WithContext(context.WithValue(r.Context(), "nick", su.Nick))
-		r.WithContext(context.WithValue(r.Context(), "token", response.Token))
 
-		json.NewEncoder(w).Encode(response)
+		ctx := r.Context()
+		ctxUser := ctx.Value(auth.AuthKey)
+		if ctxUser != nil {
+			authUser := &auth.CtxUser{
+				Nick:  su.Nick,
+				Token: response.Token,
+			}
+			ctxUser = authUser
+		}
+		err = json.NewEncoder(w).Encode(response)
+		if err != nil {
+			log.Println("Error during signing", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
