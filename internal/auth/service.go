@@ -8,12 +8,14 @@ import (
 type Repository interface {
 	LoginUser(LoginUser) (string, error)
 	SigninUser(SigninUser) (string, error)
+	ReadAuthUsers() []AuthUser
 }
 
 // Service for auth
 type Service interface {
 	LoginUser(LoginUser) (Response, error)
 	SigninUser(SigninUser) (Response, error)
+	ReadAuthUsers() []AuthUser
 }
 
 type service struct {
@@ -46,4 +48,8 @@ func (s *service) SigninUser(u SigninUser) (Response, error) {
 		return Response{}, err
 	}
 	return Response{Token: token}, nil
+}
+
+func (s *service) ReadAuthUsers() []AuthUser {
+	return s.r.ReadAuthUsers()
 }

@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 	"time"
 
+	"github.com/Crandel/go_chat/internal/auth"
 	rdn "github.com/Crandel/go_chat/internal/reading"
 )
 
@@ -61,5 +62,12 @@ func (u *User) ConvertToReading() rdn.User {
 		Email:      u.GetEmail(),
 		Name:       u.Name.String,
 		SecondName: u.GetSecondName(),
+	}
+}
+
+func (u *User) ConvertUserToAuth() auth.AuthUser {
+	return auth.AuthUser{
+		Nick:  string(u.Nick),
+		Token: u.Token,
 	}
 }

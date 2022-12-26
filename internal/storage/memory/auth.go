@@ -40,3 +40,16 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 	}
 	return u.Token, nil
 }
+
+func (str *Storage) ReadAuthUsers() []auth.AuthUser {
+	authUsers := make([]auth.AuthUser, len(str.Users))
+	str.RLock()
+	for _, u := range str.Users {
+		authUsers = append(authUsers, auth.AuthUser{
+			Nick:  string(u.Nick),
+			Token: u.Token,
+		})
+	}
+	str.RUnlock()
+	return authUsers
+}
