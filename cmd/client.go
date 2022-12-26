@@ -2,12 +2,12 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -82,14 +82,20 @@ func main() {
 	log.Println("Please provide password:")
 	password, err := rdr.ReadString('\n')
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error after password", err)
 	}
-	resp, err := http.PostForm("http://"+apiHost+"/login",
-		url.Values{"nick": {userName}, "password": {password}})
+	log.Println(password)
+	postBody, _ := json.Marshal(map[string]string{
+		"nick":     userName,
+		"password": password,
+	})
+	responseBody := bytes.NewBuffer(postBody)
+	resp, err := http.Post("http://"+apiHost+"/auth/login", "application/json", responseBody)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error in Post ", err)
 	}
+	log.Println(resp.Request.URL)
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
@@ -97,11 +103,11 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-
+	log.Println(string(body))
 	var auth auth.Response
 	err = json.Unmarshal(body, &auth)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Response Body ", err)
 		return
 	}
 

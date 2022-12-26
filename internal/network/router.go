@@ -19,7 +19,7 @@ func NewRouter(
 	rdns reading.Service,
 	chts chatting.Service,
 ) *mux.Router {
-	authMiddleware := NewAuthMiddleware()
+	authMiddleware := NewAuthMiddleware(aths)
 	r := mux.NewRouter()
 	r.HandleFunc("/", hl.RootHandler())
 	r.HandleFunc("/health", rest.HealthHandler())

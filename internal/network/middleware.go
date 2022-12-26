@@ -13,8 +13,13 @@ type authenticationMiddleware struct {
 	tokenUsers map[string]string
 }
 
-func NewAuthMiddleware() *authenticationMiddleware {
+func NewAuthMiddleware(aths auth.Service) *authenticationMiddleware {
 	tokenUsers := make(map[string]string)
+
+	users := aths.ReadAuthUsers()
+	for _, user := range users {
+		tokenUsers[user.Token] = user.Nick
+	}
 	return &authenticationMiddleware{
 		tokenUsers: tokenUsers,
 	}
@@ -23,13 +28,13 @@ func NewAuthMiddleware() *authenticationMiddleware {
 func (amw *authenticationMiddleware) Populate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		ctxUser := &auth.CtxUser{}
+		ctxUser := &auth.AuthUser{}
 		ctx = context.WithValue(ctx, auth.AuthKey, ctxUser)
 		next.ServeHTTP(w, r.WithContext(ctx))
 		authUserCtx := ctx.Value(auth.AuthKey)
 		log.Println("authUserCtx", authUserCtx)
 		if authUserCtx != nil {
-			authUser := authUserCtx.(*auth.CtxUser)
+			authUser := authUserCtx.(*auth.AuthUser)
 			amw.tokenUsers[authUser.Token] = authUser.Nick
 		}
 	})

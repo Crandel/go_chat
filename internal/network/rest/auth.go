@@ -11,7 +11,9 @@ import (
 func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var lu auth.LoginUser
+		log.Println("Inside login")
 		if err := json.NewDecoder(r.Body).Decode(&lu); err != nil {
+			log.Println("Error during decoding", err)
 			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
@@ -23,12 +25,14 @@ func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request
 		}
 		ctx := r.Context()
 		ctxUser := ctx.Value(auth.AuthKey)
+
+		log.Println(ctxUser)
 		if ctxUser != nil {
-			authUser := &auth.CtxUser{
-				Nick:  lu.Nick,
-				Token: response.Token,
-			}
-			ctxUser = authUser
+			ctxUserFull := ctxUser.(*auth.AuthUser)
+			ctxUserFull.Nick = lu.Nick
+			ctxUserFull.Token = response.Token
+			log.Println(ctxUser)
+			log.Println(ctxUserFull)
 		}
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
@@ -57,11 +61,11 @@ func SigninHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Reques
 		ctx := r.Context()
 		ctxUser := ctx.Value(auth.AuthKey)
 		if ctxUser != nil {
-			authUser := &auth.CtxUser{
-				Nick:  su.Nick,
-				Token: response.Token,
-			}
-			ctxUser = authUser
+			ctxUserFull := ctxUser.(*auth.AuthUser)
+			ctxUserFull.Nick = su.Nick
+			ctxUserFull.Token = response.Token
+			log.Println(ctxUser)
+			log.Println(ctxUserFull)
 		}
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {

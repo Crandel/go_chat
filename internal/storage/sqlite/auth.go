@@ -56,3 +56,14 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 
 	return user.Token, nil
 }
+
+func (str *Storage) ReadAuthUsers() []auth.AuthUser {
+	authUsers := make([]auth.AuthUser, 0)
+	users := make([]User, 0)
+	_ = str.db.Select(&users).Do()
+	for _, u := range users {
+		authUsers = append(authUsers, u.ConvertUserToAuth())
+	}
+
+	return authUsers
+}

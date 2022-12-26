@@ -19,7 +19,7 @@ type SigninUser struct {
 	Password   string  `json:"password"`
 }
 
-type CtxUser struct {
+type AuthUser struct {
 	Nick  string
 	Token string
 }
