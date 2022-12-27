@@ -32,7 +32,7 @@ func (amw *authenticationMiddleware) Populate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		ctxUser := &auth.AuthUser{}
-		ctx = context.WithValue(ctx, auth.AuthKey, ctxUser)
+		ctx = context.WithValue(ctx, auth.AuthKey, ctxUser) //nolint:staticcheck
 		next.ServeHTTP(w, r.WithContext(ctx))
 		authUserCtx := ctx.Value(auth.AuthKey)
 		log.Debugln("authUserCtx", authUserCtx)
