@@ -19,8 +19,7 @@ func WSHandler(chts cht.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Println(err)
-			return
+			log.Fatal(err)
 		}
 		go chts.NewClient(conn)
 	}

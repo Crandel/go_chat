@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -14,12 +15,14 @@ import (
 	mem "github.com/Crandel/go_chat/internal/storage/memory"
 )
 
+const port = 8080
+
 func main() {
-	port := 8080
 	debug := os.Getenv("DEBUG")
 	log := lg.InitLogger()
 	log.PrintDebug = debug == "1"
 	log.Println("Starting server on port", port)
+
 	memory := mem.NewStorage()
 	aths := ath.NewService(&memory)
 	adds := add.NewService(&memory)
@@ -28,7 +31,7 @@ func main() {
 	go chts.Run()
 	router := ntw.NewRouter(aths, adds, rdns, chts)
 	srv := &http.Server{
-		Addr:         ":8080",
+		Addr:         ":" + fmt.Sprint(port),
 		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -25,6 +26,7 @@ func main() {
 	log.PrintDebug = debug == "1"
 	log.Println("Starting server on port", port)
 	sqlDB, _ := godb.Open(sqlite.Adapter, "./storage.db")
+	sqlDB.SetLogger(log)
 	err := migrations.RunMigrations(sqlDB)
 	if err != nil {
 		log.Fatal(err)
@@ -38,7 +40,7 @@ func main() {
 	go chts.Run()
 	router := ntw.NewRouter(aths, adds, rdns, chts)
 	srv := &http.Server{
-		Addr:         ":8080",
+		Addr:         ":" + fmt.Sprint(port),
 		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

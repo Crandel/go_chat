@@ -10,6 +10,8 @@ import (
 	"github.com/samonzeweb/godb/types"
 )
 
+var log = lg.InitLogger()
+
 func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
 	const op lg.Op = "sqlite.SigninUser"
 
@@ -42,12 +44,14 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 
 	user := User{}
 	token := auth.MakeToken(lu.Nick, lu.Password)
-	err := str.db.Select(&user).WhereQ(
+	log.Debugf("Token %s; Nick %s ", token, lu.Nick)
+	query := str.db.Select(&user).WhereQ(
 		godb.And(
 			godb.Q("nick = ?", lu.Nick),
 			godb.Q("token = ? ", token),
 		),
-	).Do()
+	)
+	err := query.Do()
 	if err == sql.ErrNoRows {
 		return "", lg.New(op, lg.Info, "No user with nick: "+lu.Nick)
 	} else if err != nil {

@@ -1,8 +1,6 @@
 package logging
 
-import (
-	"fmt"
-)
+import "fmt"
 
 type Op string
 
@@ -14,8 +12,6 @@ const (
 	Info
 	Unknown
 )
-
-const desiredLevel Level = Debug
 
 func (l Level) String() string {
 	switch l {
@@ -31,21 +27,27 @@ func (l Level) String() string {
 }
 
 type CommonError struct {
-	Op      Op
-	Level   Level
-	Message string
 	Err     error
+	Op      Op
+	Message string
+	Level   Level
 }
 
 func (e CommonError) Error() string {
-	return e.Message
+	format := "%s: [%s] - %s"
+	if e.Err != nil {
+		format = format + "err: " + e.Err.Error()
+	}
+	return fmt.Sprintf(format, e.Level.String(), e.Op, e.Message)
 }
 
 func NewError(op Op, l Level, m string, err error) CommonError {
-	new_err := CommonError{op, l, m, err}
-	Logging(new_err, l)
-	return new_err
-
+	return CommonError{
+		Op:      op,
+		Level:   l,
+		Message: m,
+		Err:     err,
+	}
 }
 
 func New(op Op, l Level, m string) CommonError {
@@ -60,15 +62,4 @@ func Tracing(e *CommonError) []Op {
 	}
 	stack = append(stack, Tracing(intError)...)
 	return stack
-}
-
-func Logging(e CommonError, desiredLevel Level) {
-	format := "%s: [%s] - %s"
-	if e.Err != nil {
-		format = format + fmt.Sprintf(". Error: %v", e.Err)
-	}
-
-	if e.Level > desiredLevel {
-		Logger.Printf(format, e.Level.String(), e.Op, e.Message)
-	}
 }

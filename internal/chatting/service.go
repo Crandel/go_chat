@@ -46,22 +46,22 @@ func (s *service) NewClient(conn *websocket.Conn) {
 		conn:     conn,
 		commands: s.commands,
 	}
-	log.Println("New User was successfuly connected")
+	log.Debugln("New User was successfuly connected")
 	u.ReadCommands()
 }
 
 func (s *service) Run() {
 	log.SetPrefix("chatting#Run ")
-	log.Println("Before loop")
+	log.Debugln("Before loop")
 	for command := range s.commands {
 		if command.client.Nick == nil && command.id != CmdJoin {
 			command.client.WriteMsg("Please provide join room and specify your name")
 			continue
 		}
-		log.Println("command " + command.id)
+		log.Debugln("command " + command.id)
 		switch command.id {
 		case CmdMsg:
-			log.Println("MSG ")
+			log.Debugln("MSG ")
 			for _, r := range s.rooms {
 				if r.haveUser(command.client) {
 					var msg strings.Builder

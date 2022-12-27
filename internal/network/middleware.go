@@ -40,6 +40,7 @@ func (amw *authenticationMiddleware) Populate(next http.Handler) http.Handler {
 			authUser := authUserCtx.(*auth.AuthUser)
 			amw.tokenUsers[authUser.Token] = authUser.Nick
 		}
+		log.Debugln(amw.tokenUsers)
 	})
 }
 
@@ -48,6 +49,7 @@ func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 
+		log.Debugf("Token from Authorization header: %s\n", token)
 		if user, found := amw.tokenUsers[token]; found {
 			// We found the token in our map
 			log.Debugf("Authenticated user %s\n", user)

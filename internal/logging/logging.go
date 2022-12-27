@@ -15,7 +15,7 @@ var Logger *DebugLog
 func InitLogger() *DebugLog {
 	if Logger == nil {
 		Logger = &DebugLog{
-			log:        *log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile),
+			log:        *log.New(os.Stdout, "", log.Ldate|log.Ltime),
 			PrintDebug: false,
 		}
 	}

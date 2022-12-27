@@ -14,12 +14,12 @@ var log = lg.InitLogger()
 func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var lu auth.LoginUser
-		log.Println("Inside login")
 		if err := json.NewDecoder(r.Body).Decode(&lu); err != nil {
 			log.Println("Error during decoding", err)
 			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
+		log.Debugln("Inside login ", lu)
 		response, err := athS.LoginUser(lu)
 		if err != nil {
 			log.Println("Error during login", err)
@@ -33,8 +33,8 @@ func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request
 			ctxUserFull := ctxUser.(*auth.AuthUser)
 			ctxUserFull.Nick = lu.Nick
 			ctxUserFull.Token = response.Token
-			log.Println(ctxUser)
-			log.Println(ctxUserFull)
+			log.Debugf("CTX User: %s\n", ctxUser)
+			log.Debugf("CTX User full: %s\n", ctxUserFull)
 		}
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
@@ -66,8 +66,8 @@ func SigninHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Reques
 			ctxUserFull := ctxUser.(*auth.AuthUser)
 			ctxUserFull.Nick = su.Nick
 			ctxUserFull.Token = response.Token
-			log.Println(ctxUser)
-			log.Println(ctxUserFull)
+			log.Debugf("CTX User: %s\n", ctxUser)
+			log.Debugf("CTX User full: %s\n", ctxUserFull)
 		}
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {

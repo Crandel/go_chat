@@ -38,7 +38,7 @@ func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 		default:
 			line, err := rdr.ReadString('\n')
 			if err != nil {
-				log.Println("Could not scan the message")
+				log.Debugln("Could not scan the message")
 				close(done)
 				return
 			}
@@ -58,8 +58,9 @@ func reader(conn *websocket.Conn) {
 			return
 		case <-time.After(1 * time.Second):
 			_, p, err := conn.ReadMessage()
+			log.Debugf("P: %s, err: %s", p, err.Error())
 			if err != nil {
-				log.Printf("Err: %s\n", err.Error())
+				log.Println(err.Error())
 				close(done)
 				return
 			}
@@ -73,6 +74,9 @@ func main() {
 	chat = make(chan string)
 	done = make(chan interface{})
 	interrupt = make(chan os.Signal)
+
+	debug := os.Getenv("DEBUG")
+	log.PrintDebug = debug == "1"
 	rdr := bufio.NewReader(os.Stdin)
 
 	log.Println("Please provide user name:")
@@ -80,12 +84,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	userName = strings.Trim(userName, "\n")
 
 	log.Println("Please provide password:")
 	password, err := rdr.ReadString('\n')
 	if err != nil {
 		log.Fatal("Error after password", err)
 	}
+	password = strings.Trim(password, "\n")
 	log.Println(password)
 	postBody, _ := json.Marshal(map[string]string{
 		"nick":     userName,
@@ -97,7 +103,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error in Post ", err)
 	}
-	log.Println(resp.Request.URL)
+	log.Debugln(resp.Request.URL)
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
@@ -105,7 +111,7 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	log.Println(string(body))
+	log.Debugln(string(body))
 	var auth auth.Response
 	err = json.Unmarshal(body, &auth)
 	if err != nil {
@@ -118,6 +124,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	roomName = strings.Trim(roomName, "\n")
 
 	signal.Notify(interrupt, os.Interrupt) // Notify the interrupt channel for SIGINT
 	socketURL := "ws://" + apiHost + "/ws"
@@ -132,8 +139,9 @@ func main() {
 	err = conn.WriteMessage(websocket.TextMessage,
 		[]byte(
 			fmt.Sprintf("/join %s %s",
-				strings.Trim(roomName, "\n"),
-				strings.Trim(userName, "\n"))))
+				roomName,
+				userName,
+			)))
 
 	go msgHandler(conn, *rdr)
 	go reader(conn)
@@ -144,6 +152,8 @@ func main() {
 	log.Printf("You are in room %s", roomName)
 	for {
 		select {
+		case <-done:
+			return
 		case m := <-chat:
 			log.Println("> ", m)
 		case i := <-input:
