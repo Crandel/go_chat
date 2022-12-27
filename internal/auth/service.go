@@ -1,8 +1,10 @@
 package auth
 
 import (
-	"log"
+	lg "github.com/Crandel/go_chat/internal/logging"
 )
+
+var log = lg.Logger
 
 // Repository for auth
 type Repository interface {

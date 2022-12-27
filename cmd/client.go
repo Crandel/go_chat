@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,8 +13,11 @@ import (
 	"time"
 
 	"github.com/Crandel/go_chat/internal/auth"
+	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/gorilla/websocket"
 )
+
+var log = lg.Logger
 
 const host = "localhost:8080"
 const apiHost = host + "/api"

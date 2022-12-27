@@ -1,9 +1,7 @@
-package errors
+package logging
 
 import (
 	"fmt"
-
-	"log"
 )
 
 type Op string
@@ -71,8 +69,8 @@ func Logging(e CommonError, desiredLevel Level) {
 	}
 
 	if e.Level == Unknown {
-		log.Fatal(format, "ERROR", e.Op, e.Message)
+		Logger.Fatal(format, "ERROR", e.Op, e.Message)
 	} else if e.Level > desiredLevel {
-		log.Printf(format, fmt.Sprint(e.Level), e.Op, e.Message)
+		Logger.Printf(format, fmt.Sprint(e.Level), e.Op, e.Message)
 	}
 }

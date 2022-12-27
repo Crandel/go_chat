@@ -5,7 +5,7 @@ import (
 	"time"
 
 	cht "github.com/Crandel/go_chat/internal/chatting"
-	errs "github.com/Crandel/go_chat/internal/errors"
+	lg "github.com/Crandel/go_chat/internal/logging"
 )
 
 func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
@@ -22,11 +22,11 @@ func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
 }
 
 func (str *Storage) ExcludeFromRoom(roomName string, u *cht.Client) error {
-	const op errs.Op = "memory.ExcludeFromRoom"
+	const op lg.Op = "memory.ExcludeFromRoom"
 	var mr Room
 	mr, exists := str.Rooms[roomName]
 	if !exists {
-		return errs.New(op, errs.Info, "No room with name "+roomName)
+		return lg.New(op, lg.Info, "No room with name "+roomName)
 	}
 	for i, ru := range mr.Members {
 		if string(ru) == u.GetNick() {
@@ -37,7 +37,7 @@ func (str *Storage) ExcludeFromRoom(roomName string, u *cht.Client) error {
 }
 
 func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
-	const op errs.Op = "memory.AddUserToRoom"
+	const op lg.Op = "memory.AddUserToRoom"
 	var mr Room
 	mr, exists := str.Rooms[name]
 	if !exists {
@@ -49,7 +49,7 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 	}
 	ru, exists := str.Users[UserId(c.GetNick())]
 	if !exists {
-		return errs.New(op, errs.Info, "No user with id "+c.GetNick())
+		return lg.New(op, lg.Info, "No user with id "+c.GetNick())
 	}
 	mr.Members = append(mr.Members, ru.Nick)
 	return nil
