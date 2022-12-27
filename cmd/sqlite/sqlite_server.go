@@ -21,7 +21,7 @@ const port = 8080
 
 func main() {
 	debug := os.Getenv("DEBUG")
-	log := lg.Logger
+	log := lg.InitLogger()
 	log.PrintDebug = debug == "1"
 	log.Println("Starting server on port", port)
 	sqlDB, _ := godb.Open(sqlite.Adapter, "./storage.db")

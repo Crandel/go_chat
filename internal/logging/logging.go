@@ -2,14 +2,25 @@ package logging
 
 import (
 	"log"
+	"os"
 )
 
 type DebugLog struct {
-	log        *log.Logger
+	log        log.Logger
 	PrintDebug bool
 }
 
 var Logger *DebugLog
+
+func InitLogger() *DebugLog {
+	if Logger == nil {
+		Logger = &DebugLog{
+			log:        *log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile),
+			PrintDebug: false,
+		}
+	}
+	return Logger
+}
 
 func (m *DebugLog) SetPrefix(prefix string) {
 	m.log.SetPrefix(prefix)

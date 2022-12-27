@@ -17,7 +17,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var log = lg.Logger
+var log = lg.InitLogger()
 
 const host = "localhost:8080"
 const apiHost = host + "/api"

@@ -9,7 +9,7 @@ import (
 	"github.com/Crandel/go_chat/internal/auth"
 )
 
-var log = lg.Logger
+var log = lg.InitLogger()
 
 func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -4,7 +4,7 @@ import (
 	lg "github.com/Crandel/go_chat/internal/logging"
 )
 
-var log = lg.Logger
+var log = lg.InitLogger()
 
 // Repository for auth
 type Repository interface {
@@ -37,7 +37,7 @@ func NewService(r Repository) Service {
 func (s *service) LoginUser(u LoginUser) (Response, error) {
 	token, err := s.r.LoginUser(u)
 	if err != nil {
-		log.Println("Error while login:", err)
+		log.Debugln("Error while login:", err)
 		return Response{}, err
 	}
 	return Response{Token: token}, nil
@@ -46,7 +46,7 @@ func (s *service) LoginUser(u LoginUser) (Response, error) {
 func (s *service) SigninUser(u SigninUser) (Response, error) {
 	token, err := s.r.SigninUser(u)
 	if err != nil {
-		log.Println("Error while signin:", err)
+		log.Debugln("Error while signin:", err)
 		return Response{}, err
 	}
 	return Response{Token: token}, nil

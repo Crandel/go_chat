@@ -9,7 +9,7 @@ import (
 	"github.com/Crandel/go_chat/internal/auth"
 )
 
-var log = lg.Logger
+var log = lg.InitLogger()
 
 // Define authenticationMiddleware struct
 type authenticationMiddleware struct {

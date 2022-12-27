@@ -17,7 +17,7 @@ import (
 func main() {
 	port := 8080
 	debug := os.Getenv("DEBUG")
-	log := lg.Logger
+	log := lg.InitLogger()
 	log.PrintDebug = debug == "1"
 	log.Println("Starting server on port", port)
 	memory := mem.NewStorage()

@@ -43,7 +43,7 @@ func (e CommonError) Error() string {
 
 func NewError(op Op, l Level, m string, err error) CommonError {
 	new_err := CommonError{op, l, m, err}
-	Logging(new_err, desiredLevel)
+	Logging(new_err, l)
 	return new_err
 
 }
@@ -68,9 +68,7 @@ func Logging(e CommonError, desiredLevel Level) {
 		format = format + fmt.Sprintf(". Error: %v", e.Err)
 	}
 
-	if e.Level == Unknown {
-		Logger.Fatal(format, "ERROR", e.Op, e.Message)
-	} else if e.Level > desiredLevel {
-		Logger.Printf(format, fmt.Sprint(e.Level), e.Op, e.Message)
+	if e.Level > desiredLevel {
+		Logger.Printf(format, e.Level.String(), e.Op, e.Message)
 	}
 }
