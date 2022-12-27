@@ -2,11 +2,13 @@ package chatting
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
+	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/gorilla/websocket"
 )
+
+var log = lg.Logger
 
 type Repository interface {
 	WriteMessage(c *Client, r *Room, msg string) error

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	cht "github.com/Crandel/go_chat/internal/chatting"
-	errs "github.com/Crandel/go_chat/internal/errors"
+	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/Crandel/go_chat/internal/reading"
 	"github.com/samonzeweb/godb"
 )
@@ -23,11 +23,11 @@ func (*UserRoom) TableName() string {
 }
 
 func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
-	const op errs.Op = "sqlite.WriteMessage"
+	const op lg.Op = "sqlite.WriteMessage"
 	exists, id := str.RoomHasUser(r.Name, u)
 	if !exists {
-		return errs.New(
-			op, errs.Info, "User "+*u.Nick+"is not in room "+r.Name)
+		return lg.New(
+			op, lg.Info, "User "+*u.Nick+"is not in room "+r.Name)
 	}
 	rand.Seed(time.Now().UnixNano())
 	message := Message{
@@ -37,47 +37,47 @@ func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
 	}
 	error := str.db.Insert(&message).Do()
 	if error != nil {
-		return errs.NewError(
-			op, errs.Info, "", error)
+		return lg.NewError(
+			op, lg.Info, "", error)
 	}
 
 	return nil
 }
 
 func (str *Storage) ExcludeFromRoom(name string, u *cht.Client) error {
-	const op errs.Op = "sqlite.ExcludeFromRoom"
+	const op lg.Op = "sqlite.ExcludeFromRoom"
 	exists, id := str.RoomHasUser(name, u)
 
 	if !exists {
-		return errs.New(
-			op, errs.Info, "User "+*u.Nick+"is not in room "+name)
+		return lg.New(
+			op, lg.Info, "User "+*u.Nick+"is not in room "+name)
 	}
 	_, err := str.db.DeleteFrom(
 		USER_ROOMS).Where("id = ?", id).Do()
 	if err != nil {
-		return errs.New(
-			op, errs.Info, "User "+*u.Nick+"is not in room "+name)
+		return lg.New(
+			op, lg.Info, "User "+*u.Nick+"is not in room "+name)
 	}
 	return nil
 }
 
 func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
-	const op errs.Op = "sqlite.AddUserToRoom"
+	const op lg.Op = "sqlite.AddUserToRoom"
 	exists, _ := str.RoomHasUser(name, c)
 	if exists {
-		return errs.New(
-			op, errs.Info, "User "+*c.Nick+" is already in a room "+name)
+		return lg.New(
+			op, lg.Info, "User "+*c.Nick+" is already in a room "+name)
 	}
 
 	user, error := str.GetUser(reading.UserId(c.GetNick()))
 	if error != nil {
-		return errs.NewError(
-			op, errs.Info, "User not found", error)
+		return lg.NewError(
+			op, lg.Info, "User not found", error)
 	}
 	room, error := str.getRoom(name)
 	if error != nil {
-		return errs.NewError(
-			op, errs.Info, "Room not found", error)
+		return lg.NewError(
+			op, lg.Info, "Room not found", error)
 	}
 
 	userInRoom := UserRoom{
@@ -87,8 +87,8 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 
 	error = str.db.Insert(&userInRoom).Do()
 	if error != nil {
-		return errs.NewError(
-			op, errs.Info, "", error)
+		return lg.NewError(
+			op, lg.Info, "", error)
 	}
 	return nil
 }

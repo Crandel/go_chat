@@ -2,11 +2,14 @@ package rest
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
+
+	lg "github.com/Crandel/go_chat/internal/logging"
 
 	"github.com/Crandel/go_chat/internal/auth"
 )
+
+var log = lg.Logger
 
 func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +29,6 @@ func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request
 		ctx := r.Context()
 		ctxUser := ctx.Value(auth.AuthKey)
 
-		log.Println(ctxUser)
 		if ctxUser != nil {
 			ctxUserFull := ctxUser.(*auth.AuthUser)
 			ctxUserFull.Nick = lu.Nick

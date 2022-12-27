@@ -2,11 +2,14 @@ package network
 
 import (
 	"context"
-	"log"
 	"net/http"
+
+	lg "github.com/Crandel/go_chat/internal/logging"
 
 	"github.com/Crandel/go_chat/internal/auth"
 )
+
+var log = lg.Logger
 
 // Define authenticationMiddleware struct
 type authenticationMiddleware struct {
@@ -32,7 +35,7 @@ func (amw *authenticationMiddleware) Populate(next http.Handler) http.Handler {
 		ctx = context.WithValue(ctx, auth.AuthKey, ctxUser)
 		next.ServeHTTP(w, r.WithContext(ctx))
 		authUserCtx := ctx.Value(auth.AuthKey)
-		log.Println("authUserCtx", authUserCtx)
+		log.Debugln("authUserCtx", authUserCtx)
 		if authUserCtx != nil {
 			authUser := authUserCtx.(*auth.AuthUser)
 			amw.tokenUsers[authUser.Token] = authUser.Nick
@@ -47,7 +50,7 @@ func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler 
 
 		if user, found := amw.tokenUsers[token]; found {
 			// We found the token in our map
-			log.Printf("Authenticated user %s\n", user)
+			log.Debugf("Authenticated user %s\n", user)
 			// Pass down the request to the next middleware (or final handler)
 			next.ServeHTTP(w, r)
 		} else {

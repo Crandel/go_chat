@@ -1,7 +1,6 @@
 package chatting
 
 import (
-	"log"
 	"strings"
 
 	"github.com/gorilla/websocket"

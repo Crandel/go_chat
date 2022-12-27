@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/Crandel/go_chat/internal/auth"
-	errs "github.com/Crandel/go_chat/internal/errors"
+	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/samonzeweb/godb"
 	"github.com/samonzeweb/godb/types"
 )
 
 func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
-	const op errs.Op = "sqlite.SigninUser"
+	const op lg.Op = "sqlite.SigninUser"
 
 	token := auth.MakeToken(u.Nick, u.Password)
 	su := User{
@@ -31,14 +31,14 @@ func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
 
 	err := str.db.Insert(&su).Do()
 	if err != nil {
-		return "", errs.NewError(
-			op, errs.Info, fmt.Sprintf("User with nick %s already exists", u.Nick), err)
+		return "", lg.NewError(
+			op, lg.Info, fmt.Sprintf("User with nick %s already exists", u.Nick), err)
 	}
 	return token, nil
 }
 
 func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
-	const op errs.Op = "sqlite.LoginUser"
+	const op lg.Op = "sqlite.LoginUser"
 
 	user := User{}
 	token := auth.MakeToken(lu.Nick, lu.Password)
@@ -49,9 +49,9 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 		),
 	).Do()
 	if err == sql.ErrNoRows {
-		return "", errs.New(op, errs.Info, "No user with nick: "+lu.Nick)
+		return "", lg.New(op, lg.Info, "No user with nick: "+lu.Nick)
 	} else if err != nil {
-		return "", errs.NewError(op, errs.Info, "Internal error", err)
+		return "", lg.NewError(op, lg.Info, "Internal error", err)
 	}
 
 	return user.Token, nil

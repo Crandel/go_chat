@@ -1,9 +1,7 @@
 package chatting
 
 import (
-	"log"
-
-	errs "github.com/Crandel/go_chat/internal/errors"
+	lg "github.com/Crandel/go_chat/internal/logging"
 )
 
 // Room is the place for clients
@@ -22,9 +20,9 @@ func (r *Room) broadcast(sender *Client, message string) {
 }
 
 func (r *Room) addUser(c *Client) error {
-	const op errs.Op = "chatting.Room.addUser"
+	const op lg.Op = "chatting.Room.addUser"
 	if r.haveUser(c) {
-		return errs.New(op, errs.Info, "User already in room")
+		return lg.New(op, lg.Info, "User already in room")
 	}
 	r.Clients[c] = struct{}{}
 	return nil
