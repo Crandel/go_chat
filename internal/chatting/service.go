@@ -19,7 +19,7 @@ type Repository interface {
 
 type Service interface {
 	Run()
-	NewClient(conn *websocket.Conn)
+	NewClient(conn *websocket.Conn, nick string)
 	Repository
 }
 
@@ -39,10 +39,10 @@ func NewService(rep Repository) Service {
 	}
 }
 
-func (s *service) NewClient(conn *websocket.Conn) {
+func (s *service) NewClient(conn *websocket.Conn, nick string) {
 	log.SetPrefix("chatting#NewClient: ")
 	u := &Client{
-		Nick:     nil,
+		Nick:     nick,
 		conn:     conn,
 		commands: s.commands,
 	}
@@ -54,7 +54,7 @@ func (s *service) Run() {
 	log.SetPrefix("chatting#Run ")
 	log.Debugln("Before loop")
 	for command := range s.commands {
-		if command.client.Nick == nil && command.id != CmdJoin {
+		if command.id != CmdJoin {
 			command.client.WriteMsg("Please provide join room and specify your name")
 			continue
 		}
@@ -68,7 +68,7 @@ func (s *service) Run() {
 					finalMsg := strings.Join(command.args, " ")
 					err := s.WriteMessage(command.client, r, finalMsg)
 					if err == nil {
-						msg.WriteString(*command.client.Nick)
+						msg.WriteString(command.client.Nick)
 						msg.WriteString(" ")
 						msg.WriteString(finalMsg)
 						r.broadcast(command.client, msg.String())
@@ -78,23 +78,24 @@ func (s *service) Run() {
 		case CmdPing:
 			command.client.WriteMsg("pong")
 		case CmdJoin:
-			if len(command.args) != 3 {
-				command.client.WriteMsg("Please provide correct room and user name")
+			if len(command.args) != 2 {
+				command.client.WriteMsg("Please provide correct room name")
 				continue
 			}
 
 			roomName := command.args[1]
-			userName := command.args[2]
-			command.client.Nick = &userName
 			exists, _ := s.RoomHasUser(roomName, command.client)
 			if exists {
 				continue
 			} else {
 				s.excludeFromRooms(command.client)
 			}
-			if err := s.AddUserToRoom(roomName, command.client); err == nil {
-				command.client.WriteMsg("Welcome to the room " + roomName)
+			log.Debugln("Inside CmdJoin, user exists: ", exists)
+			if err := s.AddUserToRoom(roomName, command.client); err != nil {
+				command.client.WriteMsg("Something went wrong, err: " + err.Error())
+				continue
 			}
+			command.client.WriteMsg("Welcome to the room " + roomName)
 		case CmdRooms:
 			names := s.roomHandler.listRooms()
 			command.client.WriteMsg("Rooms:\n" + strings.Join(names, "\n"))
@@ -118,7 +119,7 @@ func (s *service) excludeFromRooms(c *Client) {
 		if done {
 			err := s.ExcludeFromRoom(r.Name, c)
 			if err != nil {
-				r.broadcast(c, "User "+*c.Nick+" leave the room")
+				r.broadcast(c, "User "+c.Nick+" leave the room")
 			}
 		}
 	}
@@ -145,7 +146,7 @@ func (s *service) AddUserToRoom(roomName string, c *Client) error {
 	if err != nil {
 		return err
 	}
-	message := fmt.Sprintf("User %s join the room", *c.Nick)
+	message := fmt.Sprintf("User %s join the room", c.Nick)
 
 	if done := s.roomHandler.addUser(roomName, c); done {
 		s.roomHandler.broadcast(roomName, c, message)

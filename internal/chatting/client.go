@@ -7,16 +7,9 @@ import (
 )
 
 type Client struct {
-	Nick     *string
+	Nick     string
 	conn     *websocket.Conn
 	commands chan<- Command
-}
-
-func (c *Client) GetNick() string {
-	if c.Nick == nil {
-		return *c.Nick
-	}
-	return ""
 }
 
 func (c *Client) ReadCommands() {
@@ -35,21 +28,21 @@ func (c *Client) ReadCommands() {
 		rawCommand := string(p)
 		args := strings.Split(rawCommand, " ")
 		cmd := strings.TrimSpace(args[0])
-		log.Println("Command: " + cmd)
+		log.Debugln("Command: " + cmd)
 		var cmdID CommandID
 		if !strings.HasPrefix(cmd, "/") {
 			cmdID = CmdMsg
 		} else {
-			switch CommandID(cmd) {
-			case CmdPing:
+			switch cmd {
+			case string(CmdPing):
 				cmdID = CmdPing
-			case CmdJoin:
+			case string(CmdJoin):
 				cmdID = CmdJoin
-			case CmdUsers:
+			case string(CmdUsers):
 				cmdID = CmdUsers
-			case CmdRooms:
+			case string(CmdRooms):
 				cmdID = CmdRooms
-			case CmdQuit:
+			case string(CmdQuit):
 				cmdID = CmdQuit
 			default:
 				c.WriteMsg("ERR: Unknown command " + cmd)

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -58,9 +57,8 @@ func reader(conn *websocket.Conn) {
 			return
 		case <-time.After(1 * time.Second):
 			_, p, err := conn.ReadMessage()
-			log.Debugf("P: %s, err: %s", p, err.Error())
 			if err != nil {
-				log.Println(err.Error())
+				log.Printf("P: %s, err: %s", p, err.Error())
 				close(done)
 				return
 			}
@@ -135,13 +133,7 @@ func main() {
 	defer conn.Close()
 
 	// Join test room
-	// TODO: replace this with correct authentication
-	err = conn.WriteMessage(websocket.TextMessage,
-		[]byte(
-			fmt.Sprintf("/join %s %s",
-				roomName,
-				userName,
-			)))
+	err = conn.WriteMessage(websocket.TextMessage, []byte("/join "+roomName))
 
 	go msgHandler(conn, *rdr)
 	go reader(conn)

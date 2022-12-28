@@ -13,7 +13,7 @@ func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
 	id := rand.Int()
 	str.Messages[id] = Message{
 		ID:       id,
-		UserID:   UserId(u.GetNick()),
+		UserID:   UserId(u.Nick),
 		RoomName: r.Name,
 		Payload:  msg,
 		Created:  time.Now(),
@@ -29,7 +29,7 @@ func (str *Storage) ExcludeFromRoom(roomName string, u *cht.Client) error {
 		return lg.New(op, lg.Info, "No room with name "+roomName)
 	}
 	for i, ru := range mr.Members {
-		if string(ru) == u.GetNick() {
+		if string(ru) == u.Nick {
 			mr.Members = append(mr.Members[:i], mr.Members[i+1:]...)
 		}
 	}
@@ -47,9 +47,9 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 		}
 		mr = str.Rooms[mrname]
 	}
-	ru, exists := str.Users[UserId(c.GetNick())]
+	ru, exists := str.Users[UserId(c.Nick)]
 	if !exists {
-		return lg.New(op, lg.Info, "No user with id "+c.GetNick())
+		return lg.New(op, lg.Info, "No user with id "+c.Nick)
 	}
 	mr.Members = append(mr.Members, ru.Nick)
 	return nil
@@ -61,7 +61,7 @@ func (str *Storage) RoomHasUser(name string, c *cht.Client) (bool, int) {
 		return false, 0
 	}
 	for _, mu := range mr.Members {
-		if mu == UserId(c.GetNick()) {
+		if mu == UserId(c.Nick) {
 			return true, 0
 		}
 	}

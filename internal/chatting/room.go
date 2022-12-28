@@ -101,7 +101,7 @@ func (rh *roomHandler) listUsers(c *Client) (string, []string) {
 		if room.haveUser(c) {
 			clients := make([]string, 0, len(room.Clients))
 			for client := range room.Clients {
-				clients = append(clients, *client.Nick)
+				clients = append(clients, client.Nick)
 			}
 			return room.Name, clients
 		}

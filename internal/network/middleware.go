@@ -52,9 +52,15 @@ func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler 
 		log.Debugf("Token from Authorization header: %s\n", token)
 		if user, found := amw.tokenUsers[token]; found {
 			// We found the token in our map
-			log.Debugf("Authenticated user %s\n", user)
+			ctx := r.Context()
+			ctxUser := &auth.AuthUser{
+				Nick:  user,
+				Token: token,
+			}
+			ctx = context.WithValue(ctx, auth.AuthKey, ctxUser) //nolint:staticcheck
+
 			// Pass down the request to the next middleware (or final handler)
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		} else {
 			// Write an error and stop the handler chain
 			http.Error(w, "Forbidden", http.StatusForbidden)
