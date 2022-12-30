@@ -1,0 +1,64 @@
+version: '3'
+
+
+# global environmental variables
+env:
+  DEBUG: 1
+
+tasks:
+  default:
+    deps: [build, test]
+    desc: Builds and tests all components
+
+  help:
+    cmds:
+      - cmd: "go-task --list"
+        silent: true
+
+
+  # # run this task before each other task
+
+  # build tasks
+  build:
+    desc: Builds the backend
+    cmds:
+      - cmd: echo "Building ..."
+        silent: true
+      - cmd: go build -o ./bin/sqlite ./cmd/sqlite/sqlite_server.go
+      - cmd: go build -o ./bin/memory ./cmd/memory/memory_server.go
+      - cmd: go build -o ./bin/client ./cmd/client.go
+
+  # test tasks
+  test:
+    desc: Tests project
+    cmds:
+      - cmd: echo "Testing project"
+        silent: true
+      - cmd: go test -p 1 -count=1 -cover -coverprofile=unit.coverage.out ./...
+
+  start_memory:
+    desc: Starts memory server
+    cmds:
+      - cmd: echo "Starting memory server"
+        silent: true
+      - task: build
+      - cmd: ./bin/memory
+
+  start_sqlite:
+    desc: Starts sqlite server
+    env:
+      MIGRATIONS:
+        sh: echo "$(pwd)/migrations"
+    cmds:
+      - cmd: echo "Starting sqlite server in folder"
+        silent: true
+      - task: build
+      - cmd: ./bin/sqlite
+
+  start_client:
+    desc: Starts client
+    cmds:
+      - cmd: echo "Starting client"
+        silent: true
+      - task: build
+      - cmd: ./bin/client

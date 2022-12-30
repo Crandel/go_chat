@@ -15,8 +15,6 @@ import (
 var log = lg.InitLogger()
 
 const (
-	migrationFolder = "migrations"
-
 	migrationBegin = `BEGIN TRANSACTION;
 `
 
@@ -24,7 +22,7 @@ const (
 COMMIT;`
 )
 
-func RunMigrations(db *godb.DB) error {
+func RunMigrations(db *godb.DB, migrationFolder string) error {
 	files, err := os.ReadDir(migrationFolder)
 	if err != nil {
 		return err
