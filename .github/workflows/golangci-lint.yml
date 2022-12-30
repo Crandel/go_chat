@@ -1,11 +1,12 @@
 # this workflow will run all pull requests,
 # apart from PRs that only change files in manager folder.
+name: "golangci-lint"
+
 on:
   pull_request:
     paths-ignore:
       - 'resources/**'
 
-name: "golangci-lint"
 jobs:
   # run golangci-lint to lint the golang source code.
   # the configuration is at /.golangci.yml.
