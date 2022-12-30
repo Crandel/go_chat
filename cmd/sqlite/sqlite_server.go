@@ -22,12 +22,16 @@ const port = 8080
 
 func main() {
 	debug := os.Getenv("DEBUG")
+	migrationFolder := os.Getenv("MIGRATIONS")
+	if migrationFolder == "" {
+		migrationFolder = "./migrations"
+	}
 	log := lg.InitLogger()
 	log.PrintDebug = debug == "1"
 	log.Println("Starting server on port", port)
 	sqlDB, _ := godb.Open(sqlite.Adapter, "./storage.db")
 	sqlDB.SetLogger(log)
-	err := migrations.RunMigrations(sqlDB)
+	err := migrations.RunMigrations(sqlDB, migrationFolder)
 	if err != nil {
 		log.Fatal(err)
 		return

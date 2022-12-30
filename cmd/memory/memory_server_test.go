@@ -29,7 +29,7 @@ type Login struct {
 	Token string `json:"token"`
 }
 
-func runRequest(d data, method string, url string) ([]byte, error) {
+func runRequest(d data, method string, url string, token *string) ([]byte, error) {
 	data := new(bytes.Buffer)
 	if d != nil {
 		err := json.NewEncoder(data).Encode(d)
@@ -38,6 +38,9 @@ func runRequest(d data, method string, url string) ([]byte, error) {
 		}
 	}
 	req, err := http.NewRequest(method, url, data)
+	if token != nil {
+		req.Header.Set("Authorization", *token)
+	}
 	if err != nil {
 		return []byte{}, err
 	}
@@ -77,7 +80,8 @@ func TestHandlers(t *testing.T) {
 			"password":    "pass",
 		},
 		http.MethodPost,
-		srv.URL+"/api/users/signin",
+		srv.URL+"/api/auth/signin",
+		nil,
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -93,7 +97,8 @@ func TestHandlers(t *testing.T) {
 			"password": "pass",
 		},
 		http.MethodPost,
-		srv.URL+"/api/users/login",
+		srv.URL+"/api/auth/login",
+		nil,
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -208,7 +213,7 @@ func TestHandlers(t *testing.T) {
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			response, err := runRequest(tc.data, tc.method, srv.URL+tc.url)
+			response, err := runRequest(tc.data, tc.method, srv.URL+tc.url, &token.Token)
 			if err != nil {
 				t.Fatal(err)
 			}
