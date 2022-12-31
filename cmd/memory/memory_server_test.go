@@ -13,6 +13,7 @@ import (
 	add "github.com/Crandel/go_chat/internal/adding"
 	ath "github.com/Crandel/go_chat/internal/auth"
 	cht "github.com/Crandel/go_chat/internal/chatting"
+	lg "github.com/Crandel/go_chat/internal/logging"
 	ntw "github.com/Crandel/go_chat/internal/network"
 	rdn "github.com/Crandel/go_chat/internal/reading"
 	mem "github.com/Crandel/go_chat/internal/storage/memory"
@@ -20,6 +21,7 @@ import (
 
 const (
 	user_id   = "example@post.com"
+	pass      = "pass"
 	room_name = "test room"
 )
 
@@ -29,7 +31,7 @@ type Login struct {
 	Token string `json:"token"`
 }
 
-func runRequest(d data, method string, url string, token *string) ([]byte, error) {
+func runRequest(d data, method string, url string, auth bool) ([]byte, error) {
 	data := new(bytes.Buffer)
 	if d != nil {
 		err := json.NewEncoder(data).Encode(d)
@@ -38,9 +40,11 @@ func runRequest(d data, method string, url string, token *string) ([]byte, error
 		}
 	}
 	req, err := http.NewRequest(method, url, data)
-	if token != nil {
-		req.Header.Set("Authorization", *token)
+	fmt.Println(url, auth)
+	if auth {
+		req.SetBasicAuth(user_id, pass)
 	}
+	fmt.Println(req.Header.Get("Authorization"))
 	if err != nil {
 		return []byte{}, err
 	}
@@ -62,6 +66,9 @@ func runRequest(d data, method string, url string, token *string) ([]byte, error
 }
 
 func TestHandlers(t *testing.T) {
+	log := lg.InitLogger()
+	log.PrintDebug = true
+
 	mStorage := mem.NewStorage()
 
 	aths := ath.NewService(&mStorage)
@@ -74,14 +81,15 @@ func TestHandlers(t *testing.T) {
 
 	signRes, err := runRequest(
 		data{
+			"nick":        user_id,
 			"name":        "user",
 			"email":       user_id,
 			"second_name": "second",
-			"password":    "pass",
+			"password":    pass,
 		},
 		http.MethodPost,
 		srv.URL+"/api/auth/signin",
-		nil,
+		false,
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -93,12 +101,12 @@ func TestHandlers(t *testing.T) {
 	}
 	logRes, err := runRequest(
 		data{
-			"email":    user_id,
-			"password": "pass",
+			"nick":     user_id,
+			"password": pass,
 		},
 		http.MethodPost,
 		srv.URL+"/api/auth/login",
-		nil,
+		false,
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -120,6 +128,7 @@ func TestHandlers(t *testing.T) {
 		data        data
 		compareResp func(resp interface{}) bool
 		err         string
+		auth        bool
 	}{
 		{
 			name:   "Health",
@@ -140,6 +149,7 @@ func TestHandlers(t *testing.T) {
 				}
 				return true
 			},
+			auth: false,
 		},
 		{
 			name:   "List users",
@@ -166,6 +176,7 @@ func TestHandlers(t *testing.T) {
 				}
 				return true
 			},
+			auth: true,
 		},
 		{
 			name:   "Add rooms",
@@ -184,6 +195,7 @@ func TestHandlers(t *testing.T) {
 				}
 				return true
 			},
+			auth: true,
 		},
 		{
 			name:   "List rooms",
@@ -209,11 +221,12 @@ func TestHandlers(t *testing.T) {
 				}
 				return true
 			},
+			auth: true,
 		},
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			response, err := runRequest(tc.data, tc.method, srv.URL+tc.url, &token.Token)
+			response, err := runRequest(tc.data, tc.method, srv.URL+tc.url, tc.auth)
 			if err != nil {
 				t.Fatal(err)
 			}

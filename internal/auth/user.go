@@ -25,6 +25,6 @@ type AuthUser struct {
 }
 
 func MakeToken(nick string, password string) string {
-	token := nick + "~/#" + password
+	token := nick + ":" + password
 	return b64.StdEncoding.EncodeToString([]byte(token))
 }

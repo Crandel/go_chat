@@ -17,8 +17,9 @@ CREATE TABLE IF NOT EXISTS rooms (
 
 CREATE TABLE IF NOT EXISTS user_rooms (
   id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  user_nick    TEXT NOT NULL UNIQUE,
+  user_nick    TEXT NOT NULL,
   room_name    TEXT NOT NULL,
+  UNIQUE(user_nick,room_name),
   FOREIGN KEY(user_nick) REFERENCES users(nick),
   FOREIGN KEY(room_name) REFERENCES rooms(name)
 );
