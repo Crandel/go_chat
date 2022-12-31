@@ -24,8 +24,29 @@ tasks:
     cmds:
       - cmd: echo "Building ..."
         silent: true
+      - task: build_sqlite
+      - task: build_memory
+      - task: build_client
+
+  build_sqlite:
+    desc: Builds sqlite server
+    cmds:
+      - cmd: echo "Build sqlite server"
+        silent: true
       - cmd: go build -o ./bin/sqlite ./cmd/sqlite/sqlite_server.go
+
+  build_memory:
+    desc: Builds memory server
+    cmds:
+      - cmd: echo "Build memory server"
+        silent: true
       - cmd: go build -o ./bin/memory ./cmd/memory/memory_server.go
+
+  build_client:
+    desc: Builds client
+    cmds:
+      - cmd: echo "Build client"
+        silent: true
       - cmd: go build -o ./bin/client ./cmd/client.go
 
   # test tasks
@@ -41,7 +62,7 @@ tasks:
     cmds:
       - cmd: echo "Starting memory server"
         silent: true
-      - task: build
+      - task: build_memory
       - cmd: ./bin/memory
 
   start_sqlite:
@@ -52,7 +73,7 @@ tasks:
     cmds:
       - cmd: echo "Starting sqlite server in folder"
         silent: true
-      - task: build
+      - task: build_sqlite
       - cmd: ./bin/sqlite
 
   start_client:
@@ -60,5 +81,5 @@ tasks:
     cmds:
       - cmd: echo "Starting client"
         silent: true
-      - task: build
+      - task: build_client
       - cmd: ./bin/client

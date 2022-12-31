@@ -126,7 +126,8 @@ func main() {
 
 	signal.Notify(interrupt, os.Interrupt) // Notify the interrupt channel for SIGINT
 	socketURL := "ws://" + apiHost + "/ws"
-	conn, _, err := websocket.DefaultDialer.Dial(socketURL, http.Header{"Authorization": []string{auth.Token}})
+	token := "Basic " + auth.Token
+	conn, _, err := websocket.DefaultDialer.Dial(socketURL, http.Header{"Authorization": []string{token}})
 	if err != nil {
 		log.Fatal("Could not connect to WebSocker server '"+socketURL+"'.", err)
 	}

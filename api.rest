@@ -1,6 +1,7 @@
 :content = application/json
 :host = http://localhost:8080
 
+:auth = Authorization:
 
 # Signin
 POST :host/api/auth/signin
@@ -12,7 +13,6 @@ Content-Type: :content
     "second_name": "Second",
     "password": "pass"
 }
-# {"token":"ZXhhbXBsZUBwb3N0LmNvbX4vI3Bhc3M="}
 
 # Login
 
@@ -24,34 +24,41 @@ Content-Type: :content
     "password": "pass"
 }
 
+:token = ZXhhbXBsZUBwb3N0LmNvbTpwYXNz
+:authToken = :auth Basic :token
+
 # List users
 GET :host/api/users
 Accept: :content
+:authToken
 #[
 #  {"id":"examplew@post.com","email":"examplew@post.com","name":"Name","second_name":"Second"}]
-
-
 
 #
 :user_id=example@post.com
 # User
 GET :host/api/users/:user_id
 Accept: :content
+:authToken
 
 # List rooms
 GET :host/api/rooms
 Accept: :content
+:authToken
 
 # Add room
 POST :host/api/rooms
 Accept: :content
 Content-Type: :content
+:authToken
+
 {
-    "name": "room 3"
+    "name": "test"
 }
 
 #
-:room_id=room 1
+:room_id=test
 # Room
 GET :host/api/rooms/:room_id
 Accept: :content
+:authToken

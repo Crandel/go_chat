@@ -13,9 +13,9 @@ import (
 const USER_ROOMS = "user_rooms"
 
 type UserRoom struct {
-	roomName string `db:"room_name"`
-	userNick string `db:"user_nick"`
-	id       int    `db:"id,key,auto"`
+	RoomName string `db:"room_name"`
+	UserNick string `db:"user_nick"`
+	ID       int    `db:"id,key,auto"`
 }
 
 func (*UserRoom) TableName() string {
@@ -81,10 +81,11 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 	}
 
 	userInRoom := UserRoom{
-		roomName: room.Name,
-		userNick: user.Nick,
+		RoomName: room.Name,
+		UserNick: user.Nick,
 	}
 
+	log.Debugln(userInRoom)
 	error = str.db.Insert(&userInRoom).Do()
 	if error != nil {
 		return lg.NewError(
@@ -110,7 +111,7 @@ func (str *Storage) RoomHasUser(name string, c *cht.Client) (bool, int) {
 			godb.Q("user_nick = ?", c.Nick),
 		)).Do()
 	if userInRoom != (UserRoom{}) {
-		return true, userInRoom.id
+		return true, userInRoom.ID
 	}
 	return false, 0
 }
