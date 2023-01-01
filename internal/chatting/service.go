@@ -54,14 +54,10 @@ func (s *service) Run() {
 	log.SetPrefix("chatting#Run ")
 	log.Debugln("Before loop")
 	for command := range s.commands {
-		if command.id != CmdJoin {
-			command.client.WriteMsg("Please provide join room and specify your name")
-			continue
-		}
 		log.Debugln("command " + command.id)
 		switch command.id {
 		case CmdMsg:
-			log.Debugln("MSG ")
+			log.Debugln("MSG ", s.rooms)
 			for _, r := range s.rooms {
 				if r.haveUser(command.client) {
 					var msg strings.Builder

@@ -47,6 +47,19 @@ type roomHandler struct {
 	rooms map[string]*Room
 }
 
+func (rh *roomHandler) addRoom(roomName string) bool {
+	_, exists := rh.getRoom(roomName)
+	if exists {
+		return false
+	}
+	room := Room{
+		Clients: make(map[*Client]struct{}),
+		Name:    roomName,
+	}
+	rh.rooms[roomName] = &room
+	return true
+}
+
 func (rh *roomHandler) getRoom(roomName string) (*Room, bool) {
 	r, exists := rh.rooms[roomName]
 	return r, exists
@@ -64,11 +77,12 @@ func (rh *roomHandler) roomHasUser(roomName string, c *Client) bool {
 }
 
 func (rh *roomHandler) addUser(roomName string, c *Client) bool {
-	if rh.roomHasUser(roomName, c) {
-		return false
-	}
 	r, ok := rh.getRoom(roomName)
 	if !ok {
+		rh.addRoom(roomName)
+	}
+
+	if rh.roomHasUser(roomName, c) {
 		return false
 	}
 	err := r.addUser(c)

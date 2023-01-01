@@ -1,7 +1,6 @@
 package memory
 
 import (
-	"fmt"
 	"time"
 
 	lg "github.com/Crandel/go_chat/internal/logging"
@@ -15,8 +14,7 @@ func (str *Storage) AddRoom(rn string) (string, error) {
 	} else {
 		_, exists := str.Rooms[rn]
 		if exists {
-			return "", lg.New(
-				op, lg.Info, fmt.Sprintf("Room with name %s already exists", rn))
+			return rn, nil
 		}
 	}
 	str.Unlock()

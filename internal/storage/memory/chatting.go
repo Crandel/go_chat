@@ -49,7 +49,7 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 	}
 	ru, exists := str.Users[UserId(c.Nick)]
 	if !exists {
-		return lg.New(op, lg.Info, "No user with id "+c.Nick)
+		return lg.New(op, lg.Warning, "No user with id "+c.Nick)
 	}
 	mr.Members = append(mr.Members, ru.Nick)
 	return nil
