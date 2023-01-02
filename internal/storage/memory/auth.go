@@ -7,8 +7,26 @@ import (
 	lg "github.com/Crandel/go_chat/internal/logging"
 )
 
+const (
+	EmptyNickSigninError = "Can't signin User with empty nick"
+	EmptyPassSigninError = "Can't signin User with empty password"
+	EmptyNickLoginError  = "Can't login User with empty nick"
+	EmptyPassLoginError  = "Can't login User with empty password"
+)
+
 func (str *Storage) SigninUser(su auth.SigninUser) (string, error) {
 	const op lg.Op = "memory.Signin"
+	if su.Nick == "" {
+		return "", lg.New(
+			op, lg.Warning, EmptyNickSigninError,
+		)
+	}
+	if su.Password == "" {
+		return "", lg.New(
+			op, lg.Warning, EmptyPassSigninError,
+		)
+	}
+
 	u := ConvertUserFromSigning(su)
 	if str.Users == nil {
 		str.Users = make(map[UserId]User)
@@ -26,6 +44,16 @@ func (str *Storage) SigninUser(su auth.SigninUser) (string, error) {
 
 func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 	const op lg.Op = "memory.LoginUser"
+	if lu.Nick == "" {
+		return "", lg.New(
+			op, lg.Warning, EmptyNickLoginError,
+		)
+	}
+	if lu.Password == "" {
+		return "", lg.New(
+			op, lg.Warning, EmptyPassLoginError,
+		)
+	}
 	str.RLock()
 	u, exists := str.Users[UserId(lu.Nick)]
 	str.RUnlock()

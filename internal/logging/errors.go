@@ -1,7 +1,5 @@
 package logging
 
-import "fmt"
-
 type Op string
 
 type Level int
@@ -34,11 +32,7 @@ type CommonError struct {
 }
 
 func (e CommonError) Error() string {
-	format := "%s: [%s] - %s"
-	if e.Err != nil {
-		format = format + "err: " + e.Err.Error()
-	}
-	return fmt.Sprintf(format, e.Level.String(), e.Op, e.Message)
+	return e.Message
 }
 
 func NewError(op Op, l Level, m string, err error) CommonError {
