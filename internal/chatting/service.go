@@ -24,18 +24,17 @@ type Service interface {
 }
 
 type service struct {
-	roomHandler
+	*roomHandler
 	commands chan Command
 	rep      Repository
 }
 
 func NewService(rep Repository) Service {
+	roomHandler := NewRoomHandler()
 	return &service{
-		roomHandler: roomHandler{
-			rooms: make(map[string]*Room),
-		},
-		commands: make(chan Command),
-		rep:      rep,
+		roomHandler: roomHandler,
+		commands:    make(chan Command),
+		rep:         rep,
 	}
 }
 
@@ -54,16 +53,12 @@ func (s *service) Run() {
 	log.SetPrefix("chatting#Run ")
 	log.Debugln("Before loop")
 	for command := range s.commands {
-		if command.id != CmdJoin {
-			command.client.WriteMsg("Please provide join room and specify your name")
-			continue
-		}
 		log.Debugln("command " + command.id)
 		switch command.id {
 		case CmdMsg:
-			log.Debugln("MSG ")
+			log.Debugln("MSG ", s.rooms)
 			for _, r := range s.rooms {
-				if r.haveUser(command.client) {
+				if r.hasUser(command.client) {
 					var msg strings.Builder
 					finalMsg := strings.Join(command.args, " ")
 					err := s.WriteMessage(command.client, r, finalMsg)

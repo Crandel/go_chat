@@ -65,8 +65,7 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 	const op lg.Op = "sqlite.AddUserToRoom"
 	exists, _ := str.RoomHasUser(name, c)
 	if exists {
-		return lg.New(
-			op, lg.Info, "User "+c.Nick+" is already in a room "+name)
+		return nil
 	}
 
 	user, error := str.GetUser(reading.UserId(c.Nick))
