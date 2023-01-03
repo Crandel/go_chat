@@ -22,7 +22,7 @@ func (r *Room) broadcast(sender *Client, message string) {
 func (r *Room) addUser(c *Client) error {
 	const op lg.Op = "chatting.Room.addUser"
 	if r.hasUser(c) {
-		return lg.New(op, lg.Info, "User already in room")
+		return lg.New(op, "User already in room")
 	}
 	r.Clients[c] = struct{}{}
 	return nil

@@ -12,7 +12,7 @@ func (str *Storage) AddRoom(rn string) (string, error) {
 	const op lg.Op = "memory.AddRoom"
 	if rn == "" {
 		return "", lg.New(
-			op, lg.Warning, EmptyRoomNameError,
+			op, EmptyRoomNameError,
 		)
 	}
 	str.Lock()

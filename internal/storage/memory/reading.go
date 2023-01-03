@@ -21,7 +21,7 @@ func (str *Storage) ReadRoom(rid string) (rdn.Room, error) {
 	room, exists := str.Rooms[rid]
 	str.RUnlock()
 	if !exists {
-		return rdn.Room{}, lg.New(op, lg.Info, "No rooms with id "+rid)
+		return rdn.Room{}, lg.New(op, "No rooms with id "+rid)
 	}
 	return str.collectRoomMessages(room.Name), nil
 }
@@ -36,7 +36,7 @@ func (str *Storage) ReadUsers() ([]rdn.User, error) {
 	str.RUnlock()
 	var not_found error
 	if len(users) == 0 {
-		not_found = lg.New(op, lg.Info, "No users are here")
+		not_found = lg.New(op, "No users are here")
 	}
 	return users, not_found
 }
@@ -48,7 +48,7 @@ func (str *Storage) ReadUser(uid rdn.UserId) (rdn.User, error) {
 	s_user, exists := str.Users[umid]
 	str.RUnlock()
 	if !exists {
-		return rdn.User{}, lg.New(op, lg.Info, "No user with id "+string(uid))
+		return rdn.User{}, lg.New(op, "No user with id "+string(uid))
 	}
 	return s_user.ConvertUserToReading(), nil
 }

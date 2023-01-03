@@ -34,7 +34,7 @@ func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
 	err := str.db.Insert(&su).Do()
 	if err != nil {
 		return "", lg.NewError(
-			op, lg.Info, fmt.Sprintf("User with nick %s already exists", u.Nick), err)
+			op, fmt.Sprintf("User with nick %s already exists", u.Nick), err)
 	}
 	return token, nil
 }
@@ -53,9 +53,9 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 	)
 	err := query.Do()
 	if err == sql.ErrNoRows {
-		return "", lg.New(op, lg.Info, "No user with nick: "+lu.Nick)
+		return "", lg.New(op, "No user with nick: "+lu.Nick)
 	} else if err != nil {
-		return "", lg.NewError(op, lg.Info, "Internal error", err)
+		return "", lg.NewError(op, "Internal error", err)
 	}
 
 	return user.Token, nil

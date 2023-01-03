@@ -27,7 +27,7 @@ func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
 	exists, id := str.RoomHasUser(r.Name, u)
 	if !exists {
 		return lg.New(
-			op, lg.Info, "User "+u.Nick+"is not in room "+r.Name)
+			op, "User "+u.Nick+"is not in room "+r.Name)
 	}
 	rand.Seed(time.Now().UnixNano())
 	message := Message{
@@ -38,7 +38,7 @@ func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
 	error := str.db.Insert(&message).Do()
 	if error != nil {
 		return lg.NewError(
-			op, lg.Info, "", error)
+			op, "", error)
 	}
 
 	return nil
@@ -50,13 +50,13 @@ func (str *Storage) ExcludeFromRoom(name string, u *cht.Client) error {
 
 	if !exists {
 		return lg.New(
-			op, lg.Info, "User "+u.Nick+"is not in room "+name)
+			op, "User "+u.Nick+"is not in room "+name)
 	}
 	_, err := str.db.DeleteFrom(
 		USER_ROOMS).Where("id = ?", id).Do()
 	if err != nil {
 		return lg.New(
-			op, lg.Info, "User "+u.Nick+"is not in room "+name)
+			op, "User "+u.Nick+"is not in room "+name)
 	}
 	return nil
 }
@@ -71,12 +71,12 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 	user, error := str.GetUser(reading.UserId(c.Nick))
 	if error != nil {
 		return lg.NewError(
-			op, lg.Info, "User not found", error)
+			op, "User not found", error)
 	}
 	room, error := str.getRoom(name)
 	if error != nil {
 		return lg.NewError(
-			op, lg.Info, "Room not found", error)
+			op, "Room not found", error)
 	}
 
 	userInRoom := UserRoom{
@@ -88,7 +88,7 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 	error = str.db.Insert(&userInRoom).Do()
 	if error != nil {
 		return lg.NewError(
-			op, lg.Info, "", error)
+			op, "", error)
 	}
 	return nil
 }

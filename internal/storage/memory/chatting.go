@@ -26,7 +26,7 @@ func (str *Storage) ExcludeFromRoom(roomName string, u *cht.Client) error {
 	var mr Room
 	mr, exists := str.Rooms[roomName]
 	if !exists {
-		return lg.New(op, lg.Info, "No room with name "+roomName)
+		return lg.New(op, "No room with name "+roomName)
 	}
 	for i, ru := range mr.Members {
 		if string(ru) == u.Nick {
@@ -49,7 +49,7 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 	}
 	ru, exists := str.Users[UserId(c.Nick)]
 	if !exists {
-		return lg.New(op, lg.Warning, "No user with id "+c.Nick)
+		return lg.New(op, "No user with id "+c.Nick)
 	}
 	mr.Members = append(mr.Members, ru.Nick)
 	return nil

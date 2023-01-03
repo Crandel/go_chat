@@ -33,17 +33,15 @@ type CommonError struct {
 	Err     error
 	Op      Op
 	Message string
-	Level   Level
 }
 
 func (e CommonError) Error() string {
 	return e.Message
 }
 
-func NewError(op Op, l Level, m string, err error) CommonError {
+func NewError(op Op, m string, err error) CommonError {
 	er := CommonError{
 		Op:      op,
-		Level:   l,
 		Message: m,
 		Err:     err,
 	}
@@ -51,8 +49,8 @@ func NewError(op Op, l Level, m string, err error) CommonError {
 	return er
 }
 
-func New(op Op, l Level, m string) CommonError {
-	return NewError(op, l, m, nil)
+func New(op Op, m string) CommonError {
+	return NewError(op, m, nil)
 }
 
 func Tracing(e CommonError) []string {
@@ -65,12 +63,12 @@ func Tracing(e CommonError) []string {
 	return stack
 }
 func (e *CommonError) Logging() {
-	format := "%s: [%s] - %s"
+	format := "[%s] - %s"
 	if e.Err != nil {
 		format = format + fmt.Sprintf(". Error: %v", e.Err)
 	}
 
 	stack := Tracing(*e)
 	finalStack := strings.Join(stack, "::")
-	Logger.Debugf(format, fmt.Sprint(e.Level), finalStack, e.Message)
+	Logger.Debugf(format, finalStack, e.Message)
 }
