@@ -39,24 +39,24 @@ func NewService(rep Repository) Service {
 }
 
 func (s *service) NewClient(conn *websocket.Conn, nick string) {
-	log.SetPrefix("chatting#NewClient: ")
+	const op = "chatting#NewClient:"
 	u := &Client{
 		Nick:     nick,
 		conn:     conn,
 		commands: s.commands,
 	}
-	log.Debugln("New User was successfuly connected")
+	log.Debugln(op, "New User was successfuly connected")
 	u.ReadCommands()
 }
 
 func (s *service) Run() {
-	log.SetPrefix("chatting#Run ")
-	log.Debugln("Before loop")
+	const op = "chatting#Run "
+	log.Debugln(op, "Before loop")
 	for command := range s.commands {
-		log.Debugln("command " + command.id)
+		log.Debugln(op, "command ", command.id)
 		switch command.id {
 		case CmdMsg:
-			log.Debugln("MSG ", s.rooms)
+			log.Debugln(op, "MSG ", s.rooms)
 			for _, r := range s.rooms {
 				if r.hasUser(command.client) {
 					var msg strings.Builder

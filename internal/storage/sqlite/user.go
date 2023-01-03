@@ -40,10 +40,17 @@ func (*User) TableName() string {
 	return USERS
 }
 
+func (u *User) GetName() string {
+	name := ""
+	if u.Name.Valid {
+		name = u.Name.String
+	}
+	return name
+}
 func (u *User) GetSecondName() string {
 	secondName := ""
 	if u.SecondName.Valid {
-		secondName = u.Email.String
+		secondName = u.SecondName.String
 	}
 	return secondName
 }
@@ -60,7 +67,7 @@ func (u *User) ConvertToReading() rdn.User {
 	return rdn.User{
 		Nick:       rdn.UserId(u.Nick),
 		Email:      u.GetEmail(),
-		Name:       u.Name.String,
+		Name:       u.GetName(),
 		SecondName: u.GetSecondName(),
 	}
 }

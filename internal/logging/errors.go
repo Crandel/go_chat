@@ -1,5 +1,10 @@
 package logging
 
+import (
+	"fmt"
+	"strings"
+)
+
 type Op string
 
 type Level int
@@ -36,24 +41,36 @@ func (e CommonError) Error() string {
 }
 
 func NewError(op Op, l Level, m string, err error) CommonError {
-	return CommonError{
+	er := CommonError{
 		Op:      op,
 		Level:   l,
 		Message: m,
 		Err:     err,
 	}
+	er.Logging()
+	return er
 }
 
 func New(op Op, l Level, m string) CommonError {
 	return NewError(op, l, m, nil)
 }
 
-func Tracing(e *CommonError) []Op {
-	stack := []Op{e.Op}
+func Tracing(e CommonError) []string {
+	stack := []string{string(e.Op)}
 	intError, ok := e.Err.(*CommonError)
 	if !ok {
 		return stack
 	}
-	stack = append(stack, Tracing(intError)...)
+	stack = append(stack, Tracing(*intError)...)
 	return stack
+}
+func (e *CommonError) Logging() {
+	format := "%s: [%s] - %s"
+	if e.Err != nil {
+		format = format + fmt.Sprintf(". Error: %v", e.Err)
+	}
+
+	stack := Tracing(*e)
+	finalStack := strings.Join(stack, "::")
+	Logger.Debugf(format, fmt.Sprint(e.Level), finalStack, e.Message)
 }

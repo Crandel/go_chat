@@ -48,11 +48,35 @@ func ConvertUserFromSigning(su auth.SigninUser) User {
 	}
 }
 
+func (u *User) GetName() string {
+	name := ""
+	if u.Name != nil {
+		name = *u.Name
+	}
+	return name
+}
+
+func (u *User) GetSecondName() string {
+	secondName := ""
+	if u.SecondName != nil {
+		secondName = *u.SecondName
+	}
+	return secondName
+}
+
+func (u *User) GetEmail() string {
+	email := ""
+	if u.Email != nil {
+		email = *u.Email
+	}
+	return email
+}
+
 func (u User) ConvertUserToReading() r.User {
 	return r.User{
-		Name:       *u.Name,
-		SecondName: *u.SecondName,
-		Email:      *u.Email,
+		Name:       u.GetName(),
+		SecondName: u.GetSecondName(),
+		Email:      u.GetEmail(),
 		Nick:       u.Nick.ConvertUserIdToReading(),
 	}
 }

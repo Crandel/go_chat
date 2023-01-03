@@ -8,6 +8,12 @@ import (
 
 func (str *Storage) AddRoom(rn string) (string, error) {
 	const op lg.Op = "sqlite.AddRoom"
+	if rn == "" {
+		return "", lg.New(
+			op, lg.Warning, "Room name could not be empty",
+		)
+	}
+
 	res_str := ""
 	room := Room{}
 	error := str.db.Select(&room).Where("name = ?", rn).Do()
