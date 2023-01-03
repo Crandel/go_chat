@@ -7,18 +7,18 @@ import (
 )
 
 type Client struct {
-	Nick     string
 	conn     *websocket.Conn
 	commands chan<- Command
+	Nick     string
 }
 
 func (c *Client) ReadCommands() {
-	log.SetPrefix("chatting#user#ReadCommands ")
+	const op = "chatting#user#ReadCommands "
 	defer c.conn.Close()
 	for {
 		_, p, err := c.conn.ReadMessage()
 		if err != nil {
-			log.Println(err.Error())
+			log.Println(op, err.Error())
 			c.commands <- Command{
 				id:     CmdQuit,
 				client: c,
@@ -28,7 +28,7 @@ func (c *Client) ReadCommands() {
 		rawCommand := string(p)
 		args := strings.Split(rawCommand, " ")
 		cmd := strings.TrimSpace(args[0])
-		log.Debugln("Command: " + cmd)
+		log.Debugln(op, "Command: ", cmd)
 		var cmdID CommandID
 		if !strings.HasPrefix(cmd, "/") {
 			cmdID = CmdMsg
@@ -60,7 +60,7 @@ func (c *Client) ReadCommands() {
 func (c *Client) WriteMsg(message string) {
 	messageType := websocket.TextMessage
 	if err := c.conn.WriteMessage(messageType, []byte(message)); err != nil {
-		log.Println("WriteMsg " + err.Error())
+		log.Println("WriteMsg ", err.Error())
 		return
 	}
 }
