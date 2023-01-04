@@ -28,7 +28,7 @@ func main() {
 	}
 	log := lg.InitLogger()
 	log.PrintDebug = debug == "1"
-	log.Println("Starting server on port", port)
+	log.Log(lg.Info, "Starting server on port", port)
 	sqlDB, _ := godb.Open(sqlite.Adapter, "./storage.db")
 	sqlDB.SetLogger(log)
 	err := migrations.RunMigrations(sqlDB, migrationFolder)

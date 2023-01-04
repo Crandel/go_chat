@@ -37,7 +37,7 @@ func NewService(r Repository) Service {
 func (s *service) LoginUser(u LoginUser) (Response, error) {
 	token, err := s.r.LoginUser(u)
 	if err != nil {
-		log.Debugln("Error while login:", err)
+		log.Log(lg.Debug, "Error while login:", err)
 		return Response{}, err
 	}
 	return Response{Token: token}, nil
@@ -46,7 +46,7 @@ func (s *service) LoginUser(u LoginUser) (Response, error) {
 func (s *service) SigninUser(u SigninUser) (Response, error) {
 	token, err := s.r.SigninUser(u)
 	if err != nil {
-		log.Debugln("Error while signin:", err)
+		log.Log(lg.Debug, "Error while signin:", err)
 		return Response{}, err
 	}
 	return Response{Token: token}, nil

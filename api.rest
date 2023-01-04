@@ -46,6 +46,8 @@ GET :host/api/rooms
 Accept: :content
 :authToken
 
+#
+:room_id=test
 # Add room
 POST :host/api/rooms
 Accept: :content
@@ -53,11 +55,9 @@ Content-Type: :content
 :authToken
 
 {
-    "name": "test"
+    "name": ":room_id"
 }
 
-#
-:room_id=test
 # Room
 GET :host/api/rooms/:room_id
 Accept: :content

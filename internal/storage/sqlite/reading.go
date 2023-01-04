@@ -21,23 +21,23 @@ func (str *Storage) ReadUsers() ([]rdn.User, error) {
 }
 
 func (str *Storage) GetUser(ru rdn.UserId) (User, error) {
-	const op lg.Op = "sqlite.GetUser"
+	const op lg.Stk = "sqlite.GetUser"
 	uid := string(ru)
 	user := User{}
 	err := str.db.Select(&user).Where("nick = ?", uid).Do()
 	if err == sql.ErrNoRows {
-		return User{}, lg.New(op, lg.Info, "No user with nick: "+uid)
+		return User{}, lg.New(op, "No user with nick: "+uid)
 	} else if err != nil {
-		return User{}, lg.NewError(op, lg.Info, "Error with database connection", err)
+		return User{}, lg.NewError(op, "Error with database connection", err)
 	}
 	return user, nil
 }
 
 func (str *Storage) ReadUser(ru rdn.UserId) (rdn.User, error) {
-	const op lg.Op = "sqlite.ReadUser"
+	const op lg.Stk = "sqlite.ReadUser"
 	user, err := str.GetUser(ru)
 	if err != nil {
-		return rdn.User{}, lg.New(op, lg.Info, "No user with nick: "+string(ru))
+		return rdn.User{}, lg.New(op, "No user with nick: "+string(ru))
 	}
 	return user.ConvertToReading(), nil
 }
@@ -57,25 +57,25 @@ func (str *Storage) ReadRooms() ([]rdn.Room, error) {
 }
 
 func (str *Storage) getRoom(id string) (Room, error) {
-	const op lg.Op = "sqlite.getRoom"
+	const op lg.Stk = "sqlite.getRoom"
 	room := Room{}
 	var newError error
 	err := str.db.Select(&room).Where("name = ?", id).Do()
 	if err == sql.ErrNoRows {
-		newError = lg.New(op, lg.Info, "No room with name: "+id)
+		newError = lg.New(op, "No room with name: "+id)
 	} else if err != nil {
-		newError = lg.NewError(op, lg.Info, "Error with database connection", err)
+		newError = lg.NewError(op, "Error with database connection", err)
 	}
 	return room, newError
 
 }
 
 func (str *Storage) ReadRoom(id string) (rdn.Room, error) {
-	const op lg.Op = "sqlite.ReadRoom"
+	const op lg.Stk = "sqlite.ReadRoom"
 	rdnRoom := rdn.Room{}
 	room, err := str.getRoom(id)
 	if err != nil {
-		return rdnRoom, lg.NewError(op, lg.Info, "Can't get room", err)
+		return rdnRoom, lg.NewError(op, "Can't get room", err)
 	}
 
 	rdnMessages := str.getRoomMessages(room.Name)

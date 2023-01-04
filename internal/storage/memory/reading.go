@@ -16,18 +16,18 @@ func (str *Storage) ReadRooms() ([]rdn.Room, error) {
 }
 
 func (str *Storage) ReadRoom(rid string) (rdn.Room, error) {
-	const op lg.Op = "memory.ReadRoom"
+	const op lg.Stk = "memory.ReadRoom"
 	str.RLock()
 	room, exists := str.Rooms[rid]
 	str.RUnlock()
 	if !exists {
-		return rdn.Room{}, lg.New(op, lg.Info, "No rooms with id "+rid)
+		return rdn.Room{}, lg.New(op, "No rooms with id "+rid)
 	}
 	return str.collectRoomMessages(room.Name), nil
 }
 
 func (str *Storage) ReadUsers() ([]rdn.User, error) {
-	const op lg.Op = "memory.ReadUsers"
+	const op lg.Stk = "memory.ReadUsers"
 	var users = []rdn.User{}
 	str.RLock()
 	for _, u := range str.Users {
@@ -36,19 +36,19 @@ func (str *Storage) ReadUsers() ([]rdn.User, error) {
 	str.RUnlock()
 	var not_found error
 	if len(users) == 0 {
-		not_found = lg.New(op, lg.Info, "No users are here")
+		not_found = lg.New(op, "No users are here")
 	}
 	return users, not_found
 }
 
 func (str *Storage) ReadUser(uid rdn.UserId) (rdn.User, error) {
-	const op lg.Op = "memory.ReadUser"
+	const op lg.Stk = "memory.ReadUser"
 	umid := ConvertUserIdFromReading(uid)
 	str.RLock()
 	s_user, exists := str.Users[umid]
 	str.RUnlock()
 	if !exists {
-		return rdn.User{}, lg.New(op, lg.Info, "No user with id "+string(uid))
+		return rdn.User{}, lg.New(op, "No user with id "+string(uid))
 	}
 	return s_user.ConvertUserToReading(), nil
 }

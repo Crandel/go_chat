@@ -13,16 +13,16 @@ type Room struct {
 func (r *Room) broadcast(sender *Client, message string) {
 	for member := range r.Clients {
 		if member != sender {
-			log.Printf("Broadcast message %s \n", message)
+			log.Logf(lg.Debug, "Broadcast message %s \n", message)
 			member.WriteMsg(message)
 		}
 	}
 }
 
 func (r *Room) addUser(c *Client) error {
-	const op lg.Op = "chatting.Room.addUser"
+	const op lg.Stk = "chatting.Room.addUser"
 	if r.hasUser(c) {
-		return lg.New(op, lg.Info, "User already in room")
+		return lg.New(op, "User already in room")
 	}
 	r.Clients[c] = struct{}{}
 	return nil
