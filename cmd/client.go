@@ -140,7 +140,7 @@ func main() {
 		log.Log(lg.Warning, "Error during writing to websocket:", err)
 		return
 	}
-	log.Log(lg.NoLogging, "You are in room %s", roomName)
+	log.Logf(lg.NoLogging, "You are in room %s", roomName)
 	for {
 		select {
 		case <-done:

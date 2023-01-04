@@ -23,7 +23,6 @@ func NewError(op Stk, m string, err error) CommonError {
 		Message: m,
 		Err:     err,
 	}
-	er.Logging()
 	return er
 }
 
@@ -40,6 +39,7 @@ func Tracing(e CommonError) []string {
 	stack = append(stack, Tracing(*intError)...)
 	return stack
 }
+
 func (e *CommonError) Logging() {
 	format := "[%s] - %s"
 	if e.Err != nil {
