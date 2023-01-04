@@ -21,7 +21,7 @@ func (str *Storage) ReadUsers() ([]rdn.User, error) {
 }
 
 func (str *Storage) GetUser(ru rdn.UserId) (User, error) {
-	const op lg.Op = "sqlite.GetUser"
+	const op lg.Stk = "sqlite.GetUser"
 	uid := string(ru)
 	user := User{}
 	err := str.db.Select(&user).Where("nick = ?", uid).Do()
@@ -34,7 +34,7 @@ func (str *Storage) GetUser(ru rdn.UserId) (User, error) {
 }
 
 func (str *Storage) ReadUser(ru rdn.UserId) (rdn.User, error) {
-	const op lg.Op = "sqlite.ReadUser"
+	const op lg.Stk = "sqlite.ReadUser"
 	user, err := str.GetUser(ru)
 	if err != nil {
 		return rdn.User{}, lg.New(op, "No user with nick: "+string(ru))
@@ -57,7 +57,7 @@ func (str *Storage) ReadRooms() ([]rdn.Room, error) {
 }
 
 func (str *Storage) getRoom(id string) (Room, error) {
-	const op lg.Op = "sqlite.getRoom"
+	const op lg.Stk = "sqlite.getRoom"
 	room := Room{}
 	var newError error
 	err := str.db.Select(&room).Where("name = ?", id).Do()
@@ -71,7 +71,7 @@ func (str *Storage) getRoom(id string) (Room, error) {
 }
 
 func (str *Storage) ReadRoom(id string) (rdn.Room, error) {
-	const op lg.Op = "sqlite.ReadRoom"
+	const op lg.Stk = "sqlite.ReadRoom"
 	rdnRoom := rdn.Room{}
 	room, err := str.getRoom(id)
 	if err != nil {

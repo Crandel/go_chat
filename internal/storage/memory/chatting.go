@@ -22,7 +22,7 @@ func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
 }
 
 func (str *Storage) ExcludeFromRoom(roomName string, u *cht.Client) error {
-	const op lg.Op = "memory.ExcludeFromRoom"
+	const op lg.Stk = "memory.ExcludeFromRoom"
 	var mr Room
 	mr, exists := str.Rooms[roomName]
 	if !exists {
@@ -37,7 +37,7 @@ func (str *Storage) ExcludeFromRoom(roomName string, u *cht.Client) error {
 }
 
 func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
-	const op lg.Op = "memory.AddUserToRoom"
+	const op lg.Stk = "memory.AddUserToRoom"
 	var mr Room
 	mr, exists := str.Rooms[name]
 	if !exists {

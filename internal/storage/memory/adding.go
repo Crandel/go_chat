@@ -9,7 +9,7 @@ import (
 const EmptyRoomNameError = "Room name could not be empty"
 
 func (str *Storage) AddRoom(rn string) (string, error) {
-	const op lg.Op = "memory.AddRoom"
+	const op lg.Stk = "memory.AddRoom"
 	if rn == "" {
 		return "", lg.New(
 			op, EmptyRoomNameError,

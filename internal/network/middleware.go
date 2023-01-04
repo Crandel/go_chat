@@ -47,14 +47,14 @@ func (amw *authenticationMiddleware) Populate(next http.Handler) http.Handler {
 // Middleware function, which will be called for each request
 func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Debugln(amw.tokenUsers)
+		log.Dbgln(lg.Debug, amw.tokenUsers)
 		username, password, ok := r.BasicAuth()
-		log.Debugln(username, password, ok)
+		log.Dbgln(lg.Debug, username, password, ok)
 		if !ok {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
-		log.Debugf("User from Authorization header: %s\n", username)
+		log.Dbgf(lg.Debug, "User from Authorization header: %s\n", username)
 		token := auth.MakeToken(username, password)
 		if user, found := amw.tokenUsers[token]; found {
 			// We found the token in our map

@@ -5,33 +5,11 @@ import (
 	"strings"
 )
 
-type Op string
-
-type Level int
-
-const (
-	Debug Level = iota
-	Warning
-	Info
-	Unknown
-)
-
-func (l Level) String() string {
-	switch l {
-	case Debug:
-		return "DEBUG"
-	case Warning:
-		return "WARNING"
-	case Info:
-		return "INFO"
-	default:
-		return "ERROR"
-	}
-}
+type Stk string
 
 type CommonError struct {
 	Err     error
-	Op      Op
+	Stk     Stk
 	Message string
 }
 
@@ -39,9 +17,9 @@ func (e CommonError) Error() string {
 	return e.Message
 }
 
-func NewError(op Op, m string, err error) CommonError {
+func NewError(op Stk, m string, err error) CommonError {
 	er := CommonError{
-		Op:      op,
+		Stk:     op,
 		Message: m,
 		Err:     err,
 	}
@@ -49,12 +27,12 @@ func NewError(op Op, m string, err error) CommonError {
 	return er
 }
 
-func New(op Op, m string) CommonError {
+func New(op Stk, m string) CommonError {
 	return NewError(op, m, nil)
 }
 
 func Tracing(e CommonError) []string {
-	stack := []string{string(e.Op)}
+	stack := []string{string(e.Stk)}
 	intError, ok := e.Err.(*CommonError)
 	if !ok {
 		return stack

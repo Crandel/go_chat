@@ -15,7 +15,7 @@ const (
 )
 
 func (str *Storage) SigninUser(su auth.SigninUser) (string, error) {
-	const op lg.Op = "memory.Signin"
+	const op lg.Stk = "memory.Signin"
 	if su.Nick == "" {
 		return "", lg.New(
 			op, EmptyNickSigninError,
@@ -43,7 +43,7 @@ func (str *Storage) SigninUser(su auth.SigninUser) (string, error) {
 }
 
 func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
-	const op lg.Op = "memory.LoginUser"
+	const op lg.Stk = "memory.LoginUser"
 	if lu.Nick == "" {
 		return "", lg.New(
 			op, EmptyNickLoginError,

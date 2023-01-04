@@ -13,7 +13,7 @@ import (
 var log = lg.InitLogger()
 
 func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
-	const op lg.Op = "sqlite.SigninUser"
+	const op lg.Stk = "sqlite.SigninUser"
 
 	token := auth.MakeToken(u.Nick, u.Password)
 	su := User{
@@ -40,7 +40,7 @@ func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
 }
 
 func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
-	const op lg.Op = "sqlite.LoginUser"
+	const op lg.Stk = "sqlite.LoginUser"
 
 	user := User{}
 	token := auth.MakeToken(lu.Nick, lu.Password)

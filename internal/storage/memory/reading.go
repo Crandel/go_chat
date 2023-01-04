@@ -16,7 +16,7 @@ func (str *Storage) ReadRooms() ([]rdn.Room, error) {
 }
 
 func (str *Storage) ReadRoom(rid string) (rdn.Room, error) {
-	const op lg.Op = "memory.ReadRoom"
+	const op lg.Stk = "memory.ReadRoom"
 	str.RLock()
 	room, exists := str.Rooms[rid]
 	str.RUnlock()
@@ -27,7 +27,7 @@ func (str *Storage) ReadRoom(rid string) (rdn.Room, error) {
 }
 
 func (str *Storage) ReadUsers() ([]rdn.User, error) {
-	const op lg.Op = "memory.ReadUsers"
+	const op lg.Stk = "memory.ReadUsers"
 	var users = []rdn.User{}
 	str.RLock()
 	for _, u := range str.Users {
@@ -42,7 +42,7 @@ func (str *Storage) ReadUsers() ([]rdn.User, error) {
 }
 
 func (str *Storage) ReadUser(uid rdn.UserId) (rdn.User, error) {
-	const op lg.Op = "memory.ReadUser"
+	const op lg.Stk = "memory.ReadUser"
 	umid := ConvertUserIdFromReading(uid)
 	str.RLock()
 	s_user, exists := str.Users[umid]

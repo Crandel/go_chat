@@ -19,7 +19,7 @@ func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request
 			http.Error(w, "Bad request", http.StatusBadRequest)
 			return
 		}
-		log.Debugln("Inside login ", lu)
+		log.Dbgln(lg.Info, "Inside login ", lu)
 		response, err := athS.LoginUser(lu)
 		if err != nil {
 			log.Println("Error during login", err)
@@ -33,8 +33,7 @@ func LoginHandler(athS auth.Service) func(w http.ResponseWriter, r *http.Request
 			ctxUserFull := ctxUser.(*auth.AuthUser)
 			ctxUserFull.Nick = lu.Nick
 			ctxUserFull.Token = response.Token
-			log.Debugf("CTX User: %s\n", ctxUser)
-			log.Debugf("CTX User full: %s\n", ctxUserFull)
+			log.Dbgf(lg.Debug, "CTX User full: %s\n", ctxUserFull)
 		}
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {

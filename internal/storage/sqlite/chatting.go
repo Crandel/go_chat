@@ -23,7 +23,7 @@ func (*UserRoom) TableName() string {
 }
 
 func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
-	const op lg.Op = "sqlite.WriteMessage"
+	const op lg.Stk = "sqlite.WriteMessage"
 	exists, id := str.RoomHasUser(r.Name, u)
 	if !exists {
 		return lg.New(
@@ -45,7 +45,7 @@ func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
 }
 
 func (str *Storage) ExcludeFromRoom(name string, u *cht.Client) error {
-	const op lg.Op = "sqlite.ExcludeFromRoom"
+	const op lg.Stk = "sqlite.ExcludeFromRoom"
 	exists, id := str.RoomHasUser(name, u)
 
 	if !exists {
@@ -62,7 +62,7 @@ func (str *Storage) ExcludeFromRoom(name string, u *cht.Client) error {
 }
 
 func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
-	const op lg.Op = "sqlite.AddUserToRoom"
+	const op lg.Stk = "sqlite.AddUserToRoom"
 	exists, _ := str.RoomHasUser(name, c)
 	if exists {
 		return nil

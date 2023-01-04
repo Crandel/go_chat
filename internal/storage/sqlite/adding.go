@@ -7,7 +7,7 @@ import (
 )
 
 func (str *Storage) AddRoom(rn string) (string, error) {
-	const op lg.Op = "sqlite.AddRoom"
+	const op lg.Stk = "sqlite.AddRoom"
 	if rn == "" {
 		return "", lg.New(
 			op, "Room name could not be empty",
