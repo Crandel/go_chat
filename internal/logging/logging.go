@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -15,19 +16,19 @@ const (
 	Debug Level = iota
 	Warning
 	Info
-	Unknown
+	NoLogging
 )
 
 func (l Level) String() string {
 	switch l {
 	case Debug:
-		return "DEBUG"
+		return "DEBUG:  "
 	case Warning:
-		return "WARNING"
+		return "WARNING:"
 	case Info:
-		return "INFO"
+		return "INFO:   "
 	default:
-		return "ERROR"
+		return "ERROR:  "
 	}
 }
 
@@ -47,58 +48,36 @@ func (m *DebugLog) SetPrefix(prefix string) {
 	m.log.SetPrefix(prefix)
 }
 
-func (m *DebugLog) Debug(args ...interface{}) {
-	if m.PrintDebug {
-		m.Print(args...)
-	}
-}
-
-func (m *DebugLog) Dbg(l Level, args ...interface{}) {
-	m.Debug(l, ": ", args)
-}
-
-func (m *DebugLog) Debugf(format string, args ...interface{}) {
-	if m.PrintDebug {
-		m.Printf(format, args...)
-	}
-}
-
-func (m *DebugLog) Dbgf(l Level, format string, args ...interface{}) {
-	m.Debugf("%s: "+format, l, args)
-}
-
-func (m *DebugLog) Debugln(args ...interface{}) {
-	if m.PrintDebug {
-		m.Println(args...)
-	}
-}
-
-func (m *DebugLog) Dbgln(l Level, args ...interface{}) {
-	m.Debugln(l, ": ", args)
+func (m *DebugLog) Println(args ...interface{}) {
+	m.log.Println(args...)
 }
 
 func (m *DebugLog) Print(args ...interface{}) {
 	m.log.Print(args...)
 }
 
-func (m *DebugLog) Pr(l Level, args ...interface{}) {
-	m.Print(l, ": ", args)
-}
-
 func (m *DebugLog) Printf(format string, args ...interface{}) {
 	m.log.Printf(format, args...)
 }
 
-func (m *DebugLog) Prf(l Level, format string, args ...interface{}) {
-	m.Printf("%s: "+format, l, args)
+func (m *DebugLog) Log(l Level, args ...interface{}) {
+	if l > Debug || m.PrintDebug {
+		if l >= NoLogging {
+			fmt.Println(args...)
+		} else {
+			m.Println(l, args)
+		}
+	}
 }
 
-func (m *DebugLog) Println(args ...interface{}) {
-	m.log.Println(args...)
-}
-
-func (m *DebugLog) Prln(l Level, args ...interface{}) {
-	m.Println(l, ": ", args)
+func (m *DebugLog) Logf(l Level, format string, args ...interface{}) {
+	if l > Debug || m.PrintDebug {
+		if l >= NoLogging {
+			fmt.Printf(format, args...)
+		} else {
+			m.Printf("%s"+format, l, args)
+		}
+	}
 }
 
 func (m *DebugLog) Fatal(args ...interface{}) {

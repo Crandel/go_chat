@@ -44,7 +44,7 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 
 	user := User{}
 	token := auth.MakeToken(lu.Nick, lu.Password)
-	log.Debugf("Token %s; Nick %s ", token, lu.Nick)
+	log.Logf(lg.Debug, "Token %s; Nick %s ", token, lu.Nick)
 	query := str.db.Select(&user).WhereQ(
 		godb.And(
 			godb.Q("nick = ?", lu.Nick),

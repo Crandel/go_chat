@@ -21,7 +21,7 @@ func main() {
 	debug := os.Getenv("DEBUG")
 	log := lg.InitLogger()
 	log.PrintDebug = debug == "1"
-	log.Println("Starting server on port", port)
+	log.Log(lg.Info, "Starting server on port", port)
 
 	memory := mem.NewStorage()
 	aths := ath.NewService(&memory)

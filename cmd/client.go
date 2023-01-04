@@ -37,7 +37,7 @@ func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 		default:
 			line, err := rdr.ReadString('\n')
 			if err != nil {
-				log.Debugln("Could not scan the message")
+				log.Log(lg.Debug, "Could not scan the message")
 				close(done)
 				return
 			}
@@ -58,7 +58,7 @@ func reader(conn *websocket.Conn) {
 		case <-time.After(1 * time.Second):
 			_, p, err := conn.ReadMessage()
 			if err != nil {
-				log.Printf("P: %s, err: %s", p, err.Error())
+				log.Logf(lg.Warning, "P: %s, err: %s", p, err.Error())
 				close(done)
 				return
 			}
@@ -77,20 +77,19 @@ func main() {
 	log.PrintDebug = debug == "1"
 	rdr := bufio.NewReader(os.Stdin)
 
-	log.Println("Please provide user name:")
+	log.Log(lg.NoLogging, "Please provide user name:")
 	userName, err := rdr.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)
 	}
 	userName = strings.Trim(userName, "\n")
 
-	log.Println("Please provide password:")
+	log.Log(lg.NoLogging, "Please provide password:")
 	password, err := rdr.ReadString('\n')
 	if err != nil {
 		log.Fatal("Error after password", err)
 	}
 	password = strings.Trim(password, "\n")
-	log.Println(password)
 	postBody, _ := json.Marshal(map[string]string{
 		"nick":     userName,
 		"password": password,
@@ -101,7 +100,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error in Post ", err)
 	}
-	log.Debugln(resp.Request.URL)
+	log.Log(lg.Debug, resp.Request.URL)
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
@@ -109,7 +108,6 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	log.Debugln(string(body))
 	var auth auth.Response
 	err = json.Unmarshal(body, &auth)
 	if err != nil {
@@ -117,7 +115,7 @@ func main() {
 		return
 	}
 
-	log.Println("Please provide room name:")
+	log.Log(lg.NoLogging, "Please provide room name:")
 	roomName, err := rdr.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)
@@ -139,34 +137,34 @@ func main() {
 	go msgHandler(conn, *rdr)
 	go reader(conn)
 	if err != nil {
-		log.Println("Error during writing to websocket:", err)
+		log.Log(lg.Warning, "Error during writing to websocket:", err)
 		return
 	}
-	log.Printf("You are in room %s", roomName)
+	log.Log(lg.NoLogging, "You are in room %s", roomName)
 	for {
 		select {
 		case <-done:
 			return
 		case m := <-chat:
-			log.Println("> ", m)
+			log.Log(lg.NoLogging, "> ", m)
 		case i := <-input:
 			err := conn.WriteMessage(websocket.TextMessage, []byte(i))
 			if err != nil {
-				log.Println("Error during writing to websocket:", err)
+				log.Log(lg.Warning, "Error during writing to websocket:", err)
 				return
 			}
 		case <-interrupt:
-			log.Println("Closing all pending connections due to SIGINT signal")
+			log.Log(lg.Warning, "Closing all pending connections due to SIGINT signal")
 			err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
-				log.Println("Error during closing websocket:", err)
+				log.Log(lg.Warning, "Error during closing websocket:", err)
 				return
 			}
 			select {
 			case <-done:
-				log.Println("Receiver Channel Closed! Exiting....")
+				log.Log(lg.Warning, "Receiver Channel Closed! Exiting....")
 			case <-time.After(1 * time.Second):
-				log.Println("Timeout in closing receiving channel. Exiting....")
+				log.Log(lg.Warning, "Timeout in closing receiving channel. Exiting....")
 			}
 			return
 		}

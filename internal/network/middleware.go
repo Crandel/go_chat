@@ -35,26 +35,26 @@ func (amw *authenticationMiddleware) Populate(next http.Handler) http.Handler {
 		ctx = context.WithValue(ctx, auth.AuthKey, ctxUser) //nolint:staticcheck
 		next.ServeHTTP(w, r.WithContext(ctx))
 		authUserCtx := ctx.Value(auth.AuthKey)
-		log.Debugln("authUserCtx", authUserCtx)
+		log.Log(lg.Debug, "authUserCtx", authUserCtx)
 		if authUserCtx != nil {
 			authUser := authUserCtx.(*auth.AuthUser)
 			amw.tokenUsers[authUser.Token] = authUser.Nick
 		}
-		log.Debugln(amw.tokenUsers)
+		log.Log(lg.Debug, amw.tokenUsers)
 	})
 }
 
 // Middleware function, which will be called for each request
 func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Dbgln(lg.Debug, amw.tokenUsers)
+		log.Log(lg.Debug, amw.tokenUsers)
 		username, password, ok := r.BasicAuth()
-		log.Dbgln(lg.Debug, username, password, ok)
+		log.Log(lg.Debug, username, password, ok)
 		if !ok {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
-		log.Dbgf(lg.Debug, "User from Authorization header: %s\n", username)
+		log.Logf(lg.Debug, "User from Authorization header: %s\n", username)
 		token := auth.MakeToken(username, password)
 		if user, found := amw.tokenUsers[token]; found {
 			// We found the token in our map

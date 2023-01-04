@@ -48,5 +48,5 @@ func (e *CommonError) Logging() {
 
 	stack := Tracing(*e)
 	finalStack := strings.Join(stack, "::")
-	Logger.Debugf(format, finalStack, e.Message)
+	Logger.Logf(Debug, format, finalStack, e.Message)
 }

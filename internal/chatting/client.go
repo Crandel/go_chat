@@ -3,6 +3,7 @@ package chatting
 import (
 	"strings"
 
+	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,7 +19,7 @@ func (c *Client) ReadCommands() {
 	for {
 		_, p, err := c.conn.ReadMessage()
 		if err != nil {
-			log.Println(op, err.Error())
+			log.Log(lg.Warning, op, err.Error())
 			c.commands <- Command{
 				id:     CmdQuit,
 				client: c,
@@ -28,7 +29,7 @@ func (c *Client) ReadCommands() {
 		rawCommand := string(p)
 		args := strings.Split(rawCommand, " ")
 		cmd := strings.TrimSpace(args[0])
-		log.Debugln(op, "Command: ", cmd)
+		log.Log(lg.Debug, op, "Command: ", cmd)
 		var cmdID CommandID
 		if !strings.HasPrefix(cmd, "/") {
 			cmdID = CmdMsg
@@ -60,7 +61,7 @@ func (c *Client) ReadCommands() {
 func (c *Client) WriteMsg(message string) {
 	messageType := websocket.TextMessage
 	if err := c.conn.WriteMessage(messageType, []byte(message)); err != nil {
-		log.Println("WriteMsg ", err.Error())
+		log.Log(lg.Warning, "WriteMsg ", err.Error())
 		return
 	}
 }

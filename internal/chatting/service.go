@@ -45,18 +45,18 @@ func (s *service) NewClient(conn *websocket.Conn, nick string) {
 		conn:     conn,
 		commands: s.commands,
 	}
-	log.Debugln(op, "New User was successfuly connected")
+	log.Log(lg.Info, op, "New User was successfuly connected")
 	u.ReadCommands()
 }
 
 func (s *service) Run() {
 	const op = "chatting#Run "
-	log.Debugln(op, "Before loop")
+	log.Log(lg.Debug, op, "Before loop")
 	for command := range s.commands {
-		log.Debugln(op, "command ", command.id)
+		log.Log(lg.Debug, op, "command ", command.id)
 		switch command.id {
 		case CmdMsg:
-			log.Debugln(op, "MSG ", s.rooms)
+			log.Log(lg.Debug, op, "MSG ", s.rooms)
 			for _, r := range s.rooms {
 				if r.hasUser(command.client) {
 					var msg strings.Builder
@@ -85,7 +85,7 @@ func (s *service) Run() {
 			} else {
 				s.excludeFromRooms(command.client)
 			}
-			log.Debugln("Inside CmdJoin, user exists: ", exists)
+			log.Log(lg.Debug, "Inside CmdJoin, user exists: ", exists)
 			if err := s.AddUserToRoom(roomName, command.client); err != nil {
 				command.client.WriteMsg("Something went wrong, err: " + err.Error())
 				continue

@@ -59,7 +59,7 @@ func RunMigrations(db *godb.DB, migrationFolder string) error {
 	if sb.Len() > 0 {
 		sqlQueryRaw := sb.String()
 		sqlQueryRaw = strings.ReplaceAll(sqlQueryRaw, "\n", " ")
-		log.Debugln(sqlQueryRaw)
+		log.Log(lg.Debug, sqlQueryRaw)
 		_, err = db.CurrentDB().Exec(sqlQueryRaw)
 	}
 	return err

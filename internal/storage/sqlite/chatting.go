@@ -84,7 +84,7 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 		UserNick: user.Nick,
 	}
 
-	log.Debugln(userInRoom)
+	log.Log(lg.Debug, userInRoom)
 	error = str.db.Insert(&userInRoom).Do()
 	if error != nil {
 		return lg.NewError(
