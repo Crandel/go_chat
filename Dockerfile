@@ -1,5 +1,5 @@
 ## Build stage
-FROM golang:alpine AS build
+FROM golang AS build
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY ./vendor ./vendor
 RUN go mod download
 
 ## Deployment stage
-FROM golang:alpine
+FROM golang
 
 WORKDIR /app
 
@@ -19,6 +19,7 @@ COPY --from=build /app/vendor .
 
 COPY ./cmd ./cmd
 COPY ./internal ./internal
+COPY ./migrations ./migrations
 
 RUN go build -o ./bin/sqlite ./cmd/sqlite/sqlite_server.go
 
