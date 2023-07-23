@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -12,8 +13,19 @@ import (
 	"time"
 
 	"github.com/Crandel/go_chat/internal/auth"
+	ch "github.com/Crandel/go_chat/internal/chatting"
 	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/gorilla/websocket"
+)
+
+type CommandID string
+
+const (
+	CmdJoin  CommandID = "/join"
+	CmdPing  CommandID = "/ping"
+	CmdQuit  CommandID = "/quit"
+	CmdRooms CommandID = "/rooms"
+	CmdUsers CommandID = "/users"
 )
 
 var log = lg.InitLogger()
@@ -21,10 +33,25 @@ var log = lg.InitLogger()
 const host = "localhost:8080"
 const apiHost = host + "/api"
 
-var input chan string
-var chat chan string
+var input chan ch.ChatMessage
+var chat chan ch.ChatMessage
 var done chan interface{}
 var interrupt chan os.Signal
+
+func convertToChatCommandID(input string) (ch.CommandID, error) {
+	commandID := CommandID(input)
+	switch commandID {
+	case CmdJoin, CmdPing, CmdQuit, CmdRooms, CmdUsers:
+		chatInput := strings.TrimPrefix(input, "/")
+		chatCommandID, err := ch.ConvertToCommandID(chatInput)
+		if err != nil {
+			return "", err
+		}
+		return chatCommandID, nil
+	default:
+		return "", fmt.Errorf("invalid CommandID: %s", input)
+	}
+}
 
 func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 	defer close(input)
@@ -35,13 +62,28 @@ func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 		case <-interrupt:
 			return
 		default:
-			line, err := rdr.ReadString('\n')
+			rawLine, err := rdr.ReadString('\n')
 			if err != nil {
 				log.Log(lg.Debug, "Could not scan the message")
 				close(done)
 				return
 			}
-			input <- strings.Trim(line, "\n")
+
+			line := strings.Trim(rawLine, "\n")
+			args := strings.Split(line, " ")
+			cmd := strings.TrimSpace(args[0])
+			comId, err := convertToChatCommandID(cmd)
+			var message ch.ChatMessage
+			log.Log(lg.Debug, "args before error", strings.Join(args, " "))
+			if err != nil {
+				comId = ch.CmdMsg
+			} else {
+				args = args[1:]
+			}
+			log.Log(lg.Debug, "args after error", strings.Join(args, " "))
+			message.CommandId = comId
+			message.Args = args
+			input <- message
 		}
 	}
 }
@@ -56,25 +98,31 @@ func reader(conn *websocket.Conn) {
 		case <-done:
 			return
 		case <-time.After(1 * time.Second):
-			_, p, err := conn.ReadMessage()
+			var message ch.ChatMessage
+			err := conn.ReadJSON(&message)
 			if err != nil {
-				log.Logf(lg.Warning, "P: %s, err: %s", p, err.Error())
+				log.Logf(lg.Warning, "err: %s", err.Error())
 				close(done)
 				return
 			}
-			chat <- string(p)
+			chat <- message
 		}
 	}
 }
 
 func main() {
-	input = make(chan string)
-	chat = make(chan string)
+	input = make(chan ch.ChatMessage)
+	chat = make(chan ch.ChatMessage)
 	done = make(chan interface{})
 	interrupt = make(chan os.Signal)
 
+	var newUser bool
 	debug := os.Getenv("DEBUG")
 	log.PrintDebug = debug == "1"
+
+	if len(os.Args) > 1 {
+		newUser = true
+	}
 	rdr := bufio.NewReader(os.Stdin)
 
 	log.Log(lg.NoLogging, "Please provide user name:")
@@ -95,7 +143,11 @@ func main() {
 		"password": password,
 	})
 	responseBody := bytes.NewBuffer(postBody)
-	resp, err := http.Post("http://"+apiHost+"/auth/login", "application/json", responseBody)
+	loginUrl := "login"
+	if newUser {
+		loginUrl = "signin"
+	}
+	resp, err := http.Post("http://"+apiHost+"/auth/"+loginUrl, "application/json", responseBody)
 
 	if err != nil {
 		log.Fatal("Error in Post ", err)
@@ -132,7 +184,13 @@ func main() {
 	defer conn.Close()
 
 	// Join test room
-	err = conn.WriteMessage(websocket.TextMessage, []byte("/join "+roomName))
+	joinMsg := ch.ChatMessage{
+		CommandId: ch.CmdJoin,
+		Args: []string{
+			roomName,
+		},
+	}
+	err = conn.WriteJSON(&joinMsg)
 
 	go msgHandler(conn, *rdr)
 	go reader(conn)
@@ -140,15 +198,22 @@ func main() {
 		log.Log(lg.Warning, "Error during writing to websocket:", err)
 		return
 	}
-	log.Logf(lg.NoLogging, "You are in room %s", roomName)
+	log.Logf(lg.NoLogging, "You are in room '%s'\n", roomName)
 	for {
 		select {
 		case <-done:
 			return
 		case m := <-chat:
-			log.Log(lg.NoLogging, "> ", m)
+			var message string
+			if m.User != nil {
+				message = "[" + *m.User + "]-> "
+			}
+			if len(m.Args) > 0 {
+				message = message + strings.Join(m.Args, " ")
+			}
+			log.Log(lg.NoLogging, "# ", message)
 		case i := <-input:
-			err := conn.WriteMessage(websocket.TextMessage, []byte(i))
+			err := conn.WriteJSON(&i)
 			if err != nil {
 				log.Log(lg.Warning, "Error during writing to websocket:", err)
 				return

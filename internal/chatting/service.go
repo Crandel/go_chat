@@ -59,26 +59,23 @@ func (s *service) Run() {
 			log.Log(lg.Debug, op, "MSG ", s.rooms)
 			for _, r := range s.rooms {
 				if r.hasUser(command.client) {
-					var msg strings.Builder
 					finalMsg := strings.Join(command.args, " ")
 					err := s.WriteMessage(command.client, r, finalMsg)
 					if err == nil {
-						msg.WriteString(command.client.Nick)
-						msg.WriteString(" ")
-						msg.WriteString(finalMsg)
-						r.broadcast(command.client, msg.String())
+						r.broadcast(command.client, finalMsg)
 					}
 				}
 			}
 		case CmdPing:
 			command.client.WriteMsg("pong")
 		case CmdJoin:
-			if len(command.args) != 2 {
+			if len(command.args) != 1 {
+				log.Log(lg.Debug, op+CmdJoin, strings.Join(command.args, ", "))
 				command.client.WriteMsg("Please provide correct room name")
 				continue
 			}
 
-			roomName := command.args[1]
+			roomName := command.args[0]
 			exists, _ := s.RoomHasUser(roomName, command.client)
 			if exists {
 				continue

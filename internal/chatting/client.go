@@ -1,8 +1,6 @@
 package chatting
 
 import (
-	"strings"
-
 	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/gorilla/websocket"
 )
@@ -17,7 +15,8 @@ func (c *Client) ReadCommands() {
 	const op = "chatting#user#ReadCommands "
 	defer c.conn.Close()
 	for {
-		_, p, err := c.conn.ReadMessage()
+		var message ChatMessage
+		err := c.conn.ReadJSON(&message)
 		if err != nil {
 			log.Log(lg.Warning, op, err.Error())
 			c.commands <- Command{
@@ -26,41 +25,27 @@ func (c *Client) ReadCommands() {
 			}
 			return
 		}
-		rawCommand := string(p)
-		args := strings.Split(rawCommand, " ")
-		cmd := strings.TrimSpace(args[0])
-		log.Log(lg.Debug, op, "Command: ", cmd)
-		var cmdID CommandID
-		if !strings.HasPrefix(cmd, "/") {
-			cmdID = CmdMsg
-		} else {
-			switch cmd {
-			case string(CmdPing):
-				cmdID = CmdPing
-			case string(CmdJoin):
-				cmdID = CmdJoin
-			case string(CmdUsers):
-				cmdID = CmdUsers
-			case string(CmdRooms):
-				cmdID = CmdRooms
-			case string(CmdQuit):
-				cmdID = CmdQuit
-			default:
-				c.WriteMsg("ERR: Unknown command " + cmd)
-				continue
-			}
-		}
 		c.commands <- Command{
-			id:     cmdID,
+			id:     message.CommandId,
 			client: c,
-			args:   args,
+			args:   message.Args,
 		}
 	}
 }
 
-func (c *Client) WriteMsg(message string) {
-	messageType := websocket.TextMessage
-	if err := c.conn.WriteMessage(messageType, []byte(message)); err != nil {
+func (c *Client) WriteMsg(message string, userName ...string) {
+	var user *string
+	if len(userName) > 0 {
+		user = &userName[0]
+	}
+	chatMessage := ChatMessage{
+		CmdMsg,
+		user,
+		[]string{
+			message,
+		},
+	}
+	if err := c.conn.WriteJSON(chatMessage); err != nil {
 		log.Log(lg.Warning, "WriteMsg ", err.Error())
 		return
 	}
