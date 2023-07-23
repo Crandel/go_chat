@@ -116,8 +116,13 @@ func main() {
 	done = make(chan interface{})
 	interrupt = make(chan os.Signal)
 
+	var newUser bool
 	debug := os.Getenv("DEBUG")
 	log.PrintDebug = debug == "1"
+
+	if len(os.Args) > 1 {
+		newUser = true
+	}
 	rdr := bufio.NewReader(os.Stdin)
 
 	log.Log(lg.NoLogging, "Please provide user name:")
@@ -138,7 +143,11 @@ func main() {
 		"password": password,
 	})
 	responseBody := bytes.NewBuffer(postBody)
-	resp, err := http.Post("http://"+apiHost+"/auth/login", "application/json", responseBody)
+	loginUrl := "login"
+	if newUser {
+		loginUrl = "signin"
+	}
+	resp, err := http.Post("http://"+apiHost+"/auth/"+loginUrl, "application/json", responseBody)
 
 	if err != nil {
 		log.Fatal("Error in Post ", err)
