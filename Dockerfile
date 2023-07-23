@@ -21,8 +21,9 @@ COPY ./cmd ./cmd
 COPY ./internal ./internal
 COPY ./migrations ./migrations
 
-RUN go build -o ./bin/sqlite ./cmd/sqlite/sqlite_server.go
+RUN go build -o ./bin/sq_chat ./cmd/sqlite/sqlite_server.go
+RUN go build -o ./bin/mem_chat ./cmd/memory/memory_server.go
 
 EXPOSE 8080/tcp
 
-ENTRYPOINT [ "/app/bin/sqlite"]
+ENTRYPOINT [ "/app/bin/sq_chat"]
