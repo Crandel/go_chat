@@ -198,13 +198,13 @@ func main() {
 		log.Log(lg.Warning, "Error during writing to websocket:", err)
 		return
 	}
-	log.Logf(lg.NoLogging, "You are in room %s", roomName)
+	log.Logf(lg.NoLogging, "You are in room '%s'\n", roomName)
 	for {
 		select {
 		case <-done:
 			return
 		case m := <-chat:
-			log.Log(lg.NoLogging, "> ", m)
+			log.Log(lg.NoLogging, "# ", m)
 		case i := <-input:
 			err := conn.WriteJSON(i)
 			if err != nil {
