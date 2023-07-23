@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -12,8 +13,20 @@ import (
 	"time"
 
 	"github.com/Crandel/go_chat/internal/auth"
+	"github.com/Crandel/go_chat/internal/chatting"
+	ch "github.com/Crandel/go_chat/internal/chatting"
 	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/gorilla/websocket"
+)
+
+type CommandID string
+
+const (
+	CmdJoin  CommandID = "/join"
+	CmdPing  CommandID = "/ping"
+	CmdQuit  CommandID = "/quit"
+	CmdRooms CommandID = "/rooms"
+	CmdUsers CommandID = "/users"
 )
 
 var log = lg.InitLogger()
@@ -21,10 +34,25 @@ var log = lg.InitLogger()
 const host = "localhost:8080"
 const apiHost = host + "/api"
 
-var input chan string
+var input chan ch.ChatMessage
 var chat chan string
 var done chan interface{}
 var interrupt chan os.Signal
+
+func convertToChatCommandID(input string) (ch.CommandID, error) {
+	commandID := CommandID(input)
+	switch commandID {
+	case CmdJoin, CmdPing, CmdQuit, CmdRooms, CmdUsers:
+		chatInput := strings.TrimPrefix(input, "/")
+		chatCommandID, err := ch.ConvertToCommandID(chatInput)
+		if err != nil {
+			return "", err
+		}
+		return chatCommandID, nil
+	default:
+		return "", fmt.Errorf("invalid CommandID: %s", input)
+	}
+}
 
 func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 	defer close(input)
@@ -35,13 +63,26 @@ func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 		case <-interrupt:
 			return
 		default:
-			line, err := rdr.ReadString('\n')
+			rawLine, err := rdr.ReadString('\n')
 			if err != nil {
 				log.Log(lg.Debug, "Could not scan the message")
 				close(done)
 				return
 			}
-			input <- strings.Trim(line, "\n")
+
+			line := strings.Trim(rawLine, "\n")
+			args := strings.Split(line, " ")
+			cmd := strings.TrimSpace(args[0])
+			comId, err := convertToChatCommandID(cmd)
+			var message ch.ChatMessage
+			if err != nil {
+				comId = ch.CmdMsg
+			} else {
+				args = args[1:]
+			}
+			message.CommandId = comId
+			message.Args = args
+			input <- message
 		}
 	}
 }
@@ -56,19 +97,22 @@ func reader(conn *websocket.Conn) {
 		case <-done:
 			return
 		case <-time.After(1 * time.Second):
-			_, p, err := conn.ReadMessage()
+			var message chatting.ChatMessage
+			err := conn.ReadJSON(&message)
 			if err != nil {
-				log.Logf(lg.Warning, "P: %s, err: %s", p, err.Error())
+				log.Logf(lg.Warning, "err: %s", err.Error())
 				close(done)
 				return
 			}
-			chat <- string(p)
+			if len(message.Args) > 0 {
+				chat <- string(message.Args[0])
+			}
 		}
 	}
 }
 
 func main() {
-	input = make(chan string)
+	input = make(chan ch.ChatMessage)
 	chat = make(chan string)
 	done = make(chan interface{})
 	interrupt = make(chan os.Signal)
@@ -132,7 +176,13 @@ func main() {
 	defer conn.Close()
 
 	// Join test room
-	err = conn.WriteMessage(websocket.TextMessage, []byte("/join "+roomName))
+	joinMsg := chatting.ChatMessage{
+		chatting.CmdJoin,
+		[]string{
+			roomName,
+		},
+	}
+	err = conn.WriteJSON(&joinMsg)
 
 	go msgHandler(conn, *rdr)
 	go reader(conn)
@@ -148,7 +198,7 @@ func main() {
 		case m := <-chat:
 			log.Log(lg.NoLogging, "> ", m)
 		case i := <-input:
-			err := conn.WriteMessage(websocket.TextMessage, []byte(i))
+			err := conn.WriteJSON(i)
 			if err != nil {
 				log.Log(lg.Warning, "Error during writing to websocket:", err)
 				return
