@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/Crandel/go_chat/internal/auth"
-	"github.com/Crandel/go_chat/internal/chatting"
 	ch "github.com/Crandel/go_chat/internal/chatting"
 	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/gorilla/websocket"
@@ -97,7 +96,7 @@ func reader(conn *websocket.Conn) {
 		case <-done:
 			return
 		case <-time.After(1 * time.Second):
-			var message chatting.ChatMessage
+			var message ch.ChatMessage
 			err := conn.ReadJSON(&message)
 			if err != nil {
 				log.Logf(lg.Warning, "err: %s", err.Error())
@@ -176,9 +175,9 @@ func main() {
 	defer conn.Close()
 
 	// Join test room
-	joinMsg := chatting.ChatMessage{
-		chatting.CmdJoin,
-		[]string{
+	joinMsg := ch.ChatMessage{
+		CommandId: ch.CmdJoin,
+		Args: []string{
 			roomName,
 		},
 	}
