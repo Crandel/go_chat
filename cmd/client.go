@@ -34,7 +34,7 @@ const host = "localhost:8080"
 const apiHost = host + "/api"
 
 var input chan ch.ChatMessage
-var chat chan string
+var chat chan ch.ChatMessage
 var done chan interface{}
 var interrupt chan os.Signal
 
@@ -74,11 +74,13 @@ func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 			cmd := strings.TrimSpace(args[0])
 			comId, err := convertToChatCommandID(cmd)
 			var message ch.ChatMessage
+			log.Log(lg.Debug, "args before error", strings.Join(args, " "))
 			if err != nil {
 				comId = ch.CmdMsg
 			} else {
 				args = args[1:]
 			}
+			log.Log(lg.Debug, "args after error", strings.Join(args, " "))
 			message.CommandId = comId
 			message.Args = args
 			input <- message
@@ -103,16 +105,14 @@ func reader(conn *websocket.Conn) {
 				close(done)
 				return
 			}
-			if len(message.Args) > 0 {
-				chat <- string(message.Args[0])
-			}
+			chat <- message
 		}
 	}
 }
 
 func main() {
 	input = make(chan ch.ChatMessage)
-	chat = make(chan string)
+	chat = make(chan ch.ChatMessage)
 	done = make(chan interface{})
 	interrupt = make(chan os.Signal)
 
@@ -204,9 +204,16 @@ func main() {
 		case <-done:
 			return
 		case m := <-chat:
-			log.Log(lg.NoLogging, "# ", m)
+			var message string
+			if m.User != nil {
+				message = "[" + *m.User + "]-> "
+			}
+			if len(m.Args) > 0 {
+				message = message + strings.Join(m.Args, " ")
+			}
+			log.Log(lg.NoLogging, "# ", message)
 		case i := <-input:
-			err := conn.WriteJSON(i)
+			err := conn.WriteJSON(&i)
 			if err != nil {
 				log.Log(lg.Warning, "Error during writing to websocket:", err)
 				return

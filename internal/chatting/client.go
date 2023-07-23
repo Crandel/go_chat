@@ -33,9 +33,14 @@ func (c *Client) ReadCommands() {
 	}
 }
 
-func (c *Client) WriteMsg(message string) {
+func (c *Client) WriteMsg(message string, userName ...string) {
+	var user *string
+	if len(userName) > 0 {
+		user = &userName[0]
+	}
 	chatMessage := ChatMessage{
 		CmdMsg,
+		user,
 		[]string{
 			message,
 		},

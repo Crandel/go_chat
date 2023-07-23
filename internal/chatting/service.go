@@ -59,15 +59,10 @@ func (s *service) Run() {
 			log.Log(lg.Debug, op, "MSG ", s.rooms)
 			for _, r := range s.rooms {
 				if r.hasUser(command.client) {
-					var msg strings.Builder
 					finalMsg := strings.Join(command.args, " ")
 					err := s.WriteMessage(command.client, r, finalMsg)
 					if err == nil {
-						msg.WriteString("[")
-						msg.WriteString(command.client.Nick)
-						msg.WriteString("]-> ")
-						msg.WriteString(finalMsg)
-						r.broadcast(command.client, msg.String())
+						r.broadcast(command.client, finalMsg)
 					}
 				}
 			}
