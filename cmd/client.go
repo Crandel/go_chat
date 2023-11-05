@@ -17,7 +17,6 @@ import (
 	ch "github.com/Crandel/go_chat/internal/chatting"
 	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/gorilla/websocket"
-	"gitlab.com/greyxor/slogor"
 )
 
 type CommandID string
@@ -101,7 +100,7 @@ func reader(conn *websocket.Conn) {
 			var message ch.ChatMessage
 			err := conn.ReadJSON(&message)
 			if err != nil {
-				slog.Warn("err", slogor.Err(err))
+				slog.Warn("err", slog.Any("error", err))
 				close(done)
 				return
 			}

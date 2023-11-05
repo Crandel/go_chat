@@ -32,8 +32,9 @@ type service struct {
 func NewService(rep Repository) Service {
 	roomHandler := NewRoomHandler()
 	log = slog.With(
-		slog.Group("chatting"),
+		slog.Group("internal", slog.String("package", "chatting")),
 	)
+	log.Debug("new service")
 	return &service{
 		roomHandler: roomHandler,
 		commands:    make(chan Command),

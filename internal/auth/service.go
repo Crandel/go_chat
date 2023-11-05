@@ -2,8 +2,6 @@ package auth
 
 import (
 	"log/slog"
-
-	"gitlab.com/greyxor/slogor"
 )
 
 // Repository for auth
@@ -41,7 +39,7 @@ func NewService(r Repository) Service {
 func (s *service) LoginUser(u LoginUser) (Response, error) {
 	token, err := s.r.LoginUser(u)
 	if err != nil {
-		s.log.Error("Error while login:", slogor.Err(err))
+		s.log.Error("Error while login:", slog.Any("error", err))
 		return Response{}, err
 	}
 	return Response{Token: token}, nil
@@ -50,7 +48,7 @@ func (s *service) LoginUser(u LoginUser) (Response, error) {
 func (s *service) SigninUser(u SigninUser) (Response, error) {
 	token, err := s.r.SigninUser(u)
 	if err != nil {
-		s.log.Error("Error while signin:", slogor.Err(err))
+		s.log.Error("Error while signin:", slog.Any("error", err))
 		return Response{}, err
 	}
 	return Response{Token: token}, nil

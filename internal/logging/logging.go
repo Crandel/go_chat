@@ -5,14 +5,14 @@ import (
 	"os"
 	"time"
 
-	"gitlab.com/greyxor/slogor"
+	"github.com/lmittmann/tint"
 )
 
 func InitLogger(level slog.Level, show bool) {
-	handler := slogor.NewHandler(os.Stdout, &slogor.Options{
+	handler := tint.NewHandler(os.Stdout, &tint.Options{
 		TimeFormat: time.DateTime,
 		Level:      level,
-		ShowSource: show,
+		AddSource:  show,
 	})
 
 	logger := slog.New(handler)
