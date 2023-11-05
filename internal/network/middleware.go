@@ -2,14 +2,12 @@ package network
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"net/http"
-
-	lg "github.com/Crandel/go_chat/internal/logging"
 
 	"github.com/Crandel/go_chat/internal/auth"
 )
-
-var log = lg.InitLogger()
 
 // Define authenticationMiddleware struct
 type authenticationMiddleware struct {
@@ -35,26 +33,26 @@ func (amw *authenticationMiddleware) Populate(next http.Handler) http.Handler {
 		ctx = context.WithValue(ctx, auth.AuthKey, ctxUser) //nolint:staticcheck
 		next.ServeHTTP(w, r.WithContext(ctx))
 		authUserCtx := ctx.Value(auth.AuthKey)
-		log.Log(lg.Debug, "authUserCtx", authUserCtx)
+		slog.Debug("authUserCtx", authUserCtx)
 		if authUserCtx != nil {
 			authUser := authUserCtx.(*auth.AuthUser)
 			amw.tokenUsers[authUser.Token] = authUser.Nick
 		}
-		log.Log(lg.Debug, amw.tokenUsers)
+		slog.Debug(fmt.Sprint(amw.tokenUsers))
 	})
 }
 
 // Middleware function, which will be called for each request
 func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Log(lg.Debug, amw.tokenUsers)
+		slog.Debug(fmt.Sprint(amw.tokenUsers))
 		username, password, ok := r.BasicAuth()
-		log.Log(lg.Debug, username, password, ok)
+		slog.Debug("after BasicAuth", slog.String("username", username), slog.String("pass", password), slog.Bool("OK", ok))
 		if !ok {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
-		log.Logf(lg.Debug, "User from Authorization header: %s\n", username)
+		slog.Debug("from Authorization header:", slog.String("User", username))
 		token := auth.MakeToken(username, password)
 		if user, found := amw.tokenUsers[token]; found {
 			// We found the token in our map

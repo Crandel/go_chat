@@ -2,13 +2,11 @@ package chatting
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
-	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/gorilla/websocket"
 )
-
-var log = lg.InitLogger()
 
 type Repository interface {
 	WriteMessage(c *Client, r *Room, msg string) error
@@ -23,6 +21,8 @@ type Service interface {
 	Repository
 }
 
+var log *slog.Logger
+
 type service struct {
 	*roomHandler
 	commands chan Command
@@ -31,6 +31,10 @@ type service struct {
 
 func NewService(rep Repository) Service {
 	roomHandler := NewRoomHandler()
+	log = slog.With(
+		slog.Group("internal", slog.String("package", "chatting")),
+	)
+	log.Debug("new service")
 	return &service{
 		roomHandler: roomHandler,
 		commands:    make(chan Command),
@@ -39,24 +43,23 @@ func NewService(rep Repository) Service {
 }
 
 func (s *service) NewClient(conn *websocket.Conn, nick string) {
-	const op = "chatting#NewClient:"
 	u := &Client{
 		Nick:     nick,
 		conn:     conn,
 		commands: s.commands,
 	}
-	log.Log(lg.Info, op, "New User was successfuly connected")
+	log.Info("New User was successfuly connected")
 	u.ReadCommands()
 }
 
 func (s *service) Run() {
 	const op = "chatting#Run "
-	log.Log(lg.Debug, op, "Before loop")
+	log.Debug("Before loop")
 	for command := range s.commands {
-		log.Log(lg.Debug, op, "command ", command.id)
+		log.Debug(fmt.Sprintf("command %s", command.id))
 		switch command.id {
 		case CmdMsg:
-			log.Log(lg.Debug, op, "MSG ", s.rooms)
+			log.Debug(fmt.Sprintf("%d rooms", len(s.rooms)))
 			for _, r := range s.rooms {
 				if r.hasUser(command.client) {
 					finalMsg := strings.Join(command.args, " ")
@@ -70,7 +73,7 @@ func (s *service) Run() {
 			command.client.WriteMsg("pong")
 		case CmdJoin:
 			if len(command.args) != 1 {
-				log.Log(lg.Debug, op+CmdJoin, strings.Join(command.args, ", "))
+				log.Debug(strings.Join(command.args, ", "))
 				command.client.WriteMsg("Please provide correct room name")
 				continue
 			}
@@ -82,7 +85,7 @@ func (s *service) Run() {
 			} else {
 				s.excludeFromRooms(command.client)
 			}
-			log.Log(lg.Debug, "Inside CmdJoin, user exists: ", exists)
+			log.Debug(fmt.Sprintf("Inside CmdJoin, user exists: %t", exists))
 			if err := s.AddUserToRoom(roomName, command.client); err != nil {
 				command.client.WriteMsg("Something went wrong, err: " + err.Error())
 				continue

@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-	"math/rand"
 	"time"
 
 	cht "github.com/Crandel/go_chat/internal/chatting"
@@ -29,7 +28,6 @@ func (str *Storage) WriteMessage(u *cht.Client, r *cht.Room, msg string) error {
 		return lg.New(
 			op, "User "+u.Nick+"is not in room "+r.Name)
 	}
-	rand.Seed(time.Now().UnixNano())
 	message := Message{
 		UserRoomID: id,
 		Payload:    msg,
@@ -84,7 +82,6 @@ func (str *Storage) AddUserToRoom(name string, c *cht.Client) error {
 		UserNick: user.Nick,
 	}
 
-	log.Log(lg.Debug, userInRoom)
 	error = str.db.Insert(&userInRoom).Do()
 	if error != nil {
 		return lg.NewError(

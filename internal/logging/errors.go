@@ -2,6 +2,7 @@ package logging
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 )
 
@@ -48,5 +49,5 @@ func (e *CommonError) Logging() {
 
 	stack := Tracing(*e)
 	finalStack := strings.Join(stack, "::")
-	Logger.Logf(Debug, format, finalStack, e.Message)
+	slog.Error(format, finalStack, e.Message)
 }

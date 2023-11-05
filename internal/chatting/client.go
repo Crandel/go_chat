@@ -1,7 +1,8 @@
 package chatting
 
 import (
-	lg "github.com/Crandel/go_chat/internal/logging"
+	"log/slog"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -12,13 +13,13 @@ type Client struct {
 }
 
 func (c *Client) ReadCommands() {
-	const op = "chatting#user#ReadCommands "
+	logRead := log.With(slog.Group("ReadCommands"))
 	defer c.conn.Close()
 	for {
 		var message ChatMessage
 		err := c.conn.ReadJSON(&message)
 		if err != nil {
-			log.Log(lg.Warning, op, err.Error())
+			logRead.Warn(err.Error())
 			c.commands <- Command{
 				id:     CmdQuit,
 				client: c,
@@ -34,6 +35,7 @@ func (c *Client) ReadCommands() {
 }
 
 func (c *Client) WriteMsg(message string, userName ...string) {
+	logWrite := log.With(slog.Group("WriteMsg"))
 	var user *string
 	if len(userName) > 0 {
 		user = &userName[0]
@@ -46,7 +48,7 @@ func (c *Client) WriteMsg(message string, userName ...string) {
 		},
 	}
 	if err := c.conn.WriteJSON(chatMessage); err != nil {
-		log.Log(lg.Warning, "WriteMsg ", err.Error())
+		logWrite.Warn(err.Error())
 		return
 	}
 }
