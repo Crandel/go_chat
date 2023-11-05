@@ -55,10 +55,10 @@ func (s *service) Run() {
 	const op = "chatting#Run "
 	log.Debug("Before loop")
 	for command := range s.commands {
-		log.Debug("command ", command.id)
+		log.Debug(fmt.Sprintf("command %s", command.id))
 		switch command.id {
 		case CmdMsg:
-			log.Debug("MSG ", s.rooms)
+			log.Debug(fmt.Sprintf("%d rooms", len(s.rooms)))
 			for _, r := range s.rooms {
 				if r.hasUser(command.client) {
 					finalMsg := strings.Join(command.args, " ")
@@ -84,7 +84,7 @@ func (s *service) Run() {
 			} else {
 				s.excludeFromRooms(command.client)
 			}
-			log.Debug("Inside CmdJoin, user exists: ", exists)
+			log.Debug(fmt.Sprintf("Inside CmdJoin, user exists: %t", exists))
 			if err := s.AddUserToRoom(roomName, command.client); err != nil {
 				command.client.WriteMsg("Something went wrong, err: " + err.Error())
 				continue

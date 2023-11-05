@@ -3,13 +3,18 @@ package logging
 import (
 	"log/slog"
 	"os"
+	"time"
+
+	"gitlab.com/greyxor/slogor"
 )
 
 func InitLogger(level slog.Level) {
-	opts := &slog.HandlerOptions{
-		Level: level,
-	}
-	handler := slog.NewJSONHandler(os.Stdout, opts)
+	handler := slogor.NewHandler(os.Stdout, &slogor.Options{
+		TimeFormat: time.DateTime,
+		Level:      level,
+		ShowSource: false,
+	})
+
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
 }

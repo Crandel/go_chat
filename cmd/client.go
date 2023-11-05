@@ -130,7 +130,7 @@ func main() {
 	}
 	rdr := bufio.NewReader(os.Stdin)
 
-	slog.Debug("Please provide user name:")
+	fmt.Println("Please provide user name:")
 	userName, err := rdr.ReadString('\n')
 	if err != nil {
 		intLog.Fatal(err)
@@ -172,7 +172,7 @@ func main() {
 		return
 	}
 
-	intLog.Println("Please provide room name:")
+	fmt.Println("Please provide room name:")
 	roomName, err := rdr.ReadString('\n')
 	if err != nil {
 		intLog.Fatal(err)
@@ -203,7 +203,7 @@ func main() {
 		slog.Warn("Error during writing to websocket:", err)
 		return
 	}
-	intLog.Printf("You are in room '%s'\n", roomName)
+	fmt.Printf("You are in room '%s'\n", roomName)
 	for {
 		select {
 		case <-done:
@@ -216,7 +216,7 @@ func main() {
 			if len(m.Args) > 0 {
 				message = message + strings.Join(m.Args, " ")
 			}
-			intLog.Println("# ", message)
+			fmt.Println("# ", message)
 		case i := <-input:
 			err := conn.WriteJSON(&i)
 			if err != nil {

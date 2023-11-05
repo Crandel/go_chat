@@ -27,7 +27,7 @@ func main() {
 	}
 
 	lg.InitLogger(logLevel)
-	slog.Info("Starting server on port", port)
+	slog.Info("Starting server on", slog.Int("port", port))
 
 	memory := mem.NewStorage()
 	aths := ath.NewService(&memory)

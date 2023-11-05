@@ -52,7 +52,7 @@ func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler 
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
-		slog.Debug("User from Authorization header: %s\n", username)
+		slog.Debug(fmt.Sprintf("User from Authorization header: %s\n", username))
 		token := auth.MakeToken(username, password)
 		if user, found := amw.tokenUsers[token]; found {
 			// We found the token in our map

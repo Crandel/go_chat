@@ -20,11 +20,11 @@ POST :host/api/auth/login
 Accept: :content
 Content-Type: :content
 {
-    "nick": "example@post.com",
+    "nick": "test",
     "password": "pass"
 }
 
-:token = ZXhhbXBsZUBwb3N0LmNvbTpwYXNz
+:token = dGVzdDpwYXNz
 :authToken = :auth Basic :token
 
 # List users
