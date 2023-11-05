@@ -4,6 +4,7 @@ version: '3'
 # global environmental variables
 env:
   DEBUG: 1
+  SHOW: 1
 
 tasks:
   default:

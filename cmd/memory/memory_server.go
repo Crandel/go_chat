@@ -20,13 +20,14 @@ import (
 const port = 8080
 
 func main() {
+	show := os.Getenv("SHOW")
 	debug := os.Getenv("DEBUG")
 	logLevel := slog.LevelInfo
-	if debug == "1" {
+	if debug != "" {
 		logLevel = slog.LevelDebug
 	}
-
-	lg.InitLogger(logLevel)
+	showSourse := show != ""
+	lg.InitLogger(logLevel, showSourse)
 	slog.Info("Starting server on", slog.Int("port", port))
 
 	memory := mem.NewStorage()

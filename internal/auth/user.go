@@ -1,6 +1,9 @@
 package auth
 
-import b64 "encoding/base64"
+import (
+	b64 "encoding/base64"
+	"fmt"
+)
 
 const AuthKey = "authUser"
 
@@ -22,6 +25,18 @@ type SigninUser struct {
 type AuthUser struct {
 	Nick  string
 	Token string
+}
+
+func (a *LoginUser) String() string {
+	return fmt.Sprintf("Login user %s", a.Nick)
+}
+
+func (a *SigninUser) String() string {
+	return fmt.Sprintf("Signin user %s", a.Nick)
+}
+
+func (a *AuthUser) String() string {
+	return fmt.Sprintf("Auth user %s", a.Nick)
 }
 
 func MakeToken(nick string, password string) string {

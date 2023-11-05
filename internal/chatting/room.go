@@ -1,6 +1,8 @@
 package chatting
 
 import (
+	"log/slog"
+
 	lg "github.com/Crandel/go_chat/internal/logging"
 )
 
@@ -13,7 +15,7 @@ type Room struct {
 func (r *Room) broadcast(sender *Client, message string) {
 	for member := range r.Clients {
 		if member != sender {
-			log.Debug("Broadcast message %s \n", message)
+			log.Debug("Broadcast ", slog.String("message", message))
 			member.WriteMsg(message, sender.Nick)
 		}
 	}

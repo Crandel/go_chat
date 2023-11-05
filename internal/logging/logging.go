@@ -8,11 +8,11 @@ import (
 	"gitlab.com/greyxor/slogor"
 )
 
-func InitLogger(level slog.Level) {
+func InitLogger(level slog.Level, show bool) {
 	handler := slogor.NewHandler(os.Stdout, &slogor.Options{
 		TimeFormat: time.DateTime,
 		Level:      level,
-		ShowSource: false,
+		ShowSource: show,
 	})
 
 	logger := slog.New(handler)

@@ -47,12 +47,12 @@ func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		slog.Debug(fmt.Sprint(amw.tokenUsers))
 		username, password, ok := r.BasicAuth()
-		slog.Debug(username, password, ok)
+		slog.Debug("after BasicAuth", slog.String("username", username), slog.String("pass", password), slog.Bool("OK", ok))
 		if !ok {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
-		slog.Debug(fmt.Sprintf("User from Authorization header: %s\n", username))
+		slog.Debug("from Authorization header:", slog.String("User", username))
 		token := auth.MakeToken(username, password)
 		if user, found := amw.tokenUsers[token]; found {
 			// We found the token in our map

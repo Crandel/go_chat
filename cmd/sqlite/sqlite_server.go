@@ -23,18 +23,21 @@ import (
 const port = 8080
 
 func main() {
-	debug := os.Getenv("DEBUG")
 	migrationFolder := os.Getenv("MIGRATIONS")
 	if migrationFolder == "" {
 		migrationFolder = "./migrations"
 	}
+
+	show := os.Getenv("SHOW")
+	debug := os.Getenv("DEBUG")
 	logLevel := slog.LevelInfo
-	if debug == "1" {
+	if debug != "" {
 		logLevel = slog.LevelDebug
 	}
+	showSourse := show != ""
+	lg.InitLogger(logLevel, showSourse)
+	slog.Info("Starting server on", slog.Int("port", port))
 
-	lg.InitLogger(logLevel)
-	slog.Info("Starting server on port", port)
 	sqlDB, _ := godb.Open(sqlite.Adapter, "./storage.db")
 	sqlDB.SetLogger(log.Default())
 	err := migrations.RunMigrations(sqlDB, migrationFolder)

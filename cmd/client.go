@@ -17,6 +17,7 @@ import (
 	ch "github.com/Crandel/go_chat/internal/chatting"
 	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/gorilla/websocket"
+	"gitlab.com/greyxor/slogor"
 )
 
 type CommandID string
@@ -73,13 +74,13 @@ func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 			cmd := strings.TrimSpace(args[0])
 			comId, err := convertToChatCommandID(cmd)
 			var message ch.ChatMessage
-			slog.Debug("args before error", strings.Join(args, " "))
+			slog.Debug("args before error", slog.String("attrs", strings.Join(args, " ")))
 			if err != nil {
 				comId = ch.CmdMsg
 			} else {
 				args = args[1:]
 			}
-			slog.Debug("args after error", strings.Join(args, " "))
+			slog.Debug("args after error", slog.String("attrs", strings.Join(args, " ")))
 			message.CommandId = comId
 			message.Args = args
 			input <- message
@@ -100,7 +101,7 @@ func reader(conn *websocket.Conn) {
 			var message ch.ChatMessage
 			err := conn.ReadJSON(&message)
 			if err != nil {
-				slog.Warn("err: %s", err.Error())
+				slog.Warn("err", slogor.Err(err))
 				close(done)
 				return
 			}
@@ -116,13 +117,15 @@ func main() {
 	interrupt = make(chan os.Signal)
 
 	var newUser bool
+	show := os.Getenv("SHOW")
 	debug := os.Getenv("DEBUG")
-
 	logLevel := slog.LevelInfo
-	if debug == "1" {
+	if debug != "" {
 		logLevel = slog.LevelDebug
 	}
-	lg.InitLogger(logLevel)
+	showSourse := show != ""
+	lg.InitLogger(logLevel, showSourse)
+
 	intLog := slog.NewLogLogger(slog.NewTextHandler(os.Stdout, nil), logLevel)
 
 	if len(os.Args) > 1 {
