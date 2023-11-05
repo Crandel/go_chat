@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -27,8 +28,6 @@ const (
 	CmdRooms CommandID = "/rooms"
 	CmdUsers CommandID = "/users"
 )
-
-var log = lg.InitLogger()
 
 const host = "localhost:8080"
 const apiHost = host + "/api"
@@ -64,7 +63,7 @@ func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 		default:
 			rawLine, err := rdr.ReadString('\n')
 			if err != nil {
-				log.Log(lg.Debug, "Could not scan the message")
+				slog.Debug("Could not scan the message")
 				close(done)
 				return
 			}
@@ -74,13 +73,13 @@ func msgHandler(conn *websocket.Conn, rdr bufio.Reader) {
 			cmd := strings.TrimSpace(args[0])
 			comId, err := convertToChatCommandID(cmd)
 			var message ch.ChatMessage
-			log.Log(lg.Debug, "args before error", strings.Join(args, " "))
+			slog.Debug("args before error", strings.Join(args, " "))
 			if err != nil {
 				comId = ch.CmdMsg
 			} else {
 				args = args[1:]
 			}
-			log.Log(lg.Debug, "args after error", strings.Join(args, " "))
+			slog.Debug("args after error", strings.Join(args, " "))
 			message.CommandId = comId
 			message.Args = args
 			input <- message
@@ -101,7 +100,7 @@ func reader(conn *websocket.Conn) {
 			var message ch.ChatMessage
 			err := conn.ReadJSON(&message)
 			if err != nil {
-				log.Logf(lg.Warning, "err: %s", err.Error())
+				slog.Warn("err: %s", err.Error())
 				close(done)
 				return
 			}
@@ -118,24 +117,30 @@ func main() {
 
 	var newUser bool
 	debug := os.Getenv("DEBUG")
-	log.PrintDebug = debug == "1"
+
+	logLevel := slog.LevelInfo
+	if debug == "1" {
+		logLevel = slog.LevelDebug
+	}
+	lg.InitLogger(logLevel)
+	intLog := slog.NewLogLogger(slog.NewTextHandler(os.Stdout, nil), logLevel)
 
 	if len(os.Args) > 1 {
 		newUser = true
 	}
 	rdr := bufio.NewReader(os.Stdin)
 
-	log.Log(lg.NoLogging, "Please provide user name:")
+	slog.Debug("Please provide user name:")
 	userName, err := rdr.ReadString('\n')
 	if err != nil {
-		log.Fatal(err)
+		intLog.Fatal(err)
 	}
 	userName = strings.Trim(userName, "\n")
 
-	log.Log(lg.NoLogging, "Please provide password:")
+	fmt.Println("Please provide password:")
 	password, err := rdr.ReadString('\n')
 	if err != nil {
-		log.Fatal("Error after password", err)
+		intLog.Fatal("Error after password", err)
 	}
 	password = strings.Trim(password, "\n")
 	postBody, _ := json.Marshal(map[string]string{
@@ -150,27 +155,27 @@ func main() {
 	resp, err := http.Post("http://"+apiHost+"/auth/"+loginUrl, "application/json", responseBody)
 
 	if err != nil {
-		log.Fatal("Error in Post ", err)
+		intLog.Fatal("Error in Post ", err)
 	}
-	log.Log(lg.Debug, resp.Request.URL)
+	slog.Debug(resp.Request.URL.String())
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		intLog.Fatal(err)
 		return
 	}
 	var auth auth.Response
 	err = json.Unmarshal(body, &auth)
 	if err != nil {
-		log.Fatal("Response Body ", err)
+		intLog.Fatal("Response Body ", err)
 		return
 	}
 
-	log.Log(lg.NoLogging, "Please provide room name:")
+	intLog.Println("Please provide room name:")
 	roomName, err := rdr.ReadString('\n')
 	if err != nil {
-		log.Fatal(err)
+		intLog.Fatal(err)
 	}
 	roomName = strings.Trim(roomName, "\n")
 
@@ -179,7 +184,7 @@ func main() {
 	token := "Basic " + auth.Token
 	conn, _, err := websocket.DefaultDialer.Dial(socketURL, http.Header{"Authorization": []string{token}})
 	if err != nil {
-		log.Fatal("Could not connect to WebSocker server '"+socketURL+"'.", err)
+		intLog.Fatal("Could not connect to WebSocker server '"+socketURL+"'.", err)
 	}
 	defer conn.Close()
 
@@ -195,10 +200,10 @@ func main() {
 	go msgHandler(conn, *rdr)
 	go reader(conn)
 	if err != nil {
-		log.Log(lg.Warning, "Error during writing to websocket:", err)
+		slog.Warn("Error during writing to websocket:", err)
 		return
 	}
-	log.Logf(lg.NoLogging, "You are in room '%s'\n", roomName)
+	intLog.Printf("You are in room '%s'\n", roomName)
 	for {
 		select {
 		case <-done:
@@ -211,25 +216,25 @@ func main() {
 			if len(m.Args) > 0 {
 				message = message + strings.Join(m.Args, " ")
 			}
-			log.Log(lg.NoLogging, "# ", message)
+			intLog.Println("# ", message)
 		case i := <-input:
 			err := conn.WriteJSON(&i)
 			if err != nil {
-				log.Log(lg.Warning, "Error during writing to websocket:", err)
+				slog.Warn("Error during writing to websocket:", err)
 				return
 			}
 		case <-interrupt:
-			log.Log(lg.Warning, "Closing all pending connections due to SIGINT signal")
+			slog.Warn("Closing all pending connections due to SIGINT signal")
 			err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
-				log.Log(lg.Warning, "Error during closing websocket:", err)
+				slog.Warn("Error during closing websocket:", err)
 				return
 			}
 			select {
 			case <-done:
-				log.Log(lg.Warning, "Receiver Channel Closed! Exiting....")
+				slog.Warn("Receiver Channel Closed! Exiting....")
 			case <-time.After(1 * time.Second):
-				log.Log(lg.Warning, "Timeout in closing receiving channel. Exiting....")
+				slog.Warn("Timeout in closing receiving channel. Exiting....")
 			}
 			return
 		}

@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"log/slog"
 	"os"
 	"path"
 	"path/filepath"
@@ -8,11 +9,7 @@ import (
 	"strings"
 
 	"github.com/samonzeweb/godb"
-
-	lg "github.com/Crandel/go_chat/internal/logging"
 )
-
-var log = lg.InitLogger()
 
 const (
 	migrationBegin = `BEGIN TRANSACTION;
@@ -59,7 +56,7 @@ func RunMigrations(db *godb.DB, migrationFolder string) error {
 	if sb.Len() > 0 {
 		sqlQueryRaw := sb.String()
 		sqlQueryRaw = strings.ReplaceAll(sqlQueryRaw, "\n", " ")
-		log.Log(lg.Debug, sqlQueryRaw)
+		slog.Debug(sqlQueryRaw)
 		_, err = db.CurrentDB().Exec(sqlQueryRaw)
 	}
 	return err

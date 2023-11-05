@@ -3,14 +3,13 @@ package sqlite
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"github.com/Crandel/go_chat/internal/auth"
 	lg "github.com/Crandel/go_chat/internal/logging"
 	"github.com/samonzeweb/godb"
 	"github.com/samonzeweb/godb/types"
 )
-
-var log = lg.InitLogger()
 
 func (str *Storage) SigninUser(u auth.SigninUser) (string, error) {
 	const op lg.Stk = "sqlite.SigninUser"
@@ -44,7 +43,7 @@ func (str *Storage) LoginUser(lu auth.LoginUser) (string, error) {
 
 	user := User{}
 	token := auth.MakeToken(lu.Nick, lu.Password)
-	log.Logf(lg.Debug, "Token %s; Nick %s ", token, lu.Nick)
+	slog.Debug("Token %s; Nick %s ", token, lu.Nick)
 	query := str.db.Select(&user).WhereQ(
 		godb.And(
 			godb.Q("nick = ?", lu.Nick),

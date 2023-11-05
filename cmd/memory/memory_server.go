@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -19,9 +21,13 @@ const port = 8080
 
 func main() {
 	debug := os.Getenv("DEBUG")
-	log := lg.InitLogger()
-	log.PrintDebug = debug == "1"
-	log.Log(lg.Info, "Starting server on port", port)
+	logLevel := slog.LevelInfo
+	if debug == "1" {
+		logLevel = slog.LevelDebug
+	}
+
+	lg.InitLogger(logLevel)
+	slog.Info("Starting server on port", port)
 
 	memory := mem.NewStorage()
 	aths := ath.NewService(&memory)

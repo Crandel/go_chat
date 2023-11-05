@@ -13,7 +13,7 @@ type Room struct {
 func (r *Room) broadcast(sender *Client, message string) {
 	for member := range r.Clients {
 		if member != sender {
-			log.Logf(lg.Debug, "Broadcast message %s \n", message)
+			log.Debug("Broadcast message %s \n", message)
 			member.WriteMsg(message, sender.Nick)
 		}
 	}

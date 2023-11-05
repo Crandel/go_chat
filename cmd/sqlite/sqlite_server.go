@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -26,11 +28,15 @@ func main() {
 	if migrationFolder == "" {
 		migrationFolder = "./migrations"
 	}
-	log := lg.InitLogger()
-	log.PrintDebug = debug == "1"
-	log.Log(lg.Info, "Starting server on port", port)
+	logLevel := slog.LevelInfo
+	if debug == "1" {
+		logLevel = slog.LevelDebug
+	}
+
+	lg.InitLogger(logLevel)
+	slog.Info("Starting server on port", port)
 	sqlDB, _ := godb.Open(sqlite.Adapter, "./storage.db")
-	sqlDB.SetLogger(log)
+	sqlDB.SetLogger(log.Default())
 	err := migrations.RunMigrations(sqlDB, migrationFolder)
 	if err != nil {
 		log.Fatal(err)

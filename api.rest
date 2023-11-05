@@ -8,7 +8,7 @@ POST :host/api/auth/signin
 Accept: :content
 Content-Type: :content
 {
-    "nick": "example@post.com",
+    "nick": "test",
     "name": "test",
     "second_name": "Second",
     "password": "pass"

@@ -1,10 +1,8 @@
 package auth
 
 import (
-	lg "github.com/Crandel/go_chat/internal/logging"
+	"log/slog"
 )
-
-var log = lg.InitLogger()
 
 // Repository for auth
 type Repository interface {
@@ -21,7 +19,8 @@ type Service interface {
 }
 
 type service struct {
-	r Repository
+	r   Repository
+	log slog.Logger
 }
 
 // Response return token
@@ -31,13 +30,16 @@ type Response struct {
 
 // NewService will return Service
 func NewService(r Repository) Service {
-	return &service{r}
+	authLog := slog.With(
+		slog.Group("auth"),
+	)
+	return &service{r, *authLog}
 }
 
 func (s *service) LoginUser(u LoginUser) (Response, error) {
 	token, err := s.r.LoginUser(u)
 	if err != nil {
-		log.Log(lg.Debug, "Error while login:", err)
+		s.log.Debug("Error while login:", err)
 		return Response{}, err
 	}
 	return Response{Token: token}, nil
@@ -46,7 +48,7 @@ func (s *service) LoginUser(u LoginUser) (Response, error) {
 func (s *service) SigninUser(u SigninUser) (Response, error) {
 	token, err := s.r.SigninUser(u)
 	if err != nil {
-		log.Log(lg.Debug, "Error while signin:", err)
+		s.log.Debug("Error while signin:", err)
 		return Response{}, err
 	}
 	return Response{Token: token}, nil
