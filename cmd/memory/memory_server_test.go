@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -66,8 +67,7 @@ func runRequest(d data, method string, url string, auth bool) ([]byte, error) {
 }
 
 func TestHandlers(t *testing.T) {
-	log := lg.InitLogger()
-	log.PrintDebug = true
+	lg.InitLogger(slog.LevelDebug, true)
 
 	mStorage := mem.NewStorage()
 
