@@ -1,0 +1,204 @@
+version: "2"
+run:
+  build-tags:
+    - integration
+    - replica
+  modules-download-mode: vendor
+  # include test files or not, default is true
+  tests: true
+linters:
+  default: none
+  enable:
+    - errcheck
+    - errorlint
+    - forbidigo
+    - gocritic
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - paralleltest
+    - prealloc
+    - revive
+    - staticcheck
+    - unconvert
+    - unparam
+    - unused
+  settings:
+    dogsled:
+      max-blank-identifiers: 2
+    dupl:
+      threshold: 150
+    errcheck:
+      check-type-assertions: false
+      check-blank: false
+    errorlint:
+      errorf: true
+      errorf-multi: false
+      asserts: true
+      comparison: true
+    forbidigo:
+      forbid:
+        - pattern: ^os\.Getenv$
+        - pattern: ^os\.LookupEnv$
+        - pattern: ^os\.Exit$
+        - pattern: ^log\.Fatal$
+        - pattern: ^log\.Fatalf$
+        - pattern: ^logger\.Fatal$
+        - pattern: ^logger\.Fatalf$
+    funlen:
+      lines: 60
+      statements: 40
+    gocognit:
+      min-complexity: 20
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+    gocyclo:
+      min-complexity: 20
+    godox:
+      keywords:
+        - TODO
+        - BUG
+        - FIXME
+    govet:
+      enable:
+        - asmdecl
+        - assign
+        - atomic
+        - bools
+        - buildtag
+        - cgocall
+        - composites
+        - copylocks
+        - httpresponse
+        - loopclosure
+        - lostcancel
+        - nilfunc
+        - printf
+        - shadow
+        - shift
+        - stdmethods
+        - structtag
+        - tests
+        - unmarshal
+        - unreachable
+        - unsafeptr
+        - unusedresult
+    misspell:
+      locale: US
+      ignore-rules:
+        - cancelled
+    nakedret:
+      max-func-lines: 30
+    prealloc:
+      simple: true
+      range-loops: true
+      for-loops: false
+    revive:
+      rules:
+        - name: exported
+        - name: comment-spacings
+          arguments:
+            - nolint
+        - name: range-val-address
+        - name: bare-return
+        - name: confusing-results
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: receiver-naming
+        - name: unexported-return
+        - name: early-return
+        - name: superfluous-else
+        - name: empty-lines
+    unparam:
+      check-exported: false
+    whitespace:
+      multi-if: false
+      multi-func: false
+    wsl:
+      strict-append: true
+      allow-assign-and-call: true
+      allow-multiline-assign: true
+      force-case-trailing-whitespace: 0
+      allow-trailing-comment: false
+      allow-cuddle-declarations: false
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - dupl
+          - errcheck
+          - gocyclo
+          - gosec
+          - unused
+        path: _test\.go
+      - linters:
+          - revive
+        text: const [`\w_]+ should be [`\w_]+
+      - linters:
+          - revive
+        text: type [`\w_]+ should be [`\w_]+
+      - linters:
+          - revive
+        text: function [`\w_]+ should be [`\w_]+
+      - linters:
+          - revive
+        text: method [`\w_]+ should be [`\w_]+
+      - linters:
+          - revive
+        text: method parameter [`\w_]+ should be [`\w_]+
+      - linters:
+          - revive
+        text: interface method parameter [`\w_]+ should be [`\w_]+
+      - linters:
+          - revive
+        text: function parameter [`\w_]+ should be [`\w_]+
+      - linters:
+          - revive
+        text: var [`\w_]+ should be [`\w_]+
+      - linters:
+          - revive
+        text: struct field [`\w_]+ should be [`\w_]+
+      - linters:
+          - govet
+        text: declaration of "err" shadows declaration at line
+      - linters:
+          - gocritic
+        text: append result not assigned to the same slice
+    paths:
+      - api/dat/db_schema_generated.go
+      - api/wire/schemas.go
+      - third_party$
+      - builtin$
+      - examples$
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/Crandel/gmail)
+        - blank
+        - dot
+        - localmodule
+      custom-order: true
+    gofmt:
+      simplify: true
+    gofumpt:
+      extra-rules: true
+  exclusions:
+    generated: lax
+    paths:
+      - api/dat/db_schema_generated.go
+      - api/wire/schemas.go
+      - third_party$
+      - builtin$
+      - examples$

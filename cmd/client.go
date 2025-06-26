@@ -13,10 +13,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/websocket"
+
 	"github.com/Crandel/go_chat/internal/auth"
 	ch "github.com/Crandel/go_chat/internal/chatting"
 	lg "github.com/Crandel/go_chat/internal/logging"
-	"github.com/gorilla/websocket"
 )
 
 type CommandID string
@@ -34,7 +35,7 @@ const apiHost = host + "/api"
 
 var input chan ch.ChatMessage
 var chat chan ch.ChatMessage
-var done chan interface{}
+var done chan any
 var interrupt chan os.Signal
 
 func convertToChatCommandID(input string) (ch.CommandID, error) {
@@ -202,7 +203,7 @@ func main() {
 	go msgHandler(conn, *rdr)
 	go reader(conn)
 	if err != nil {
-		slog.Warn("Error during writing to websocket:", err)
+		slog.Warn("Error during writing to websocket:", slog.Any("error", err))
 		return
 	}
 	fmt.Printf("You are in room '%s'\n", roomName)
@@ -216,20 +217,20 @@ func main() {
 				message = "[" + *m.User + "]-> "
 			}
 			if len(m.Args) > 0 {
-				message = message + strings.Join(m.Args, " ")
+				message += strings.Join(m.Args, " ")
 			}
 			fmt.Println("# ", message)
 		case i := <-input:
 			err := conn.WriteJSON(&i)
 			if err != nil {
-				slog.Warn("Error during writing to websocket:", err)
+				slog.Warn("Error during writing to websocket:", slog.Any("error", err))
 				return
 			}
 		case <-interrupt:
 			slog.Warn("Closing all pending connections due to SIGINT signal")
 			err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
-				slog.Warn("Error during closing websocket:", err)
+				slog.Warn("Error during closing websocket:", slog.Any("error", err))
 				return
 			}
 			select {
