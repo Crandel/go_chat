@@ -1,6 +1,6 @@
 module github.com/Crandel/go_chat
 
-go 1.24
+go 1.25
 
 require (
 	github.com/gorilla/mux v1.8.1
