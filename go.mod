@@ -5,7 +5,7 @@ go 1.25
 require (
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/websocket v1.5.3
-	github.com/lmittmann/tint v1.1.2
+	github.com/lmittmann/tint v1.1.3
 	github.com/samonzeweb/godb v1.0.15
 )
 
