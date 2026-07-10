@@ -1,6 +1,6 @@
 module github.com/Crandel/go_chat
 
-go 1.25
+go 1.25.0
 
 require (
 	github.com/gorilla/mux v1.8.1
@@ -11,5 +11,5 @@ require (
 
 require (
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
-	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 )
